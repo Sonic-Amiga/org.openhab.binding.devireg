@@ -68,6 +68,8 @@ public class DeviRegHandler extends BaseThingHandler {
         logger.trace("initialize()");
         config = getConfigAs(DeviRegConfiguration.class);
 
+        DanfossGridConnection.AddUser();
+
         // set the thing status to UNKNOWN temporarily and let the background task decide for the real status.
         // the framework is then able to reuse the resources from the thing handler initialization.
         // we set this upfront to reliably check status updates in unit tests.
@@ -75,7 +77,7 @@ public class DeviRegHandler extends BaseThingHandler {
 
         // Example for background initialization:
         scheduler.execute(() -> {
-            DanfossGridConnection grid = DanfossGridConnection.get(logger);
+            DanfossGridConnection grid = DanfossGridConnection.get();
 
             if (grid == null) {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR,
@@ -107,6 +109,7 @@ public class DeviRegHandler extends BaseThingHandler {
             connection.Dispose();
             connection = null;
         }
+        DanfossGridConnection.RemoveUser();
     }
 
     public void setOnlineStatus(boolean isOnline) {
