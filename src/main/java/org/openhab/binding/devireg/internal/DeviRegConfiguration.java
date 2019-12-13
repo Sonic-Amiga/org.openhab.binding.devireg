@@ -19,8 +19,5 @@ package org.openhab.binding.devireg.internal;
  */
 public class DeviRegConfiguration {
 
-    /**
-     * Sample configuration parameter. Replace with your own.
-     */
-    public String config1;
+    public String peerId;
 }

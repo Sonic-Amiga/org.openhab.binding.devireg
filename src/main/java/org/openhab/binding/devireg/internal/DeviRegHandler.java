@@ -12,13 +12,16 @@
  */
 package org.openhab.binding.devireg.internal;
 
-import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.*;
+import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.CHANNEL_TEMPERATURE_FLOOR;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
+import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
@@ -38,13 +41,15 @@ public class DeviRegHandler extends BaseThingHandler {
 
     private @Nullable DeviRegConfiguration config;
 
+    private @Nullable DeviSmartConnection connection;
+
     public DeviRegHandler(Thing thing) {
         super(thing);
     }
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (CHANNEL_1.equals(channelUID.getId())) {
+        if (CHANNEL_TEMPERATURE_FLOOR.equals(channelUID.getId())) {
             if (command instanceof RefreshType) {
                 // TODO: handle data refresh
             }
@@ -60,16 +65,8 @@ public class DeviRegHandler extends BaseThingHandler {
 
     @Override
     public void initialize() {
-        // logger.debug("Start initializing!");
+        logger.trace("initialize()");
         config = getConfigAs(DeviRegConfiguration.class);
-
-        // TODO: Initialize the handler.
-        // The framework requires you to return from this method quickly. Also, before leaving this method a thing
-        // status from one of ONLINE, OFFLINE or UNKNOWN must be set. This might already be the real thing status in
-        // case you can decide it directly.
-        // In case you can not decide the thing status directly (e.g. for long running connection handshake using WAN
-        // access or similar) you should set status UNKNOWN here and then decide the real status asynchronously in the
-        // background.
 
         // set the thing status to UNKNOWN temporarily and let the background task decide for the real status.
         // the framework is then able to reuse the resources from the thing handler initialization.
@@ -78,21 +75,41 @@ public class DeviRegHandler extends BaseThingHandler {
 
         // Example for background initialization:
         scheduler.execute(() -> {
-            boolean thingReachable = true; // <background task with long running initialization here>
-            // when done do:
-            if (thingReachable) {
-                updateStatus(ThingStatus.ONLINE);
-            } else {
-                updateStatus(ThingStatus.OFFLINE);
+            DanfossGridConnection grid = DanfossGridConnection.get(logger);
+
+            if (grid == null) {
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR,
+                        "Danfoss grid connection failed");
+                // TODO: Retry after some time ?
+                return;
             }
+
+            if (config.peerId == null || config.peerId.isEmpty()) {
+                logger.error("Peer ID is not set");
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, "Peer ID is not set");
+                return;
+            }
+
+            logger.info("Connecting to peer " + config.peerId);
+            connection = new DeviSmartConnection(this);
+
+            byte[] peerId = DatatypeConverter.parseHexBinary(config.peerId);
+            connection.ConnectToRemote(grid, peerId, "dominion-1.0");
         });
+    }
 
-        // logger.debug("Finished initializing!");
+    @Override
+    public void dispose() {
+        logger.trace("dispose()");
+        if (connection != null) {
+            connection.SetBlockingMode(true);
+            connection.Close();
+            connection.Dispose();
+            connection = null;
+        }
+    }
 
-        // Note: When initialization can NOT be done set the status with more details for further
-        // analysis. See also class ThingStatusDetail for all available status details.
-        // Add a description to give user information to understand why thing does not work as expected. E.g.
-        // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
-        // "Can not access device as username and/or password are invalid");
+    public void setOnlineStatus(boolean isOnline) {
+        updateStatus(isOnline ? ThingStatus.ONLINE : ThingStatus.OFFLINE);
     }
 }

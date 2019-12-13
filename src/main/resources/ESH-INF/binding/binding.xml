@@ -4,7 +4,18 @@
 	xsi:schemaLocation="https://openhab.org/schemas/binding/v1.0.0 https://openhab.org/schemas/binding-1.0.0.xsd">
 
 	<name>DeviReg Binding</name>
-	<description>This is the binding for DeviReg.</description>
+	<description>DeviReg(tm) smart floor thermostat binding.</description>
 	<author>Pavel Fedin</author>
+	
+	<config-description>
+		<parameter name="privateKey" type="text">
+			<label>SecureDeviceGrid peer private key</label>
+			<description>Private key used by OpenHAB to comminicate with devices.</description>
+		</parameter>
+		<parameter name="publicKey" type="text">
+			<label>SecureDeviceGrid peer ID</label>
+			<description>Indentifies the OpenHAB installation on SecureDeviceGrid network, used to communicate with devices.</description>
+		</parameter>
+	</config-description>
 
 </binding:binding>
