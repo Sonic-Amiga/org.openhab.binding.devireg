@@ -11,29 +11,25 @@ import org.slf4j.LoggerFactory;
 
 public class DanfossGridConnection extends OSDGConnection {
     private static final Logger logger = LoggerFactory.getLogger(DanfossGridConnection.class);
-    static final DeviRegBindingConfig g_Config = new DeviRegBindingConfig();
     private static boolean g_KeyLoaded = false;
     private static DanfossGridConnection g_Conn;
     private static int numUsers = 0;
 
     public synchronized static DanfossGridConnection get() {
-        byte[] privateKey;
-
         // FIXME: Figure out why i don't see logs with higher levels and use info here
         if (!g_KeyLoaded) {
-            if (g_Config.privateKey == null || g_Config.privateKey.isEmpty()) {
-                privateKey = OpenSDG.CreatePrivateKey();
-                g_Config.privateKey = DatatypeConverter.printHexBinary(privateKey);
-                logger.warn("Created private key: " + g_Config.privateKey);
+            DeviRegBindingConfig config = DeviRegBindingConfig.get();
+
+            if (config.privateKey == null || config.privateKey.isEmpty()) {
+                byte[] privateKey = OpenSDG.CreatePrivateKey();
+                OpenSDG.SetPrivateKey(privateKey);
+
+                config.privateKey = DatatypeConverter.printHexBinary(privateKey);
+                config.publicKey = DatatypeConverter.printHexBinary(OpenSDG.GetMyPeerId());
             } else {
-                logger.warn("Using private key: " + g_Config.privateKey);
-                privateKey = DatatypeConverter.parseHexBinary(g_Config.privateKey);
+                OpenSDG.SetPrivateKey(DatatypeConverter.parseHexBinary(config.privateKey));
             }
 
-            OpenSDG.SetPrivateKey(privateKey);
-
-            g_Config.publicKey = DatatypeConverter.printHexBinary(OpenSDG.GetMyPeerId());
-            logger.warn("My peer ID is:" + g_Config.publicKey);
             g_KeyLoaded = true;
         }
 

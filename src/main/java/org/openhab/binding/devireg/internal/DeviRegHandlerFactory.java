@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
@@ -56,7 +55,7 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
     @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> config) {
         super.activate(componentContext);
-        modified(config);
+        DeviRegBindingConfig.update(config);
     }
 
     @Override
@@ -70,7 +69,7 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
         // We update instead of replace the configuration object, so that if the user updates the
         // configuration, the values are automatically available in all handlers. Because they all
         // share the same instance.
-        DanfossGridConnection.g_Config.update(new Configuration(config).as(DeviRegBindingConfig.class));
+        DeviRegBindingConfig.update(config);
     }
 
     @Override
