@@ -26,9 +26,20 @@
 	</channel-type>
 	<channel-type id="temperature_room">
 		<item-type>Number</item-type>
-		<label>Room temperature
-</label>
+		<label>Room temperature</label>
 		<description>Current temperature from room sensor</description>
 	</channel-type>
+	<channel-type id="otp">
+		<item-type>String</item-type>
+		<label>OTP</label>
+		<description>One time password</description>
+	</channel-type>
+	<thing-type id="configreceiver">
+		<label>DeviSmart config receiver</label>
+		<description>Facilicates receiving configuration from the smartphone</description>
+		<channels>
+			<channel typeId="otp" id="otp"></channel>
+		</channels>
+	</thing-type>
 
 </thing:thing-descriptions>

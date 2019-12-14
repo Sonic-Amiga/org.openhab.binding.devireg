@@ -28,8 +28,10 @@ public class DeviRegBindingConstants {
 
     // List of all Thing Type UIDs
     public static final ThingTypeUID THING_TYPE_DEVIREG_SMART = new ThingTypeUID(BINDING_ID, "devismart");
+    public static final ThingTypeUID THING_TYPE_CONFIG_RECEIVER = new ThingTypeUID(BINDING_ID, "configreceiver");
 
     // List of all Channel ids
     public static final String CHANNEL_TEMPERATURE_FLOOR = "temperature_floor";
     public static final String CHANNEL_TEMPERATURE_ROOM = "temperature_room";
+    public static final String CHANNEL_OTP = "otp";
 }
