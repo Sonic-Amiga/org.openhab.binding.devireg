@@ -1,5 +1,7 @@
 package org.openhab.binding.devireg.internal;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -22,5 +24,17 @@ public class DeviRegBindingConfig {
 
     public static void update(@NonNull Map<String, Object> config) {
         g_Config.update(new Configuration(config).as(DeviRegBindingConfig.class));
+    }
+
+    public Dictionary<String, Object> asDictionary() {
+        Dictionary<String, Object> data = new Hashtable<String, Object>();
+
+        data.put("privateKey", privateKey);
+        data.put("publicKey", publicKey);
+        return data;
+    }
+
+    public boolean hasPrivateKey() {
+        return !(privateKey == null || privateKey.isEmpty());
     }
 }
