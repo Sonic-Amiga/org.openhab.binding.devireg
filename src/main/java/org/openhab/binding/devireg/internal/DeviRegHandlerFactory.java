@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.devireg.internal;
 
-import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.*;
+import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.THING_TYPE_DEVIREG_SMART;
 
 import java.util.Collections;
 import java.util.Map;
@@ -43,8 +43,8 @@ import org.osgi.service.component.annotations.Modified;
 @Component(configurationPid = "binding.devireg", service = ThingHandlerFactory.class)
 public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.unmodifiableSet(
-            Stream.of(THING_TYPE_DEVIREG_SMART, THING_TYPE_CONFIG_RECEIVER).collect(Collectors.toSet()));
+    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections
+            .unmodifiableSet(Stream.of(THING_TYPE_DEVIREG_SMART).collect(Collectors.toSet()));
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -78,9 +78,6 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
 
         if (THING_TYPE_DEVIREG_SMART.equals(thingTypeUID)) {
             return new DeviRegHandler(thing);
-        }
-        if (THING_TYPE_CONFIG_RECEIVER.equals(thingTypeUID)) {
-            return new ConfigReceiverHandler(thing);
         }
 
         return null;
