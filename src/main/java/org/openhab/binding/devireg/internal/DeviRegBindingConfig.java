@@ -4,8 +4,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.smarthome.config.core.Configuration;
 
@@ -34,18 +32,5 @@ public class DeviRegBindingConfig {
         data.put("privateKey", privateKey);
         data.put("publicKey", publicKey);
         return data;
-    }
-
-    public boolean hasPrivateKey() {
-        return !(privateKey == null || privateKey.length() != 64);
-    }
-
-    public byte[] getPrivateKey() {
-        if (privateKey == null) {
-            return null;
-        }
-
-        byte[] key = DatatypeConverter.parseHexBinary(privateKey);
-        return key.length == 32 ? key : null;
     }
 }

@@ -14,8 +14,6 @@ package org.openhab.binding.devireg.internal;
 
 import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.CHANNEL_TEMPERATURE_FLOOR;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -47,6 +45,7 @@ public class DeviRegHandler extends BaseThingHandler {
     public DeviRegHandler(Thing thing, ConfigurationAdmin configurationAdmin) {
         super(thing);
         confAdmin = configurationAdmin;
+        DanfossGridConnection.AddUser();
     }
 
     @Override
@@ -70,8 +69,6 @@ public class DeviRegHandler extends BaseThingHandler {
         logger.trace("initialize()");
         config = getConfigAs(DeviRegConfiguration.class);
 
-        DanfossGridConnection.AddUser();
-
         // set the thing status to UNKNOWN temporarily and let the background task decide for the real status.
         // the framework is then able to reuse the resources from the thing handler initialization.
         // we set this upfront to reliably check status updates in unit tests.
@@ -88,7 +85,8 @@ public class DeviRegHandler extends BaseThingHandler {
                 return;
             }
 
-            if (config.peerId == null || config.peerId.isEmpty()) {
+            byte[] peerId = SDGUtils.ParseKey(config.peerId);
+            if (peerId == null) {
                 logger.error("Peer ID is not set");
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, "Peer ID is not set");
                 return;
@@ -96,8 +94,6 @@ public class DeviRegHandler extends BaseThingHandler {
 
             logger.info("Connecting to peer " + config.peerId);
             connection = new DeviSmartConnection(this);
-
-            byte[] peerId = DatatypeConverter.parseHexBinary(config.peerId);
             connection.ConnectToRemote(grid, peerId, "dominion-1.0");
         });
     }

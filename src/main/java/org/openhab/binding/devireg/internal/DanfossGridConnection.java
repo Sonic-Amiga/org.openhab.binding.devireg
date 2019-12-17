@@ -22,33 +22,7 @@ public class DanfossGridConnection extends OSDGConnection {
         if (g_Conn == null) {
             g_Conn = new DanfossGridConnection();
             g_Conn.SetBlockingMode(true);
-
-            DeviRegBindingConfig config = DeviRegBindingConfig.get();
-            byte[] privateKey = config.getPrivateKey();
-            boolean updateConfig = false;
-
-            if (privateKey == null) {
-                privateKey = OpenSDG.CreatePrivateKey();
-                config.privateKey = DatatypeConverter.printHexBinary(privateKey);
-                updateConfig = true;
-            }
-
-            // TODO: Library API will change, keys will belong to a connection
-            OpenSDG.SetPrivateKey(privateKey);
-            String publicKey = DatatypeConverter.printHexBinary(OpenSDG.GetMyPeerId());
-
-            if (publicKey != config.publicKey) {
-                config.publicKey = publicKey;
-                updateConfig = true;
-            }
-
-            if (updateConfig) {
-                try {
-                    confAdmin.getConfiguration("binding.devireg", null).update(config.asDictionary());
-                } catch (IOException e) {
-                    logger.error("Failed to update binding config: " + e.getLocalizedMessage());
-                }
-            }
+            g_Conn.SetPrivateKey(confAdmin, DeviRegBindingConfig.get());
         }
 
         if (g_Conn.getState() != OSDGState.CONNECTED) {
@@ -61,6 +35,51 @@ public class DanfossGridConnection extends OSDGConnection {
         }
 
         return g_Conn;
+    }
+
+    private void SetPrivateKey(ConfigurationAdmin confAdmin, DeviRegBindingConfig config) {
+        byte[] privateKey = SDGUtils.ParseKey(config.privateKey);
+        boolean updateConfig = false;
+
+        if (privateKey == null) {
+            privateKey = OpenSDG.CreatePrivateKey();
+            config.privateKey = DatatypeConverter.printHexBinary(privateKey);
+            updateConfig = true;
+        }
+
+        // TODO: Library API will change, keys will belong to a connection
+        OpenSDG.SetPrivateKey(privateKey);
+        String publicKey = DatatypeConverter.printHexBinary(OpenSDG.GetMyPeerId());
+
+        if (publicKey != config.publicKey) {
+            config.publicKey = publicKey;
+            updateConfig = true;
+        }
+
+        if (updateConfig) {
+            try {
+                confAdmin.getConfiguration("binding.devireg", null).update(config.asDictionary());
+            } catch (IOException e) {
+                logger.error("Failed to update binding config: " + e.getLocalizedMessage());
+            }
+        }
+    }
+
+    public static synchronized void UpdatePrivateKey(ConfigurationAdmin admin, String newKey) {
+        DeviRegBindingConfig config = DeviRegBindingConfig.get();
+
+        if (newKey.equals(config.privateKey)) {
+            return;
+        }
+
+        logger.debug("Private key changed to: " + newKey);
+        config.privateKey = newKey;
+        if (g_Conn == null) {
+            return;
+        }
+
+        g_Conn.Close(); // Will reconnect on demand
+        g_Conn.SetPrivateKey(admin, config);
     }
 
     public static synchronized void AddUser() {
