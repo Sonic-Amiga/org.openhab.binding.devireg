@@ -1,41 +1,54 @@
 package org.openhab.binding.devireg.internal;
 
+import java.io.IOException;
+
 import javax.xml.bind.DatatypeConverter;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.opensdg.OSDGConnection;
 import org.opensdg.OSDGResult;
 import org.opensdg.OSDGState;
 import org.opensdg.OpenSDG;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DanfossGridConnection extends OSDGConnection {
     private static final Logger logger = LoggerFactory.getLogger(DanfossGridConnection.class);
-    private static boolean g_KeyLoaded = false;
     private static DanfossGridConnection g_Conn;
     private static int numUsers = 0;
 
-    public synchronized static DanfossGridConnection get() {
-        // FIXME: Figure out why i don't see logs with higher levels and use info here
-        if (!g_KeyLoaded) {
-            DeviRegBindingConfig config = DeviRegBindingConfig.get();
-
-            if (config.privateKey == null || config.privateKey.isEmpty()) {
-                byte[] privateKey = OpenSDG.CreatePrivateKey();
-                OpenSDG.SetPrivateKey(privateKey);
-
-                config.privateKey = DatatypeConverter.printHexBinary(privateKey);
-                config.publicKey = DatatypeConverter.printHexBinary(OpenSDG.GetMyPeerId());
-            } else {
-                OpenSDG.SetPrivateKey(DatatypeConverter.parseHexBinary(config.privateKey));
-            }
-
-            g_KeyLoaded = true;
-        }
-
+    public synchronized static DanfossGridConnection get(@NonNull ConfigurationAdmin confAdmin) {
         if (g_Conn == null) {
             g_Conn = new DanfossGridConnection();
             g_Conn.SetBlockingMode(true);
+
+            DeviRegBindingConfig config = DeviRegBindingConfig.get();
+            byte[] privateKey = config.getPrivateKey();
+            boolean updateConfig = false;
+
+            if (privateKey == null) {
+                privateKey = OpenSDG.CreatePrivateKey();
+                config.privateKey = DatatypeConverter.printHexBinary(privateKey);
+                updateConfig = true;
+            }
+
+            // TODO: Library API will change, keys will belong to a connection
+            OpenSDG.SetPrivateKey(privateKey);
+            String publicKey = DatatypeConverter.printHexBinary(OpenSDG.GetMyPeerId());
+
+            if (publicKey != config.publicKey) {
+                config.publicKey = publicKey;
+                updateConfig = true;
+            }
+
+            if (updateConfig) {
+                try {
+                    confAdmin.getConfiguration("binding.devireg", null).update(config.asDictionary());
+                } catch (IOException e) {
+                    logger.error("Failed to update binding config: " + e.getLocalizedMessage());
+                }
+            }
         }
 
         if (g_Conn.getState() != OSDGState.CONNECTED) {
@@ -44,7 +57,7 @@ public class DanfossGridConnection extends OSDGConnection {
                 logger.error("Could not connect to Danfoss grid");
                 return null; // TODO: throw
             }
-            logger.warn("Successfully connected to Danfoss grid");
+            logger.info("Successfully connected to Danfoss grid");
         }
 
         return g_Conn;

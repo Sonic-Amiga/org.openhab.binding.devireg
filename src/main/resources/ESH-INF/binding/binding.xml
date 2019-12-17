@@ -8,13 +8,15 @@
 	<author>Pavel Fedin</author>
 	
 	<config-description>
-		<parameter name="privateKey" type="text">
+		<parameter name="privateKey" type="text" readOnly="true">
 			<label>SecureDeviceGrid peer private key</label>
 			<description>Private key used by OpenHAB to comminicate with devices.</description>
 		</parameter>
-		<parameter name="publicKey" type="text">
+		<parameter name="publicKey" type="text" readOnly="true">
 			<label>SecureDeviceGrid peer ID</label>
-			<description>Indentifies the OpenHAB installation on SecureDeviceGrid network, used to communicate with devices.</description>
+			<description>
+				Indentifies the OpenHAB installation on SecureDeviceGrid network, used to communicate with devices.
+			</description>
 		</parameter>
 	</config-description>
 

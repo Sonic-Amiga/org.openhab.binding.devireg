@@ -27,11 +27,13 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * The {@link DeviRegHandlerFactory} is responsible for creating things and thing
@@ -45,6 +47,10 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections
             .unmodifiableSet(Stream.of(THING_TYPE_DEVIREG_SMART).collect(Collectors.toSet()));
+
+    @Reference
+    @NonNullByDefault({})
+    ConfigurationAdmin configurationAdmin;
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -69,7 +75,7 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
         // We update instead of replace the configuration object, so that if the user updates the
         // configuration, the values are automatically available in all handlers. Because they all
         // share the same instance.
-        DeviRegBindingConfig.update(config);
+        // DeviRegBindingConfig.update(config);
     }
 
     @Override
@@ -77,7 +83,7 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (THING_TYPE_DEVIREG_SMART.equals(thingTypeUID)) {
-            return new DeviRegHandler(thing);
+            return new DeviRegHandler(thing, configurationAdmin);
         }
 
         return null;
