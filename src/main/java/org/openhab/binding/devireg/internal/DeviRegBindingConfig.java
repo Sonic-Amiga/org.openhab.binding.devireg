@@ -1,13 +1,18 @@
 package org.openhab.binding.devireg.internal;
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.smarthome.config.core.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DeviRegBindingConfig {
+    private static final Logger logger = LoggerFactory.getLogger(DeviRegBindingConfig.class);
     private static DeviRegBindingConfig g_Config = new DeviRegBindingConfig();
 
     public String privateKey;
@@ -26,11 +31,16 @@ public class DeviRegBindingConfig {
         g_Config.update(new Configuration(config).as(DeviRegBindingConfig.class));
     }
 
-    public Dictionary<String, Object> asDictionary() {
+    public void Save(ConfigurationAdmin confAdmin) {
         Dictionary<String, Object> data = new Hashtable<String, Object>();
 
         data.put("privateKey", privateKey);
         data.put("publicKey", publicKey);
-        return data;
+
+        try {
+            confAdmin.getConfiguration("binding.devireg", null).update(data);
+        } catch (IOException e) {
+            logger.error("Failed to update binding config: " + e.getLocalizedMessage());
+        }
     }
 }

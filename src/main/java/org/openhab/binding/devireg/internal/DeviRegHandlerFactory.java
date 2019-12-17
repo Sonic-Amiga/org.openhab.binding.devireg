@@ -75,9 +75,8 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
         // We update instead of replace the configuration object, so that if the user updates the
         // configuration, the values are automatically available in all handlers. Because they all
         // share the same instance.
-        Object privateKey = config.get("privateKey");
-        if (privateKey != null) {
-            DanfossGridConnection.UpdatePrivateKey(configurationAdmin, (String) privateKey);
+        if (config.containsKey("privateKey")) {
+            DanfossGridConnection.UpdatePrivateKey(configurationAdmin, (String) config.get("privateKey"));
         }
     }
 

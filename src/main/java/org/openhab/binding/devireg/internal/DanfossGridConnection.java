@@ -1,10 +1,9 @@
 package org.openhab.binding.devireg.internal;
 
-import java.io.IOException;
-
 import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opensdg.OSDGConnection;
 import org.opensdg.OSDGResult;
 import org.opensdg.OSDGState;
@@ -57,29 +56,38 @@ public class DanfossGridConnection extends OSDGConnection {
         }
 
         if (updateConfig) {
-            try {
-                confAdmin.getConfiguration("binding.devireg", null).update(config.asDictionary());
-            } catch (IOException e) {
-                logger.error("Failed to update binding config: " + e.getLocalizedMessage());
-            }
+            config.Save(confAdmin);
         }
     }
 
-    public static synchronized void UpdatePrivateKey(ConfigurationAdmin admin, String newKey) {
+    public static synchronized void UpdatePrivateKey(ConfigurationAdmin admin, @Nullable String newKey) {
         DeviRegBindingConfig config = DeviRegBindingConfig.get();
 
-        if (newKey.equals(config.privateKey)) {
+        if (newKey != null) {
+            if (newKey.equals(config.privateKey)) {
+                return;
+            }
+
+            if (!newKey.isEmpty()) {
+                // Validate the new key and revert back to the old one if validation fails
+                // It is rather dangerous to inadvertently damage it, you'll lose all
+                // your thermostats and probably have to set everything up from scratch.
+                if (SDGUtils.ParseKey(newKey) == null) {
+                    config.Save(admin);
+                    return;
+                }
+            }
+        } else if (config.privateKey == null) {
             return;
         }
 
-        logger.debug("Private key changed to: " + newKey);
+        logger.warn("Private key manually changed to: " + newKey);
         config.privateKey = newKey;
-        if (g_Conn == null) {
-            return;
-        }
 
-        g_Conn.Close(); // Will reconnect on demand
-        g_Conn.SetPrivateKey(admin, config);
+        if (g_Conn != null) {
+            g_Conn.Close(); // Will reconnect on demand
+            g_Conn.SetPrivateKey(admin, config);
+        }
     }
 
     public static synchronized void AddUser() {
