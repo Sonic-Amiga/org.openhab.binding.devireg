@@ -23,6 +23,7 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
+import org.opensdg.protocol.DeviSmart;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,4 +114,9 @@ public class DeviRegHandler extends BaseThingHandler {
     public void setOnlineStatus(boolean isOnline) {
         updateStatus(isOnline ? ThingStatus.ONLINE : ThingStatus.OFFLINE);
     }
+
+    public void handlePacket(DeviSmart.Packet pkt) {
+        // TODO: Parse and set items
+    }
+
 }
