@@ -14,35 +14,37 @@ public class DeviSmart {
         public static final int HeaderSize = 4;
 
         private ByteBuffer m_Buffer;
+        private int m_Start;
 
         public Packet(byte[] data, int startOffset) {
-            m_Buffer = ByteBuffer.wrap(data, startOffset, data.length - startOffset);
+            m_Buffer = ByteBuffer.wrap(data);
+            m_Start = startOffset;
             m_Buffer.order(ByteOrder.LITTLE_ENDIAN);
         }
 
-        public byte getMsgClass() {
-            return m_Buffer.get(0);
+        public int getMsgClass() {
+            return Byte.toUnsignedInt(m_Buffer.get(m_Start));
         }
 
-        public short getMsgCode() {
-            return m_Buffer.getShort(1);
+        public int getMsgCode() {
+            return Short.toUnsignedInt(m_Buffer.getShort(m_Start + 1));
         }
 
         public int getLength() {
-            return m_Buffer.get(3) + HeaderSize;
+            return Byte.toUnsignedInt(m_Buffer.get(m_Start + 3)) + HeaderSize;
         }
 
         // Following methods return payload, interpreted as respective format
         public byte getByte() {
-            return m_Buffer.get(4);
+            return m_Buffer.get(m_Start + HeaderSize);
         }
 
         public short getShort() {
-            return m_Buffer.getShort(4);
+            return m_Buffer.getShort(m_Start + HeaderSize);
         }
 
         public int getInt() {
-            return m_Buffer.getInt(4);
+            return m_Buffer.getInt(m_Start + HeaderSize);
         }
 
         public boolean getBoolean() {
@@ -56,10 +58,10 @@ public class DeviSmart {
 
         public byte[] getArray() {
             // Arrays and strings are prefixed with length byte
-            int length = m_Buffer.get(4);
+            int length = Byte.toUnsignedInt(getByte());
             byte[] data = new byte[length];
 
-            m_Buffer.get(data, 5, length);
+            m_Buffer.get(data, m_Start + HeaderSize + 1, length);
             return data;
         }
 

@@ -13,7 +13,7 @@
 			<channel typeId="setpoint_comfort" id="setpoint_comfort"></channel>
 			<channel typeId="setpoint_economy" id="setpoint_economy"></channel>
 			<channel typeId="setpoint_manual" id="setpoint_manual"></channel>
-			<channel typeId="setpoint_away" id="setpoint_awy"></channel>
+			<channel typeId="setpoint_away" id="setpoint_away"></channel>
 			<channel typeId="setpoint_antifreeze" id="setpoint_antifreeze"></channel>
 			<channel typeId="setpoint_min_floor" id="setpoint_min_floor"></channel>
             <channel typeId="setpoint_min_floor_enable" id="setpoint_min_floor_enable"></channel>
