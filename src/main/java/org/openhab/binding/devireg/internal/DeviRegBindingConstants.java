@@ -32,4 +32,13 @@ public class DeviRegBindingConstants {
     // List of all Channel ids
     public static final String CHANNEL_TEMPERATURE_FLOOR = "temperature_floor";
     public static final String CHANNEL_TEMPERATURE_ROOM = "temperature_room";
+    public static final String CHANNEL_SETPOINT_COMFORT = "setpoint_comfort";
+    public static final String CHANNEL_SETPOINT_ECONOMY = "setpoint_economy";
+    public static final String CHANNEL_SETPOINT_MANUAL = "setpoint_manual";
+    public static final String CHANNEL_SETPOINT_AWAY = "setpoint_away";
+    public static final String CHANNEL_SETPOINT_ANTIFREEZE = "setpoint_antifreeze";
+    public static final String CHANNEL_SETPOINT_MIN_FLOOR = "setpoint_min_floor";
+    public static final String CHANNEL_SETPOINT_MIN_FLOOR_ENABLE = "setpoint_min_floor_enable";
+    public static final String CHANNEL_SETPOINT_MAX_FLOOR = "setpoint_max_floor";
+    public static final String CHANNEL_SETPOINT_WARNING = "setpoint_warning";
 }

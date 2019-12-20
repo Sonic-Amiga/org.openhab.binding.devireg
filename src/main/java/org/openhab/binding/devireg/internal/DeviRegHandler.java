@@ -12,10 +12,17 @@
  */
 package org.openhab.binding.devireg.internal;
 
-import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.CHANNEL_TEMPERATURE_FLOOR;
+import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.*;
+import static org.opensdg.protocol.DeviSmart.MsgCode.*;
+
+import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.eclipse.smarthome.core.library.types.OnOffType;
+import org.eclipse.smarthome.core.library.types.QuantityType;
+import org.eclipse.smarthome.core.library.unit.SIUnits;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -115,8 +122,49 @@ public class DeviRegHandler extends BaseThingHandler {
         updateStatus(isOnline ? ThingStatus.ONLINE : ThingStatus.OFFLINE);
     }
 
-    public void handlePacket(DeviSmart.Packet pkt) {
-        // TODO: Parse and set items
+    private void reportTemperature(String ch, double temp) {
+        updateState(ch, new QuantityType<Temperature>(new DecimalType(temp), SIUnits.CELSIUS));
     }
 
+    private void reportSwitch(String ch, boolean on) {
+        updateState(ch, OnOffType.from(on));
+    }
+
+    public void handlePacket(DeviSmart.Packet pkt) {
+        switch (pkt.getMsgCode()) {
+            case HEATING_TEMPERATURE_FLOOR:
+                reportTemperature(CHANNEL_TEMPERATURE_FLOOR, pkt.getDecimal());
+                break;
+            case HEATING_TEMPERATURE_ROOM:
+                reportTemperature(CHANNEL_TEMPERATURE_ROOM, pkt.getDecimal());
+                break;
+            case HEATING_LOW_TEMPERATURE_WARNING:
+                reportTemperature(CHANNEL_SETPOINT_WARNING, pkt.getDecimal());
+                break;
+            case SCHEDULER_SETPOINT_COMFORT:
+                reportTemperature(CHANNEL_SETPOINT_COMFORT, pkt.getDecimal());
+                break;
+            case SCHEDULER_SETPOINT_ECONOMY:
+                reportTemperature(CHANNEL_SETPOINT_ECONOMY, pkt.getDecimal());
+                break;
+            case SCHEDULER_SETPOINT_MANUAL:
+                reportTemperature(CHANNEL_SETPOINT_MANUAL, pkt.getDecimal());
+                break;
+            case SCHEDULER_SETPOINT_AWAY:
+                reportTemperature(CHANNEL_SETPOINT_AWAY, pkt.getDecimal());
+                break;
+            case SCHEDULER_SETPOINT_FROST_PROTECTION:
+                reportTemperature(CHANNEL_SETPOINT_ANTIFREEZE, pkt.getDecimal());
+                break;
+            case SCHEDULER_SETPOINT_FLOOR_COMFORT:
+                reportTemperature(CHANNEL_SETPOINT_MIN_FLOOR, pkt.getDecimal());
+                break;
+            case SCHEDULER_SETPOINT_FLOOR_COMFORT_ENABLED:
+                reportSwitch(CHANNEL_SETPOINT_MIN_FLOOR_ENABLE, pkt.getBoolean());
+                break;
+            case SCHEDULER_SETPOINT_MAX_FLOOR:
+                reportTemperature(CHANNEL_SETPOINT_MAX_FLOOR, pkt.getDecimal());
+                break;
+        }
+    }
 }

@@ -8,7 +8,17 @@
 		<description>DeviReg Smart floor thermostat</description>
 
 		<channels>
-			<channel id="temperature_floor" typeId="temperature_floor" /><channel typeId="temperature_room" id="temperature_room"></channel>
+			<channel id="temperature_floor" typeId="temperature_floor" />
+			<channel typeId="temperature_room" id="temperature_room"></channel>
+			<channel typeId="setpoint_comfort" id="setpoint_comfort"></channel>
+			<channel typeId="setpoint_economy" id="setpoint_economy"></channel>
+			<channel typeId="setpoint_manual" id="setpoint_manual"></channel>
+			<channel typeId="setpoint_away" id="setpoint_awy"></channel>
+			<channel typeId="setpoint_antifreeze" id="setpoint_antifreeze"></channel>
+			<channel typeId="setpoint_min_floor" id="setpoint_min_floor"></channel>
+            <channel typeId="setpoint_min_floor_enable" id="setpoint_min_floor_enable"></channel>
+			<channel typeId="setpoint_max_floor" id="setpoint_max_floor"></channel>
+			<channel typeId="setpoint_warning" id="setpoint_warning" />
 		</channels>
 
 		<config-description>
@@ -20,15 +30,69 @@
 
 	</thing-type>
 	<channel-type id="temperature_floor">
-		<item-type>Number</item-type>
+		<item-type>Number:Temperature</item-type>
 		<label>Floor temperature</label>
 		<description>Current temperature from floor sensor</description>
+		<state readOnly="true" pattern="%.2f %unit%" />
 	</channel-type>
 	<channel-type id="temperature_room">
-		<item-type>Number</item-type>
-		<label>Room temperature
-</label>
+		<item-type>Number:Temperature</item-type>
+		<label>Room temperature</label>
 		<description>Current temperature from room sensor</description>
+        <state readOnly="true" pattern="%.2f %unit%" />
 	</channel-type>
+    <channel-type id="setpoint_comfort">
+        <item-type>Number:Temperature</item-type>
+        <label>At Home temperature</label>
+        <description>Temperature setting when you are at home (according to schedule)</description>
+        <state readOnly="true" pattern="%.1f %unit%" step="0.5" />
+    </channel-type>
+    <channel-type id="setpoint_economy">
+        <item-type>Number:Temperature</item-type>
+        <label>Night / away temperature</label>
+        <description>Temperature setting when you are away (according to schedule)</description>
+        <state readOnly="true" pattern="%.1f %unit%" step="0.5" />
+    </channel-type>
+    <channel-type id="setpoint_manual">
+        <item-type>Number:Temperature</item-type>
+        <label>Manual temperature</label>
+        <description>Temperature setting for manual mode</description>
+        <state readOnly="true" pattern="%.1f %unit%" step="0.5" />
+    </channel-type>
+    <channel-type id="setpoint_away">
+        <item-type>Number:Temperature</item-type>
+        <label>Vacation temperature</label>
+        <description>Temperature setting for vacation mode</description>
+        <state readOnly="true" pattern="%.1f %unit%" step="0.5" />
+    </channel-type>
+    <channel-type id="setpoint_antifreeze">
+        <item-type>Number:Temperature</item-type>
+        <label>Frost protection temperature</label>
+        <description>Temperature setting for frost protection mode</description>
+        <state readOnly="true" pattern="%.1f %unit%" step="0.5" />
+    </channel-type>
+    <channel-type id="setpoint_min_floor">
+        <item-type>Number:Temperature</item-type>
+        <label>Minimum floor temperature</label>
+        <description>Minimum allowed floor temperature</description>
+        <state readOnly="true" pattern="%.1f %unit%" step="0.5" />
+    </channel-type>
+    <channel-type id="setpoint_min_floor_enable">
+        <item-type>Switch</item-type>
+        <label>Enable minimum floor temperature</label>
+        <description>Keep floor temperature above the minimum</description>
+    </channel-type>
+    <channel-type id="setpoint_max_floor">
+        <item-type>Number:Temperature</item-type>
+        <label>Maximum floor temperature</label>
+        <description>Maximum allowed floor temperature</description>
+        <state readOnly="true" pattern="%.1f %unit%" step="0.5" />
+    </channel-type>
+    <channel-type id="setpoint_warning">
+        <item-type>Number:Temperature</item-type>
+        <label>Warning temperature</label>
+        <description>Send warning notification to your phones if the temperature drops below this value</description>
+        <state readOnly="true" pattern="%.1f %unit%" step="0.5" />
+    </channel-type>
 
 </thing:thing-descriptions>

@@ -1,5 +1,7 @@
 package org.openhab.binding.devireg.internal;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.opensdg.OSDGConnection;
 import org.opensdg.OSDGResult;
 import org.opensdg.OSDGState;
@@ -32,13 +34,14 @@ public class DeviSmartConnection extends OSDGConnection {
          * to be done at any moment. Also this suggests that garbage zero byte
          * in the beginning of this bunch could be a buffering bug.
          */
-        while (length > DeviSmart.Packet.HeaderSize) {
+        while (length >= DeviSmart.Packet.HeaderSize) {
             DeviSmart.Packet pkt = new DeviSmart.Packet(data, offset);
             int packetLen = pkt.getLength();
 
             if (packetLen > length) {
                 // Packet header specifies more bytes than we have. The packet is clearly malformed.
-                logger.error("Malformed DeviSmart data at position " + offset + "; packet size exceeds maximum");
+                logger.error("Malformed data at position {}; size exceeds buffer", offset);
+                logger.error(DatatypeConverter.printHexBinary(data));
                 break; // Drop the rest of data and continue
             }
 
