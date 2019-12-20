@@ -22,13 +22,14 @@ public class DeviRegBindingConfig {
         return g_Config;
     }
 
-    public void update(@NonNull DeviRegBindingConfig newConfig) {
-        privateKey = newConfig.privateKey;
-        publicKey = newConfig.publicKey;
-    }
-
     public static void update(@NonNull Map<String, Object> config) {
-        g_Config.update(new Configuration(config).as(DeviRegBindingConfig.class));
+        DeviRegBindingConfig newConfig = new Configuration(config).as(DeviRegBindingConfig.class);
+
+        // We update instead of replace the configuration object, so that if the user updates the
+        // configuration, the values are automatically available in all handlers. Because they all
+        // share the same instance.
+        g_Config.privateKey = newConfig.privateKey;
+        g_Config.publicKey = newConfig.publicKey;
     }
 
     public void Save(ConfigurationAdmin confAdmin) {

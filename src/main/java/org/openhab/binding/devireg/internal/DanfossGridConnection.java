@@ -43,6 +43,7 @@ public class DanfossGridConnection extends OSDGConnection {
         if (privateKey == null) {
             privateKey = OpenSDG.CreatePrivateKey();
             config.privateKey = DatatypeConverter.printHexBinary(privateKey);
+            logger.debug("Generated new private key: " + config.privateKey);
             updateConfig = true;
         }
 
