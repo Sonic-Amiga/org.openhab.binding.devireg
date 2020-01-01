@@ -5,8 +5,11 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.smarthome.config.core.Configuration;
+import org.opensdg.OpenSDG;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,14 +25,45 @@ public class DeviRegBindingConfig {
         return g_Config;
     }
 
-    public static void update(@NonNull Map<String, Object> config) {
+    private void update(DeviRegBindingConfig newConfig) {
+        String newKey = newConfig.privateKey;
+        byte[] newPrivkey;
+
+        if (newKey == null || newKey.isEmpty()) {
+            newPrivkey = OpenSDG.CreatePrivateKey();
+            newKey = DatatypeConverter.printHexBinary(newPrivkey);
+
+            logger.debug("Created new private key: " + newKey);
+        } else if (newKey.equals(privateKey)) {
+            return;
+        } else {
+            // Validate the new key and revert back to the old one if validation fails
+            // It is rather dangerous to inadvertently damage it, you'll lose all
+            // your thermostats and probably have to set everything up from scratch.
+            newPrivkey = SDGUtils.ParseKey(newKey);
+
+            if (newPrivkey == null) {
+                logger.warn("Invalid private key entered: " + newKey + "; reverting back to old one");
+                return;
+            }
+
+            logger.warn("Private key manually changed to: " + newKey);
+        }
+
+        privateKey = newKey;
+        publicKey = DatatypeConverter.printHexBinary(OpenSDG.CalcPublicKey(newPrivkey));
+
+    }
+
+    public static void update(@NonNull Map<String, Object> config, ConfigurationAdmin admin) {
         DeviRegBindingConfig newConfig = new Configuration(config).as(DeviRegBindingConfig.class);
 
-        // We update instead of replace the configuration object, so that if the user updates the
-        // configuration, the values are automatically available in all handlers. Because they all
-        // share the same instance.
-        g_Config.privateKey = newConfig.privateKey;
-        g_Config.publicKey = newConfig.publicKey;
+        g_Config.update(newConfig);
+
+        if (!(g_Config.privateKey.equals(newConfig.privateKey) && g_Config.publicKey.equals(newConfig.publicKey))) {
+            // Some value has been updated by the validation, save the validated version
+            g_Config.Save(admin);
+        }
     }
 
     public void Save(ConfigurationAdmin confAdmin) {

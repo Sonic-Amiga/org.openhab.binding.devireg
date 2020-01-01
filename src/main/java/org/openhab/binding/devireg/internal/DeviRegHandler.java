@@ -31,7 +31,6 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.opensdg.protocol.DeviSmart;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,13 +45,11 @@ public class DeviRegHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(DeviRegHandler.class);
 
-    private ConfigurationAdmin confAdmin;
     private @Nullable DeviRegConfiguration config;
     private @Nullable DeviSmartConnection connection;
 
-    public DeviRegHandler(Thing thing, ConfigurationAdmin configurationAdmin) {
+    public DeviRegHandler(Thing thing) {
         super(thing);
-        confAdmin = configurationAdmin;
         DanfossGridConnection.AddUser();
     }
 
@@ -84,7 +81,7 @@ public class DeviRegHandler extends BaseThingHandler {
 
         // Example for background initialization:
         scheduler.execute(() -> {
-            DanfossGridConnection grid = DanfossGridConnection.get(confAdmin);
+            DanfossGridConnection grid = DanfossGridConnection.get();
 
             if (grid == null) {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR,

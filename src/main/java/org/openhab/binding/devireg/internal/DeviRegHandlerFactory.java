@@ -61,7 +61,7 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
     @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> config) {
         super.activate(componentContext);
-        DeviRegBindingConfig.update(config);
+        DeviRegBindingConfig.get().update(config, configurationAdmin);
     }
 
     @Override
@@ -72,11 +72,10 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
 
     @Modified
     protected void modified(Map<String, Object> config) {
-        if (config.containsKey("privateKey")) {
-            // We can only update the private key. Connection object
-            // will do the validation and update the public key.
-            DanfossGridConnection.UpdatePrivateKey(configurationAdmin, (String) config.get("privateKey"));
-        }
+        // We update instead of replace the configuration object, so that if the user updates the
+        // configuration, the values are automatically available in all handlers. Because they all
+        // share the same instance.
+        DeviRegBindingConfig.get().update(config, configurationAdmin);
     }
 
     @Override
@@ -84,7 +83,7 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (THING_TYPE_DEVIREG_SMART.equals(thingTypeUID)) {
-            return new DeviRegHandler(thing, configurationAdmin);
+            return new DeviRegHandler(thing);
         }
 
         return null;
