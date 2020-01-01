@@ -43,11 +43,11 @@ public class DeviRegBindingConfig {
             newPrivkey = SDGUtils.ParseKey(newKey);
 
             if (newPrivkey == null) {
-                logger.warn("Invalid private key entered: " + newKey + "; reverting back to old one");
+                logger.warn("Invalid private key configured: " + newKey + "; reverting back to old one");
                 return;
             }
 
-            logger.warn("Private key manually changed to: " + newKey);
+            logger.debug("Got private key from configuration: " + newKey);
         }
 
         privateKey = newKey;
