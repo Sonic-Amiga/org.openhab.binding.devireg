@@ -325,9 +325,9 @@ public class DeviSmart {
       public static final int SYSTEM_UI_BRIGTHNESS = 29247;
       public static final int SYSTEM_UI_SCREEN_OFF = 29248;
       public static final int SYSTEM_LOCAL_CONFIRM_REQUEST = 29249;
-      public static final int SYSTEM_ROOM_NAME                             = 29250; // ?   String    Room name for this thermostat
-      public static final int SYSTEM_HOUSE_NAME                            = 29251; // ?   String    House name for this thermostat
-      public static final int SYSTEM_ZONE_NAME                             = 29252; // ?   String    Zone name for this thermostat
+      public static final int SYSTEM_ROOM_NAME                             = 29250; // 33  String    Room name for this thermostat
+      public static final int SYSTEM_HOUSE_NAME                            = 29251; // 33  String    House name for this thermostat
+      public static final int SYSTEM_ZONE_NAME                             = 29252; // 33  String    Zone name for this thermostat
       public static final int SYSTEM_READY_RESTART                         = 29253;
       public static final int SYSTEM_LOCAL_CONFIRM_RESPONSE                = 29254;
       public static final int SYSTEM_TIME_OFFSET_TABLE                     = 29255;
