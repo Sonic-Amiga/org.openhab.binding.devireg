@@ -23,6 +23,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.QuantityType;
+import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.library.unit.SIUnits;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
@@ -31,6 +32,7 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.opensdg.protocol.DeviSmart;
+import org.opensdg.protocol.DeviSmart.ControlState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,6 +177,18 @@ public class DeviRegHandler extends BaseThingHandler {
         updateState(ch, OnOffType.from(on));
     }
 
+    private void reportControlInfo(byte info) {
+        String mode;
+
+        if (info >= ControlState.Configuring && info <= ControlState.AtHomeOverride) {
+            mode = CONTROL_MODES[info];
+        } else {
+            mode = "";
+        }
+
+        updateState(CHANNEL_CONTROL_MODE, StringType.valueOf(mode));
+    }
+
     public void handlePacket(DeviSmart.Packet pkt) {
         switch (pkt.getMsgCode()) {
             case HEATING_TEMPERATURE_FLOOR:
@@ -209,6 +223,9 @@ public class DeviRegHandler extends BaseThingHandler {
                 break;
             case SCHEDULER_SETPOINT_MAX_FLOOR:
                 reportTemperature(CHANNEL_SETPOINT_MAX_FLOOR, pkt.getDecimal());
+                break;
+            case SCHEDULER_CONTROL_INFO:
+                reportControlInfo(pkt.getByte());
                 break;
         }
     }

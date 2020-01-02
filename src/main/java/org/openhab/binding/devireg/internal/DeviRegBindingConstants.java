@@ -41,4 +41,9 @@ public class DeviRegBindingConstants {
     public static final String CHANNEL_SETPOINT_MIN_FLOOR_ENABLE = "setpoint_min_floor_enable";
     public static final String CHANNEL_SETPOINT_MAX_FLOOR = "setpoint_max_floor";
     public static final String CHANNEL_SETPOINT_WARNING = "setpoint_warning";
+    public static final String CHANNEL_CONTROL_MODE = "control_mode";
+
+    public static final String[] CONTROL_MODES = { "CONFIGURING", "MANUAL", "HOME", "AWAY", "VACATION", "FATAL",
+            "PAUSE", "OFF", "OVERRIDE" };
+
 }

@@ -2,6 +2,9 @@ package org.opensdg.protocol;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class DeviSmart {
     public static class Packet {
@@ -62,12 +65,42 @@ public class DeviSmart {
 
         public Packet(int msgClass, int msgCode, byte[] data) {
             this((byte) msgClass, msgCode, data.length + 1);
-            m_Buffer.put((byte) data.length);
+            putByte(data.length);
             m_Buffer.put(data);
         }
 
         public Packet(int msgClass, int msgCode, String data) {
             this(msgClass, msgCode, data.getBytes());
+        }
+
+        public void position(int offset) {
+            m_Buffer.position(m_Start + HeaderSize + offset);
+        }
+
+        // Argument is int for convenience because all Java expressions return int
+        public void putByte(int data) {
+            m_Buffer.put((byte) data);
+        }
+
+        public void putDate(Date date) {
+            Calendar c = Calendar.getInstance();
+            c.setTime(date);
+            c.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            int dow = c.get(Calendar.DAY_OF_WEEK) - 1;
+
+            // Move SUNDAY to the end
+            if (dow == 0) {
+                dow = 7;
+            }
+
+            putByte(c.get(Calendar.SECOND));
+            putByte(c.get(Calendar.MINUTE));
+            putByte(c.get(Calendar.HOUR_OF_DAY));
+            putByte(day | (dow << 5));
+            putByte(c.get(Calendar.MONTH) + 1);
+            putByte(c.get(Calendar.YEAR) - 2000);
         }
 
         public byte[] getBuffer() {
@@ -119,6 +152,43 @@ public class DeviSmart {
 
         public String getString() {
             return new String(getArray());
+        }
+
+        public Date getDate(int offset) {
+            position(offset);
+
+            // Date is encoded as 6 bytes: year month day hour minute second in UTC
+            // Months count starts from 1; year count begins from 2000
+            byte sec = m_Buffer.get();
+            byte min = m_Buffer.get();
+            int hr = m_Buffer.get() & 63; // No idea why 63 here; DeviSmart app does this
+            int d = m_Buffer.get() & 31; // Strip day of week
+            int m = m_Buffer.get() - 1;
+            int y = Byte.toUnsignedInt(m_Buffer.get()) + 2000; // Greetings year 2256! :)
+
+            Calendar c = Calendar.getInstance();
+            c.clear();
+            c.setTimeZone(TimeZone.getTimeZone("UTC"));
+            c.set(y, m, d, hr, min, sec);
+            return c.getTime();
+        }
+    }
+
+    public static class AwayPacket extends Packet {
+        public AwayPacket(Date start, Date end) {
+            super((byte) MsgClass.DOMINION_SCHEDULER, MsgCode.SCHEDULER_AWAY, 14);
+            setDate(0, start);
+            setDate(7, end);
+        }
+
+        private void setDate(int offset, Date d) {
+            position(offset);
+            if (d != null) {
+                putByte(1);
+                putDate(d);
+            } else {
+                putByte(0);
+            }
         }
     }
 
@@ -359,8 +429,8 @@ public class DeviSmart {
       public static final int HEATING_LOW_TEMPERATURE_WARNING              = 29300; // 2   decimal   Setting for "low temperature" push notification
       public static final int HEATING_LOW_TEMPERATURE_WARNING_THRESHOLD    = 29301; // 2   decimal   Unclear. Set to 1 on my device.
       /* Class DOMINION_SCHEDULER */
-      public static final int SCHEDULER_CONTROL_INFO                       = 29328; // 1   byte
-      public static final int SCHEDULER_CONTROL_MODE                       = 29329; // 1   byte      Mode. See ControlMode values below
+      public static final int SCHEDULER_CONTROL_INFO                       = 29328; // 1   byte      Current control mode. See ControlState values below.
+      public static final int SCHEDULER_CONTROL_MODE                       = 29329; // 1   byte      Mode change request; shows last command on read. See ControlMode values below
       public static final int SCHEDULER_SETPOINT_COMFORT                   = 29330; // 2   decimal   Temperature setting for "At home" period
       public static final int SCHEDULER_SETPOINT_ECONOMY                   = 29331; // 2   decimal   Temperature setting for "Away/asleep" period
       public static final int SCHEDULER_SETPOINT_MANUAL                    = 29332; // 2   decimal   Manual mode temperature setting
@@ -382,6 +452,18 @@ public class DeviSmart {
       public static final int LOG_LATEST_ACTIVITIES                        = 29380;
     };
  // @formatter:on
+
+    public static class ControlState {
+        public static final int Configuring = 0;
+        public static final int Manual = 1;
+        public static final int AtHome = 2;
+        public static final int Away = 3;
+        public static final int Vacation = 4;
+        public static final int Fatal = 5;
+        public static final int Pause = 6;
+        public static final int Off = 7;
+        public static final int AtHomeOverride = 8;
+    };
 
     public static class ControlMode {
         public static final int WEEKLY_SCHEDULE_ON = 0;
