@@ -13,6 +13,7 @@
 package org.openhab.binding.devireg.internal;
 
 import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.*;
+import static org.opensdg.protocol.DeviSmart.MsgClass.*;
 import static org.opensdg.protocol.DeviSmart.MsgCode.*;
 
 import javax.measure.quantity.Temperature;
@@ -29,7 +30,6 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.opensdg.protocol.DeviSmart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,17 +55,65 @@ public class DeviRegHandler extends BaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (CHANNEL_TEMPERATURE_FLOOR.equals(channelUID.getId())) {
-            if (command instanceof RefreshType) {
-                // TODO: handle data refresh
+        switch (channelUID.getId()) {
+            case CHANNEL_SETPOINT_WARNING:
+                setTemperature(DOMINION_HEATING, HEATING_LOW_TEMPERATURE_WARNING, command);
+                break;
+            case CHANNEL_SETPOINT_COMFORT:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_COMFORT, command);
+                break;
+            case CHANNEL_SETPOINT_ECONOMY:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_ECONOMY, command);
+                break;
+            case CHANNEL_SETPOINT_MANUAL:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MANUAL, command);
+                break;
+            case CHANNEL_SETPOINT_AWAY:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_AWAY, command);
+                break;
+            case CHANNEL_SETPOINT_ANTIFREEZE:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FROST_PROTECTION, command);
+                break;
+            case CHANNEL_SETPOINT_MIN_FLOOR:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FLOOR_COMFORT, command);
+                break;
+            case CHANNEL_SETPOINT_MIN_FLOOR_ENABLE:
+                setSwitch(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FLOOR_COMFORT_ENABLED, command);
+                break;
+            case CHANNEL_SETPOINT_MAX_FLOOR:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MAX_FLOOR, command);
+                break;
+        }
+    }
+
+    private void setTemperature(int msgClass, int msgCode, Command command) {
+        double newTemperature;
+
+        if (command instanceof DecimalType) {
+            newTemperature = ((DecimalType) command).doubleValue();
+        } else if (command instanceof QuantityType) {
+            @SuppressWarnings("unchecked")
+            QuantityType<Temperature> celsius = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
+            if (celsius == null) {
+                return;
             }
+            newTemperature = celsius.doubleValue();
+        } else {
+            return;
+        }
 
-            // TODO: handle command
+        SendPacket(new DeviSmart.Packet(msgClass, msgCode, newTemperature));
+    }
 
-            // Note: if communication with thing fails for some reason,
-            // indicate that by setting the status with detail information:
-            // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-            // "Could not control device at IP address x.x.x.x");
+    private void setSwitch(int msgClass, int msgCode, Command command) {
+        if (command instanceof OnOffType) {
+            SendPacket(new DeviSmart.Packet(msgClass, msgCode, command.equals(OnOffType.ON)));
+        }
+    }
+
+    private void SendPacket(DeviSmart.Packet pkt) {
+        if (connection != null) {
+            connection.Send(pkt.getBuffer());
         }
     }
 
