@@ -19,6 +19,7 @@
             <channel typeId="setpoint_min_floor_enable" id="setpoint_min_floor_enable"></channel>
 			<channel typeId="setpoint_max_floor" id="setpoint_max_floor"></channel>
 			<channel typeId="setpoint_warning" id="setpoint_warning" />
+            <channel typeId="control_mode" id="control_mode" />
 			<channel typeId="control_state" id="control_state" />
 		</channels>
 
@@ -94,6 +95,21 @@
         <label>Warning temperature</label>
         <description>Send warning notification to your phones if the temperature drops below this value</description>
         <state pattern="%.1f %unit%" min="0" max="10" step="0.5" />
+    </channel-type>
+    <channel-type id="control_mode">
+        <item-type>String</item-type>
+        <label>Mode</label>
+        <description>Control mode switch</description>
+        <state>
+            <options>
+                <option value="MANUAL">Manual</option>
+                <option value="OVERRIDE">At home override</option>
+                <option value="SCHEDULE">Schedule</option>
+                <option value="VACATION">Vacation</option>
+                <option value="PAUSE">Frost protection</option>
+                <option value="OFF">Off</option>
+            </options>
+        </state>
     </channel-type>
     <channel-type id="control_state">
         <item-type>String</item-type>

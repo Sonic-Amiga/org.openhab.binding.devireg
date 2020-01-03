@@ -42,6 +42,19 @@ public class DeviRegBindingConstants {
     public static final String CHANNEL_SETPOINT_MAX_FLOOR = "setpoint_max_floor";
     public static final String CHANNEL_SETPOINT_WARNING = "setpoint_warning";
     public static final String CHANNEL_CONTROL_STATE = "control_state";
+    public static final String CHANNEL_CONTROL_MODE = "control_mode";
+
+    public static final String CONTROL_MODE_MANUAL = "MANUAL";
+    public static final String CONTROL_MODE_OVERRIDE = "OVERRIDE";
+    public static final String CONTROL_MODE_SCHEDULE = "SCHEDULE";
+    public static final String CONTROL_MODE_VACATION = "VACATION";
+    public static final String CONTROL_MODE_PAUSE = "PAUSE";
+    public static final String CONTROL_MODE_OFF = "OFF";
+
+    // Modes corresponding to states below
+    public static final String[] CONTROL_MODES = { "", CONTROL_MODE_MANUAL, CONTROL_MODE_SCHEDULE,
+            CONTROL_MODE_SCHEDULE, CONTROL_MODE_VACATION, "", CONTROL_MODE_PAUSE, CONTROL_MODE_OFF,
+            CONTROL_MODE_OVERRIDE };
 
     public static final String[] CONTROL_STATES = { "CONFIGURING", "MANUAL", "HOME", "AWAY", "VACATION", "FATAL",
             "PAUSE", "OFF", "OVERRIDE" };

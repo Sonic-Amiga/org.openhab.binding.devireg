@@ -16,6 +16,9 @@ import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.*;
 import static org.opensdg.protocol.DeviSmart.MsgClass.*;
 import static org.opensdg.protocol.DeviSmart.MsgCode.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -32,6 +35,7 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.opensdg.protocol.DeviSmart;
+import org.opensdg.protocol.DeviSmart.ControlMode;
 import org.opensdg.protocol.DeviSmart.ControlState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +53,7 @@ public class DeviRegHandler extends BaseThingHandler {
 
     private @Nullable DeviRegConfiguration config;
     private @Nullable DeviSmartConnection connection;
+    private byte currentMode = -1;
 
     public DeviRegHandler(Thing thing) {
         super(thing);
@@ -85,6 +90,9 @@ public class DeviRegHandler extends BaseThingHandler {
             case CHANNEL_SETPOINT_MAX_FLOOR:
                 setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MAX_FLOOR, command);
                 break;
+            case CHANNEL_CONTROL_MODE:
+                setMode(command);
+                break;
         }
     }
 
@@ -110,6 +118,104 @@ public class DeviRegHandler extends BaseThingHandler {
     private void setSwitch(int msgClass, int msgCode, Command command) {
         if (command instanceof OnOffType) {
             SendPacket(new DeviSmart.Packet(msgClass, msgCode, command.equals(OnOffType.ON)));
+        }
+    }
+
+    private void setMode(Command command) {
+        if (command instanceof StringType) {
+            try {
+                String cmdString = command.toString();
+                // We are going to send more than one packet, let's collect them and send
+                // together.
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+                logger.trace("setMode " + command);
+
+                // In "special" modes (Off, Pause, Vacation) the thermostat ignores
+                // other mode commands; we first need to cancel this mode. We also
+                // check if the same mode is requested and just bail out in such a case.
+                switch (currentMode) {
+                    case ControlState.Configuring:
+                    case ControlState.Fatal:
+                        return; // I think we cannot do much here
+
+                    case ControlState.Vacation:
+                        if (cmdString.equals(CONTROL_MODE_VACATION)) {
+                            return;
+                        }
+
+                        // Original app resets both scheduled period and PLANNED flag, we do the same.
+                        buffer.write(new DeviSmart.AwayPacket(null, null).getBuffer());
+                        buffer.write(
+                                new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_AWAY_ISPLANNED, false).getBuffer());
+                        break;
+
+                    case ControlState.Pause:
+                        if (cmdString.equals(CONTROL_MODE_PAUSE)) {
+                            return;
+                        }
+
+                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                                ControlMode.FROST_PROTECTION_OFF).getBuffer());
+                        break;
+
+                    case ControlState.Off:
+                        if (cmdString.equals(CONTROL_MODE_OFF)) {
+                            return;
+                        }
+
+                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                                ControlMode.OFF_STATE_OFF).getBuffer());
+                        break;
+
+                    case ControlState.AtHomeOverride:
+                        if (cmdString.equals(CONTROL_MODE_OVERRIDE)) {
+                            return;
+                        }
+
+                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                                ControlMode.TEMPORARY_HOME_OFF).getBuffer());
+                        break;
+                }
+
+                switch (cmdString) {
+                    case CONTROL_MODE_MANUAL:
+                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                                ControlMode.WEEKLY_SCHEDULE_OFF).getBuffer());
+                        break;
+                    case CONTROL_MODE_OVERRIDE:
+                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                                ControlMode.TEMPORARY_HOME_ON).getBuffer());
+                        break;
+                    case CONTROL_MODE_SCHEDULE:
+                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                                ControlMode.WEEKLY_SCHEDULE_ON).getBuffer());
+                        break;
+                    case CONTROL_MODE_VACATION:
+                        // In order to enter vacation mode immediately we need to reset
+                        // scheduled time period and set PLANNED to true.
+                        buffer.write(new DeviSmart.AwayPacket(null, null).getBuffer());
+                        buffer.write(
+                                new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_AWAY_ISPLANNED, true).getBuffer());
+                        break;
+                    case CONTROL_MODE_PAUSE:
+                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                                ControlMode.FROST_PROTECTION_ON).getBuffer());
+                        break;
+                    case CONTROL_MODE_OFF:
+                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                                ControlMode.OFF_STATE_ON).getBuffer());
+                        break;
+                }
+
+                if (connection != null) {
+                    connection.Send(buffer.toByteArray());
+                }
+
+            } catch (IOException e) {
+                // We should never get here
+                logger.error("Error building control mode packet(s): " + e.toString());
+            }
         }
     }
 
@@ -178,15 +284,20 @@ public class DeviRegHandler extends BaseThingHandler {
     }
 
     private void reportControlInfo(byte info) {
-        String mode;
+        String mode, state;
+
+        currentMode = info;
 
         if (info >= ControlState.Configuring && info <= ControlState.AtHomeOverride) {
-            mode = CONTROL_STATES[info];
+            mode = CONTROL_MODES[info];
+            state = CONTROL_STATES[info];
         } else {
             mode = "";
+            state = "";
         }
 
-        updateState(CHANNEL_CONTROL_STATE, StringType.valueOf(mode));
+        updateState(CHANNEL_CONTROL_MODE, StringType.valueOf(mode));
+        updateState(CHANNEL_CONTROL_STATE, StringType.valueOf(state));
     }
 
     public void handlePacket(DeviSmart.Packet pkt) {

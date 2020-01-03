@@ -454,25 +454,25 @@ public class DeviSmart {
  // @formatter:on
 
     public static class ControlState {
-        public static final int Configuring = 0;
-        public static final int Manual = 1;
-        public static final int AtHome = 2;
-        public static final int Away = 3;
-        public static final int Vacation = 4;
-        public static final int Fatal = 5;
-        public static final int Pause = 6;
-        public static final int Off = 7;
-        public static final int AtHomeOverride = 8;
+        public static final byte Configuring = 0;
+        public static final byte Manual = 1;
+        public static final byte AtHome = 2;
+        public static final byte Away = 3;
+        public static final byte Vacation = 4;
+        public static final byte Fatal = 5;
+        public static final byte Pause = 6;
+        public static final byte Off = 7;
+        public static final byte AtHomeOverride = 8;
     };
 
     public static class ControlMode {
-        public static final int WEEKLY_SCHEDULE_ON = 0;
-        public static final int WEEKLY_SCHEDULE_OFF = 1;
-        public static final int OFF_STATE_ON = 2;
-        public static final int OFF_STATE_OFF = 3;
-        public static final int FROST_PROTECTION_ON = 4;
-        public static final int FROST_PROTECTION_OFF = 5;
-        public static final int TEMPORARY_HOME_ON = 6;
-        public static final int TEMPORARY_HOME_OFF = 7;
+        public static final byte WEEKLY_SCHEDULE_ON = 0;
+        public static final byte WEEKLY_SCHEDULE_OFF = 1;
+        public static final byte OFF_STATE_ON = 2;
+        public static final byte OFF_STATE_OFF = 3;
+        public static final byte FROST_PROTECTION_ON = 4;
+        public static final byte FROST_PROTECTION_OFF = 5;
+        public static final byte TEMPORARY_HOME_ON = 6;
+        public static final byte TEMPORARY_HOME_OFF = 7;
     };
 }
