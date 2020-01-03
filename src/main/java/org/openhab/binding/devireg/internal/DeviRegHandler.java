@@ -181,12 +181,12 @@ public class DeviRegHandler extends BaseThingHandler {
         String mode;
 
         if (info >= ControlState.Configuring && info <= ControlState.AtHomeOverride) {
-            mode = CONTROL_MODES[info];
+            mode = CONTROL_STATES[info];
         } else {
             mode = "";
         }
 
-        updateState(CHANNEL_CONTROL_MODE, StringType.valueOf(mode));
+        updateState(CHANNEL_CONTROL_STATE, StringType.valueOf(mode));
     }
 
     public void handlePacket(DeviSmart.Packet pkt) {

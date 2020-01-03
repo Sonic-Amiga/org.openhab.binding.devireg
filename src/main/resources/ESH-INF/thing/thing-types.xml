@@ -19,7 +19,7 @@
             <channel typeId="setpoint_min_floor_enable" id="setpoint_min_floor_enable"></channel>
 			<channel typeId="setpoint_max_floor" id="setpoint_max_floor"></channel>
 			<channel typeId="setpoint_warning" id="setpoint_warning" />
-			<channel typeId="control_mode" id="control_mode" />
+			<channel typeId="control_state" id="control_state" />
 		</channels>
 
 		<config-description>
@@ -95,10 +95,10 @@
         <description>Send warning notification to your phones if the temperature drops below this value</description>
         <state pattern="%.1f %unit%" min="0" max="10" step="0.5" />
     </channel-type>
-    <channel-type id="control_mode">
+    <channel-type id="control_state">
         <item-type>String</item-type>
-        <label>Mode</label>
-        <description>Current control mode</description>
+        <label>State</label>
+        <description>Current control state</description>
         <state readOnly="true">
             <options>
                 <option value="CONFIGURING">Not configured</option>
