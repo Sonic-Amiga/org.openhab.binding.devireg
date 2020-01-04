@@ -1,14 +1,12 @@
 # DeviReg Binding
 
-_Give some details about what this binding is meant for - a protocol, system, specific device._
-
-_If possible, provide some resources like pictures, a YouTube video, etc. to give an impression of what can be done with this binding. You can place such resources into a `doc` folder next to this README.md._
+This binding allows you to control DeviReg Smart(tm) smart floor thermostat (https://www.devismart.com/), produced by Danfoss company.
+This thermostat communicates over Wi-Fi using a proprietary cloud via a protocol called SecureDeviceGrid(tm) (http://securedevicegrid.com/).
+The cloud solution is developed by Trifork company. This binding relies on OpenSDG (https://github.com/Sonic-Amiga/opensdg), the free and opensource implementation of this protocol. The library must be installed in your system in order for this binding to operate.
 
 ## Supported Things
 
-_Please describe the different supported things / devices within this section._
-_Which different types are supported, which models were tested etc.?_
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/ESH-INF/thing``` of your binding._
+At least currently only DeviReg Smart(tm) is supported.
 
 ## Discovery
 
@@ -39,13 +37,27 @@ _Note that it is planned to generate some part of this based on the XML files wi
 
 ## Channels
 
-_Here you should provide information about available channel types, what their meaning is and how they can be used._
+| channel                   | type        | description                                    | Read-only |
+|---------------------------|-------------|------------------------------------------------|-----------|
+| temperature_floor         | Temperature | Floor temperature sensor reading                      | Y |
+| temperature_room          | Temperature | Room temperature sensor reading                       | Y |
+| setpoint_comfort          | Temperature | Set point for "At home" period                        | N |
+| setpoint_economy          | Temperature | Set point for "Away/Asleep" period                    | N |
+| setpoint_manual           | Temperature | Set point for manual mode                             | N |
+| setpoint_away             | Temperature | Set point for vacation mode                           | N |
+| setpoint_antifreeze       | Temperature | Set point for frost protection (paused) mode          | N |
+| setpoint_min_floor        | Temperature | Minimum floor temperature                             | N |
+| setpoint_min_floor_enable | Switch      | Enable keeping minimum floor temperature              | N |
+| setpoint_max_floor        | Temperature | Maximum allowed floor temperature                     | N |
+| setpoint_warning          | Temperature | Temperature below which an alarm notification is sent to your phone  | N |
+| control_mode              | String      | Chosen control mode: MANUAL, OVERRIDE, SCHEDULE, VACATION, PAUSE, OFF| N |
+| control_state             | String      | Current control state: CONFIGURING, MANUAL, HOME, AWAY, VACATION, FATAL, PAUSE, OFF, OVERRIDE | Y |
 
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/ESH-INF/thing``` of your binding._
+NOTES:
 
-| channel  | type   | description                  |
-|----------|--------|------------------------------|
-| control  | Switch | This is the control channel  |
+1. Push notifications are sent directly by the thermostat via original Danfoss cloud infrastructure,
+this is part of the original service. OpenHAB takes no part in this process.
+2. If there's no "at home" time configured in the schedule for the given day, OVERRIDE mode does not work and immediately falls back to SCHEDULE. This is a bug in thermostat's firmware, OpenHAB does not affect this.
 
 ## Full Example
 
