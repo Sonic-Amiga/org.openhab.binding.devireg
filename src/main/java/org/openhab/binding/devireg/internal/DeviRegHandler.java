@@ -271,8 +271,14 @@ public class DeviRegHandler extends BaseThingHandler {
         DanfossGridConnection.RemoveUser();
     }
 
-    public void setOnlineStatus(boolean isOnline) {
-        updateStatus(isOnline ? ThingStatus.ONLINE : ThingStatus.OFFLINE);
+    public void setOnlineStatus() {
+        logger.info("Connection established");
+        updateStatus(ThingStatus.ONLINE);
+    }
+
+    public void setOfflineStatus(String reason) {
+        logger.error(reason);
+        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, reason);
     }
 
     private void reportTemperature(String ch, double temp) {

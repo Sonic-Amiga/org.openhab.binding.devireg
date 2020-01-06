@@ -20,7 +20,11 @@ public class DeviSmartConnection extends OSDGConnection {
 
     @Override
     protected void onStatusChanged(OSDGState newState) {
-        m_Handler.setOnlineStatus(newState == OSDGState.CONNECTED);
+        if (newState == OSDGState.CONNECTED) {
+            m_Handler.setOnlineStatus();
+        } else {
+            m_Handler.setOfflineStatus(getLastResultStr());
+        }
     }
 
     @Override
