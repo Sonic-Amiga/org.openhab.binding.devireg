@@ -3,7 +3,6 @@ package org.openhab.binding.devireg.internal;
 import org.opensdg.OSDGConnection;
 import org.opensdg.OSDGResult;
 import org.opensdg.OSDGState;
-import org.opensdg.OpenSDG;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +34,7 @@ public class DanfossGridConnection extends OSDGConnection {
 
     private void SetPrivateKey(DeviRegBindingConfig config) {
         privateKey = config.privateKey;
-        // TODO: Library API will change, keys will belong to a connection
-        OpenSDG.SetPrivateKey(SDGUtils.ParseKey(privateKey));
+        SetPrivateKey(SDGUtils.ParseKey(privateKey));
     }
 
     public static synchronized void UpdatePrivateKey() {
