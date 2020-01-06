@@ -192,6 +192,8 @@ public class DeviSmart {
         }
     }
 
+    public static final String ProtocolName = "dominion-1.0";
+
     /*
      * Message class. Codes (defined below) appear only under their class,
      * so this is kinda redundant.

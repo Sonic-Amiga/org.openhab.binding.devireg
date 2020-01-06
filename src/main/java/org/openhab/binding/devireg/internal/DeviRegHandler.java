@@ -18,8 +18,13 @@ import static org.opensdg.protocol.DeviSmart.MsgCode.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.measure.quantity.Temperature;
+import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -52,12 +57,14 @@ public class DeviRegHandler extends BaseThingHandler {
     private final Logger logger = LoggerFactory.getLogger(DeviRegHandler.class);
 
     private @Nullable DeviRegConfiguration config;
+    private byte @Nullable [] peerId;
     private @Nullable DeviSmartConnection connection;
+    private @Nullable Future<?> reconnectReq;
     private byte currentMode = -1;
+    private final ExecutorService singleThread = Executors.newSingleThreadExecutor();
 
     public DeviRegHandler(Thing thing) {
         super(thing);
-        DanfossGridConnection.AddUser();
     }
 
     @Override
@@ -225,49 +232,51 @@ public class DeviRegHandler extends BaseThingHandler {
         }
     }
 
+    @SuppressWarnings("null")
     @Override
     public void initialize() {
         logger.trace("initialize()");
+        DanfossGridConnection.AddUser();
+
         config = getConfigAs(DeviRegConfiguration.class);
+
+        peerId = SDGUtils.ParseKey(config.peerId);
+        if (peerId == null) {
+            logger.error("Peer ID is not set");
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, "Peer ID is not set");
+            return;
+        }
 
         // set the thing status to UNKNOWN temporarily and let the background task decide for the real status.
         // the framework is then able to reuse the resources from the thing handler initialization.
         // we set this upfront to reliably check status updates in unit tests.
         updateStatus(ThingStatus.UNKNOWN);
 
-        // Example for background initialization:
-        scheduler.execute(() -> {
-            DanfossGridConnection grid = DanfossGridConnection.get();
-
-            if (grid == null) {
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR,
-                        "Danfoss grid connection failed");
-                // TODO: Retry after some time ?
-                return;
-            }
-
-            byte[] peerId = SDGUtils.ParseKey(config.peerId);
-            if (peerId == null) {
-                logger.error("Peer ID is not set");
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, "Peer ID is not set");
-                return;
-            }
-
-            logger.info("Connecting to peer " + config.peerId);
-            connection = new DeviSmartConnection(this);
-            connection.ConnectToRemote(grid, peerId, "dominion-1.0");
-        });
+        connection = new DeviSmartConnection(this);
+        connect();
     }
 
     @Override
     public void dispose() {
         logger.trace("dispose()");
-        if (connection != null) {
-            connection.SetBlockingMode(true);
-            connection.Close();
-            connection.Dispose();
+
+        singleThread.execute(() -> {
+            DeviSmartConnection conn = connection;
             connection = null;
-        }
+
+            if (reconnectReq != null) {
+                reconnectReq.cancel(false);
+                reconnectReq = null;
+            }
+
+            if (conn != null) {
+                conn.SetBlockingMode(true);
+                conn.Close();
+                logger.info("Connection closed");
+                conn.Dispose();
+            }
+        });
+
         DanfossGridConnection.RemoveUser();
     }
 
@@ -279,6 +288,36 @@ public class DeviRegHandler extends BaseThingHandler {
     public void setOfflineStatus(String reason) {
         logger.error(reason);
         updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, reason);
+        scheduleReconnect();
+    }
+
+    private void scheduleReconnect() {
+        reconnectReq = scheduler.schedule(() -> {
+            connect();
+        }, 10, TimeUnit.SECONDS);
+    }
+
+    @SuppressWarnings("null")
+    private void connect() {
+        // In order not to mess up our connection state we need to make sure
+        // that any two calls are never running concurrently. We use
+        // singleThreadExecutorService for this purpose
+        singleThread.execute(() -> {
+            if (connection == null) {
+                return; // Stale Reconnect request from deleted/disabled Thing
+            }
+
+            DanfossGridConnection grid = DanfossGridConnection.get();
+
+            if (grid == null) {
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR,
+                        "Danfoss grid connection failed");
+                scheduleReconnect();
+            }
+
+            logger.info("Connecting to peer " + DatatypeConverter.printHexBinary(peerId));
+            connection.ConnectToRemote(grid, peerId, DeviSmart.ProtocolName);
+        });
     }
 
     private void reportTemperature(String ch, double temp) {
