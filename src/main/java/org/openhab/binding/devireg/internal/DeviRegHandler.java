@@ -18,6 +18,7 @@ import static org.opensdg.protocol.DeviSmart.MsgCode.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Hashtable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -39,6 +40,8 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.smarthome.core.types.RefreshType;
+import org.eclipse.smarthome.core.types.State;
 import org.opensdg.protocol.DeviSmart;
 import org.opensdg.protocol.DeviSmart.ControlMode;
 import org.opensdg.protocol.DeviSmart.ControlState;
@@ -60,46 +63,57 @@ public class DeviRegHandler extends BaseThingHandler {
     private byte @Nullable [] peerId;
     private @Nullable DeviSmartConnection connection;
     private @Nullable Future<?> reconnectReq;
-    private byte currentMode = -1;
     private final ExecutorService singleThread = Executors.newSingleThreadExecutor();
+    private byte currentMode = -1;
+    private Hashtable<String, State> lastState = new Hashtable<String, State>();
 
     public DeviRegHandler(Thing thing) {
         super(thing);
     }
 
+    @SuppressWarnings("null")
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        switch (channelUID.getId()) {
-            case CHANNEL_SETPOINT_WARNING:
-                setTemperature(DOMINION_HEATING, HEATING_LOW_TEMPERATURE_WARNING, command);
-                break;
-            case CHANNEL_SETPOINT_COMFORT:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_COMFORT, command);
-                break;
-            case CHANNEL_SETPOINT_ECONOMY:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_ECONOMY, command);
-                break;
-            case CHANNEL_SETPOINT_MANUAL:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MANUAL, command);
-                break;
-            case CHANNEL_SETPOINT_AWAY:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_AWAY, command);
-                break;
-            case CHANNEL_SETPOINT_ANTIFREEZE:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FROST_PROTECTION, command);
-                break;
-            case CHANNEL_SETPOINT_MIN_FLOOR:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FLOOR_COMFORT, command);
-                break;
-            case CHANNEL_SETPOINT_MIN_FLOOR_ENABLE:
-                setSwitch(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FLOOR_COMFORT_ENABLED, command);
-                break;
-            case CHANNEL_SETPOINT_MAX_FLOOR:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MAX_FLOOR, command);
-                break;
-            case CHANNEL_CONTROL_MODE:
-                setMode(command);
-                break;
+        String ch = channelUID.getId();
+        if (command instanceof RefreshType) {
+            State value = lastState.get(ch);
+
+            if (value != null) {
+                updateState(ch, value);
+            }
+        } else {
+            switch (ch) {
+                case CHANNEL_SETPOINT_WARNING:
+                    setTemperature(DOMINION_HEATING, HEATING_LOW_TEMPERATURE_WARNING, command);
+                    break;
+                case CHANNEL_SETPOINT_COMFORT:
+                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_COMFORT, command);
+                    break;
+                case CHANNEL_SETPOINT_ECONOMY:
+                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_ECONOMY, command);
+                    break;
+                case CHANNEL_SETPOINT_MANUAL:
+                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MANUAL, command);
+                    break;
+                case CHANNEL_SETPOINT_AWAY:
+                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_AWAY, command);
+                    break;
+                case CHANNEL_SETPOINT_ANTIFREEZE:
+                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FROST_PROTECTION, command);
+                    break;
+                case CHANNEL_SETPOINT_MIN_FLOOR:
+                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FLOOR_COMFORT, command);
+                    break;
+                case CHANNEL_SETPOINT_MIN_FLOOR_ENABLE:
+                    setSwitch(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FLOOR_COMFORT_ENABLED, command);
+                    break;
+                case CHANNEL_SETPOINT_MAX_FLOOR:
+                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MAX_FLOOR, command);
+                    break;
+                case CHANNEL_CONTROL_MODE:
+                    setMode(command);
+                    break;
+            }
         }
     }
 
@@ -321,11 +335,11 @@ public class DeviRegHandler extends BaseThingHandler {
     }
 
     private void reportTemperature(String ch, double temp) {
-        updateState(ch, new QuantityType<Temperature>(new DecimalType(temp), SIUnits.CELSIUS));
+        reportState(ch, new QuantityType<Temperature>(new DecimalType(temp), SIUnits.CELSIUS));
     }
 
     private void reportSwitch(String ch, boolean on) {
-        updateState(ch, OnOffType.from(on));
+        reportState(ch, OnOffType.from(on));
     }
 
     private void reportControlInfo(byte info) {
@@ -341,8 +355,16 @@ public class DeviRegHandler extends BaseThingHandler {
             state = "";
         }
 
-        updateState(CHANNEL_CONTROL_MODE, StringType.valueOf(mode));
-        updateState(CHANNEL_CONTROL_STATE, StringType.valueOf(state));
+        reportState(CHANNEL_CONTROL_MODE, StringType.valueOf(mode));
+        reportState(CHANNEL_CONTROL_STATE, StringType.valueOf(state));
+    }
+
+    private void reportState(String ch, State value) {
+        // Unfortunately we seem to have no way to request arbitrary value
+        // from the thermostat, so we remember all the values in a dictionary
+        // in order to be able to handle RefreshType command
+        lastState.put(ch, value);
+        updateState(ch, value);
     }
 
     public void handlePacket(DeviSmart.Packet pkt) {
