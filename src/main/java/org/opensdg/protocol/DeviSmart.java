@@ -179,6 +179,8 @@ public class DeviSmart {
     }
 
     public static class AwayPacket extends Packet {
+        // Interval is encoded as 2 dates, each prefixed with a boolean.
+        // The boolean tells whether the corresponding date is valid
         public AwayPacket(Date start, Date end) {
             super((byte) MsgClass.DOMINION_SCHEDULER, MsgCode.SCHEDULER_AWAY, 14);
             setDate(0, start);
@@ -243,7 +245,7 @@ public class DeviSmart {
       public static final int GLOBAL_AVAILABLEENDPOINTS                    = 24;    /* 32  ?         Unknown */
       public static final int GLOBAL_HARDWAREREVISION                      = 34;    /* 2   Version   Hardware version */
       public static final int GLOBAL_SOFTWAREREVISION                      = 35;    /* 2   Version   software version */
-      public static final int GLOBAL_PRODUCTIONDATE                        = 44;    /* 6   ?         Format yet unknown */
+      public static final int GLOBAL_PRODUCTIONDATE                        = 44;    /* 6   DateTime  Production date */
       /* Class TESTANDPRODUCTION */
       public static final int TESTANDPRODUCTION_ERROR_CODE                 = 1008;  /* 2   short     Usage and values are unknown */
       public static final int TESTANDPRODUCTION_RESET_LEVEL                = 4197;  /* 1   byte      ??? */
@@ -388,7 +390,7 @@ public class DeviSmart {
       public static final int SYSTEM_RUNTIME_INFO_SYSTEM_RUNTIME           = 29234;
       public static final int SYSTEM_RUNTIME_INFO_SYSTEM_RESETS            = 29235;
       public static final int SYSTEM_TIME_ISVALID                          = 29236; // 1   boolean   Self-descriptive. Reads 1 = true on my device.
-      public static final int SYSTEM_TIME                                  = 29237;
+      public static final int SYSTEM_TIME                                  = 29237; // 6   DateTime  Current time
       public static final int SYSTEM_TIME_OFFSET                           = 29238; // 2   short     GMT offset in minutes
       public static final int SYSTEM_WIZARD_INFO                           = 29239;
       public static final int SYSTEM_HEATING_INFO                          = 29240;
@@ -446,8 +448,8 @@ public class DeviSmart {
       public static final int SCHEDULER_SETPOINT_FLOOR_COMFORT_ENABLED     = 29336; // 1   boolean   Enable keeping minimal floor temperature
       public static final int SCHEDULER_SETPOINT_MAX_FLOOR                 = 29337; // 2   decimal   Maximum floor temperature setting
       public static final int SCHEDULER_SETPOINT_TEMPORARY                 = 29338; // 2   decimal   Not sure what this is
-      public static final int SCHEDULER_AWAY_ISPLANNED                     = 29339; // 1   boolean ? Unknown
-      public static final int SCHEDULER_AWAY                               = 29340; // 15
+      public static final int SCHEDULER_AWAY_ISPLANNED                     = 29339; // 1   boolean   Vacation period valid or not
+      public static final int SCHEDULER_AWAY                               = 29340; // 15  Interval  Vacation period: start - end
       public static final int SCHEDULER_WEEK                               = 29341; // 29
       public static final int SCHEDULER_WEEK_2                             = 29342; // 43
       /* Class DOMINION_LOGS */
