@@ -18,6 +18,7 @@ import static org.opensdg.protocol.DeviSmart.MsgCode.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.Hashtable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -66,6 +67,8 @@ public class DeviRegHandler extends BaseThingHandler {
     private final ExecutorService singleThread = Executors.newSingleThreadExecutor();
     private byte currentMode = -1;
     private Hashtable<String, State> lastState = new Hashtable<String, State>();
+    private DeviSmart.@Nullable Version firmwareVer;
+    private int firmwareBuild = -1;
 
     public DeviRegHandler(Thing thing) {
         super(thing);
@@ -367,6 +370,13 @@ public class DeviRegHandler extends BaseThingHandler {
         updateState(ch, value);
     }
 
+    private void reportFirmware() {
+        if (firmwareVer != null && firmwareBuild != -1) {
+            updateProperty(Thing.PROPERTY_FIRMWARE_VERSION,
+                    firmwareVer.toString() + "." + String.valueOf(firmwareBuild));
+        }
+    }
+
     public void handlePacket(DeviSmart.Packet pkt) {
         switch (pkt.getMsgCode()) {
             case HEATING_TEMPERATURE_FLOOR:
@@ -404,6 +414,23 @@ public class DeviRegHandler extends BaseThingHandler {
                 break;
             case SCHEDULER_CONTROL_INFO:
                 reportControlInfo(pkt.getByte());
+                break;
+            case GLOBAL_HARDWAREREVISION:
+                updateProperty(Thing.PROPERTY_HARDWARE_VERSION, pkt.getVersion().toString());
+                break;
+            case GLOBAL_SOFTWAREREVISION:
+                firmwareVer = pkt.getVersion();
+                reportFirmware();
+                break;
+            case GLOBAL_SOFTWAREBUILDREVISION:
+                firmwareBuild = Short.toUnsignedInt(pkt.getShort());
+                reportFirmware();
+                break;
+            case GLOBAL_SERIALNUMBER:
+                updateProperty(Thing.PROPERTY_SERIAL_NUMBER, String.valueOf(pkt.getInt()));
+                break;
+            case GLOBAL_PRODUCTIONDATE:
+                updateProperty("productionDate", DateFormat.getDateTimeInstance().format(pkt.getDate(0)));
                 break;
         }
     }

@@ -172,6 +172,10 @@ public class DeviSmart {
             c.set(y, m, d, hr, min, sec);
             return c.getTime();
         }
+
+        public Version getVersion() {
+            return new Version(getShort());
+        }
     }
 
     public static class AwayPacket extends Packet {
@@ -388,15 +392,15 @@ public class DeviSmart {
       public static final int SYSTEM_TIME_OFFSET                           = 29238; // 2   short     GMT offset in minutes
       public static final int SYSTEM_WIZARD_INFO                           = 29239;
       public static final int SYSTEM_HEATING_INFO                          = 29240;
-      public static final int SYSTEM_ALARM_INFO = 29241;
-      public static final int SYSTEM_WINDOW_OPEN = 29242;
-      public static final int SYSTEM_INFO_FLOOR_SENSOR_CONNECTED = 29243;
-      public static final int SYSTEM_INFO_FORECAST_ENABLED = 29244;
-      public static final int SYSTEM_INFO_BREAKOUT = 29245;
-      public static final int SYSTEM_INFO_WINDOW_OPEN_DETECTION = 29246;
-      public static final int SYSTEM_UI_BRIGTHNESS = 29247;
-      public static final int SYSTEM_UI_SCREEN_OFF = 29248;
-      public static final int SYSTEM_LOCAL_CONFIRM_REQUEST = 29249;
+      public static final int SYSTEM_ALARM_INFO                            = 29241;
+      public static final int SYSTEM_WINDOW_OPEN                           = 29242;
+      public static final int SYSTEM_INFO_FLOOR_SENSOR_CONNECTED           = 29243;
+      public static final int SYSTEM_INFO_FORECAST_ENABLED                 = 29244;
+      public static final int SYSTEM_INFO_BREAKOUT                         = 29245;
+      public static final int SYSTEM_INFO_WINDOW_OPEN_DETECTION            = 29246;
+      public static final int SYSTEM_UI_BRIGTHNESS                         = 29247;
+      public static final int SYSTEM_UI_SCREEN_OFF                         = 29248;
+      public static final int SYSTEM_LOCAL_CONFIRM_REQUEST                 = 29249;
       public static final int SYSTEM_ROOM_NAME                             = 29250; // 33  String    Room name for this thermostat
       public static final int SYSTEM_HOUSE_NAME                            = 29251; // 33  String    House name for this thermostat
       public static final int SYSTEM_ZONE_NAME                             = 29252; // 33  String    Zone name for this thermostat
@@ -410,10 +414,10 @@ public class DeviSmart {
       public static final int NVM_SCHEDULER_MODE                           = 29260;
       public static final int NVM_SCHEDULER_TIME                           = 29261;
       public static final int NVM_SETPOINTS_CONF                           = 29262; // 25  byte[]    Looks like raw NVRAM dump for all scheduler setpoints
-      public static final int NVM_TRACING = 29263;
-      public static final int NVM_RUNTIME_STATS = 29264;
-      public static final int NVM_HOME_EARLY = 29265;
-      public static final int NVM_CREDENTIALS = 29266;
+      public static final int NVM_TRACING                                  = 29263;
+      public static final int NVM_RUNTIME_STATS                            = 29264;
+      public static final int NVM_HOME_EARLY                               = 29265;
+      public static final int NVM_CREDENTIALS                              = 29266;
       public static final int NVM_DEFAULT_HEATCONTROLLER_INTEGRATORS       = 29267;
       public static final int SYSTEM_UI_SAFETY_LOCK                        = 29268;
       public static final int NVM_CONSUMPTION_HISTORY                      = 29269;
@@ -454,6 +458,22 @@ public class DeviSmart {
       public static final int LOG_LATEST_ACTIVITIES                        = 29380;
     };
  // @formatter:on
+
+    public static class Version {
+        public int Major;
+        public int Minor;
+
+        // Version number is short, composed of (Major, Minor)
+        Version(short num) {
+            Minor = num & 0xFF;
+            Major = Short.toUnsignedInt(num) >> 8;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(Major) + "." + String.valueOf(Minor);
+        }
+    };
 
     public static class ControlState {
         public static final byte Configuring = 0;
