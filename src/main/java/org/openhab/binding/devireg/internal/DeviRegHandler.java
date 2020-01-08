@@ -153,8 +153,6 @@ public class DeviRegHandler extends BaseThingHandler {
                 // together.
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-                logger.trace("setMode " + command);
-
                 // In "special" modes (Off, Pause, Vacation) the thermostat ignores
                 // other mode commands; we first need to cancel this mode. We also
                 // check if the same mode is requested and just bail out in such a case.
@@ -431,6 +429,9 @@ public class DeviRegHandler extends BaseThingHandler {
                 break;
             case GLOBAL_PRODUCTIONDATE:
                 updateProperty("productionDate", DateFormat.getDateTimeInstance().format(pkt.getDate(0)));
+                break;
+            case MDG_CONNECTION_COUNT:
+                updateProperty("connectionCount", String.valueOf(pkt.getByte()));
                 break;
         }
     }

@@ -367,7 +367,7 @@ public class DeviSmart {
       public static final int MDG_REVOKE_ALL_PAIRINGS                      = 30467; // 1   byte      Probably to be used as a command. Reads zero.
       public static final int MDG_LICENCE_KEY                              = 30468; // ?   byte[] ?  Likely stores device's license key. Not sent upon connecting.
       public static final int MDG_RANDOM_BYTES                             = 30469; // ?   byte[] ?  May be RNG seed
-      public static final int MDG_CONNECTION_COUNT                         = 30470; // 1   byte      Number of active connections ?
+      public static final int MDG_CONNECTION_COUNT                         = 30470; // 1   byte      Number of active connections
       public static final int MDG_PENDING_PAIRING                          = 30471; // 33  byte[] ?  Looks like peer ID; purpose is unknown. Reads zeroes on my device
       public static final int MDG_ADD_PAIRING                              = 30472; // 33  byte[]    Original app always sets this to own peerID upon connection. Purpose is not known.
       public static final int MDG_SERVER_DISCONNECT_COUNT                  = 30473; // 2   short ?   The name is self-descriptive, reads 0 on my device
