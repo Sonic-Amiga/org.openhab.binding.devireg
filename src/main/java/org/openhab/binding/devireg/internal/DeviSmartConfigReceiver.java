@@ -11,11 +11,9 @@ import java.net.URL;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.json.JSONObject;
 import org.opensdg.OSDGConnection;
 import org.opensdg.OSDGResult;
-
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
 
 public class DeviSmartConfigReceiver {
 
@@ -51,7 +49,7 @@ public class DeviSmartConfigReceiver {
             System.exit(10);
         }
 
-        JSONObject json = (JSONObject) JSONValue.parse(configData);
+        JSONObject json = new JSONObject(configData);
         byte[] privateKey = SDGUtils.ParseKey((String) json.get("privateKey"));
 
         if (privateKey == null) {
@@ -95,7 +93,7 @@ public class DeviSmartConfigReceiver {
                 request.put("phonePublicKey", DatatypeConverter.printHexBinary(grid.GetMyPeerId()));
                 request.put("chunkedMessage", true);
 
-                cfg.Send(request.toJSONString().getBytes());
+                cfg.Send(request.toString().getBytes());
                 configJSON = cfg.Receive();
 
                 if (configJSON == null) {
