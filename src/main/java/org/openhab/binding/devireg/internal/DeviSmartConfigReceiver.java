@@ -18,7 +18,7 @@ import org.opensdg.OSDGResult;
 public class DeviSmartConfigReceiver {
 
     // Development only!!! Replace with localhost !
-    static private final String configURL = "http://192.168.0.17:8080/rest/bindings/devireg/config";
+    static private final String configURL = "http://localhost:8080/rest/bindings/devireg/config";
 
     // This code is invoked from the CLI in a separate process, so we
     // don't make any calls to OpenHAB frameworks here. We also need
