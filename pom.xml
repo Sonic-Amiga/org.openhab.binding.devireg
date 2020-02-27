@@ -19,10 +19,5 @@
         <artifactId>json</artifactId>
         <version>20180130</version>
   	</dependency>
-  	<dependency>
-  		<groupId>org.openhab.core.bundles</groupId>
-  		<artifactId>org.openhab.core.io.rest</artifactId>
-  		<version>2.5.0</version>
-  	</dependency>
   </dependencies>
 </project>
