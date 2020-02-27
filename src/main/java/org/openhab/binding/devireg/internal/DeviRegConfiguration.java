@@ -18,6 +18,7 @@ package org.openhab.binding.devireg.internal;
  * @author Pavel Fedin - Initial contribution
  */
 public class DeviRegConfiguration {
+    public static final String PEER_ID = "peerId";
 
     public String peerId;
 }

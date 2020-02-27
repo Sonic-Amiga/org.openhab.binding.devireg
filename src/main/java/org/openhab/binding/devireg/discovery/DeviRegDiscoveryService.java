@@ -7,13 +7,17 @@ import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
+import org.eclipse.smarthome.config.discovery.DiscoveryResult;
+import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
 import org.eclipse.smarthome.config.discovery.DiscoveryService;
+import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.io.rest.JSONResponse;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.openhab.binding.devireg.internal.DanfossGridConnection;
 import org.openhab.binding.devireg.internal.DeviRegBindingConfig;
 import org.openhab.binding.devireg.internal.DeviRegBindingConstants;
-import org.openhab.binding.devireg.internal.DeviSmartConfigConnection;
+import org.openhab.binding.devireg.internal.DeviRegConfiguration;
 import org.opensdg.OSDGConnection;
 import org.opensdg.OSDGResult;
 import org.osgi.service.component.annotations.Component;
@@ -77,15 +81,19 @@ public class DeviRegDiscoveryService extends AbstractDiscoveryService {
                 case NO_ERROR:
                     logger.debug("Pairing successful");
 
+                    // Our peer is the sending phone. Once we know the ID, we can establish data connection
                     byte[] phoneId = pairing.getPeerId();
-
-                    // Now we know phone's peer ID so we can establish data connection
                     DeviSmartConfigConnection cfg = new DeviSmartConfigConnection();
+
                     cfg.SetBlockingMode(true);
 
                     if (cfg.ConnectToRemote(grid, phoneId, "dominion-config-1.0") == OSDGResult.NO_ERROR) {
                         JSONObject request = new JSONObject();
 
+                        // Request the data from the phone. chunkedMessage is important
+                        // because if the data is too long, it wouldn't fit into fixed length
+                        // buffer (approx. 1536 bytes) of phone's mdglib version. See comments
+                        // in DeviSmartConfigConnection for more insight on this.
                         request.put("phoneName", userName);
                         request.put("phonePublicKey", DatatypeConverter.printHexBinary(grid.GetMyPeerId()));
                         request.put("chunkedMessage", true);
@@ -132,7 +140,54 @@ public class DeviRegDiscoveryService extends AbstractDiscoveryService {
             return JSONResponse.createErrorResponse(errorCode, errorStr);
         }
 
-        // Temporarily dump the JSON to the output
-        return Response.ok(configJSON).build();
+        /*
+         * Configuration description is a JSON of the following self-explanatory format:
+         * @formatter:off
+         * {
+         *   "houseName":"My Flat",
+         *   "houseEditUsers":false,
+         *   "rooms":[
+         *      {
+         *        "roomName":"Living room",
+         *        "peerId":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+         *        "zone":"Living",
+         *        "sortOrder":0
+         *      },
+         *      {
+         *        "roomName":"Kitchen",
+         *        "peerId":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+         *        "zone":"None",
+         *        "sortOrder":1
+         *      }
+         *   ]
+         * }
+         * @formatter:on
+         * "houseEditUsers", "zone" and "sortOrder" are used by the smartphone app only. Thermostats
+         * are not aware of them.
+         */
+
+        JSONObject parsedConfig = new JSONObject(configJSON);
+        String houseName = parsedConfig.getString("houseName");
+        JSONArray rooms = parsedConfig.getJSONArray("rooms");
+
+        logger.debug("Received house: " + houseName);
+
+        for (int i = 0; i < rooms.length(); i++) {
+            JSONObject room = rooms.getJSONObject(i);
+            String roomName = room.getString("roomName");
+            String peerId = room.getString("peerId");
+
+            logger.debug("Received peer: " + peerId + " " + roomName);
+
+            ThingUID thingUID = new ThingUID(DeviRegBindingConstants.THING_TYPE_DEVIREG_SMART, peerId);
+            DiscoveryResult result = DiscoveryResultBuilder.create(thingUID)
+                    .withProperty(DeviRegConfiguration.PEER_ID, peerId)
+                    .withLabel("DeviReg Smart (" + houseName + " / " + roomName + ")").build();
+
+            thingDiscovered(result);
+
+        }
+
+        return Response.ok("Received " + rooms.length() + " things, check your Inbox").build();
     }
 }

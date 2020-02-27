@@ -1,4 +1,4 @@
-package org.openhab.binding.devireg.internal;
+package org.openhab.binding.devireg.discovery;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -23,6 +23,10 @@ public class DeviSmartConfigConnection extends OSDGConnection {
         if (size > 8) {
             ByteBuffer header = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
 
+            // In chunked mode the data will arrive in several packets.
+            // The first one will contain the header, specifying full data length.
+            // The header has integer 0 in the beginning so that it's easily distinguished
+            // from JSON plaintext
             if (header.getInt() == 0) {
                 dataSize = header.getInt();
                 offset = 8;
@@ -31,6 +35,9 @@ public class DeviSmartConfigConnection extends OSDGConnection {
         }
 
         if (dataSize == 0) {
+            // If the first packet didn't contain the header, this is not
+            // a chunked mode, so just use the complete length of this packet
+            // and we're done
             dataSize = size;
         }
 
