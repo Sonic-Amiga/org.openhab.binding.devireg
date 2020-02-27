@@ -10,5 +10,5 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-@org.osgi.annotation.bundle.Header(name = org.osgi.framework.Constants.BUNDLE_NATIVECODE, value = "jni/win64/opensdg_jni.dll;processor=amd64;osname=win32,jni/armhf/libopensdg_jni.so;processor=arm;osname=linux")
+@org.osgi.annotation.bundle.Header(name = org.osgi.framework.Constants.BUNDLE_NATIVECODE, value = "jni/win64/opensdg_jni.dll;processor=amd64;osname=win32,jni/armhf/libopensdg_jni.so;processor=arm;osname=linux,*")
 package org.openhab.binding.devireg;

@@ -20,6 +20,7 @@ public class DeviRegBindingConfig {
 
     public String privateKey;
     public String publicKey;
+    public String userName;
 
     public static DeviRegBindingConfig get() {
         return g_Config;
@@ -28,6 +29,8 @@ public class DeviRegBindingConfig {
     private void update(DeviRegBindingConfig newConfig) {
         String newKey = newConfig.privateKey;
         byte[] newPrivkey;
+
+        userName = newConfig.userName;
 
         if (newKey == null || newKey.isEmpty()) {
             newPrivkey = OpenSDG.CreatePrivateKey();
@@ -52,7 +55,7 @@ public class DeviRegBindingConfig {
 
         privateKey = newKey;
         publicKey = DatatypeConverter.printHexBinary(OpenSDG.CalcPublicKey(newPrivkey));
-
+        userName = newConfig.userName;
     }
 
     public static void update(@NonNull Map<String, Object> config, ConfigurationAdmin admin) {
@@ -60,7 +63,8 @@ public class DeviRegBindingConfig {
 
         g_Config.update(newConfig);
 
-        if (!(g_Config.privateKey.equals(newConfig.privateKey) && g_Config.publicKey.equals(newConfig.publicKey))) {
+        if (!(g_Config.privateKey.equals(newConfig.privateKey) && g_Config.publicKey.equals(newConfig.publicKey)
+                && g_Config.userName.equals(newConfig.userName))) {
             // Some value has been updated by the validation, save the validated version
             g_Config.Save(admin);
         }
@@ -71,6 +75,7 @@ public class DeviRegBindingConfig {
 
         data.put("privateKey", privateKey);
         data.put("publicKey", publicKey);
+        data.put("userName", userName);
 
         try {
             confAdmin.getConfiguration("binding.devireg", null).update(data);
