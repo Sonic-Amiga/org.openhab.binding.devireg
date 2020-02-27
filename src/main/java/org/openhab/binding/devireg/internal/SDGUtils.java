@@ -8,7 +8,11 @@ public class SDGUtils {
             return null;
         }
 
-        byte[] key = DatatypeConverter.parseHexBinary(keyStr);
-        return key.length == 32 ? key : null;
+        try {
+            byte[] key = DatatypeConverter.parseHexBinary(keyStr);
+            return key.length == 32 ? key : null;
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }

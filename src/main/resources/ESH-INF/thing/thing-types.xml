@@ -24,9 +24,10 @@
 		</channels>
 
 		<config-description>
-			<parameter name="peerId" type="text">
+			<parameter name="peerId" type="text" readOnly="true" pattern="[0-9A-Fa-f]{64}" required="true">
 				<label>Peer ID</label>
-				<description>Thermostat peer ID</description>
+				<description>Thermostat peer ID (AKA public key)</description>
+				<verify>true</verify>
 			</parameter>
 		</config-description>
 
