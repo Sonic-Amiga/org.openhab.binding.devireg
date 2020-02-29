@@ -39,8 +39,6 @@ function receive()
     // just for cook look, like a telephone number.
     var otp = document.getElementById("otp").value.replace(/\D/g, "");
 
-    console.log("Filtered OTP: " + otp)
-
     // OpeSDG library validates the OTP itself, but this also catches empty OTP,
     // which would have caused HTTP 404 otherwise due to a completely missing URL part
     if (otp.length < 7)

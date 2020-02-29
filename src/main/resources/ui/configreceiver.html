@@ -1,6 +1,24 @@
 <html>
 <head>
 <meta charset="utf-8" />
+<!-- Borrow some styles and font from PaperUI -->
+<link type="text/css" href="/paperui/css/bootstrap.min.css" rel="stylesheet">
+<link type="text/css" href="/paperui/css/angular-material.min.css" rel="stylesheet">
+<link type="text/css" href="/paperui/css/components.css" rel="stylesheet">
+<link type="text/css" href="/paperui/css/roboto-fontface.css" rel="stylesheet" media="all">
+<style>
+body {
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  font-weight:300;
+  margin:0px;
+  background-color:#F9F9F9
+}
+.headerCell {
+  vertical-align: middle;
+  display:table-cell;
+  font-size:25px;
+}
+</style>
 <script>
 var msg_ok = "Successfully received {0} things. Please check your <a href='/paperui/#/inbox'>Inbox</a>";
 var msg_error = "HTTP error {0}";
@@ -10,20 +28,32 @@ var bad_otp = "Invalid OTP supplied. Must be at least 7 digits."
 <title>DeviSmart configuration receiver</title>
 </head>
 <body>
-<H1>DeviSmart configuration receiving utility</H1>
+<div style="background-color:#ff6600;border-bottom:1px solid #CCC;">
+<div style="display:table;">
+<span class="headerCell" style="background-color:white;width:239px">
+<img src="/paperui/img/logo.png" style="display:block;margin-left:auto;margin-right:auto;"/>
+</span>
+<span class="headerCell" style="color:white;padding:20px;">DeviSmart configuration receiving utility</span>
+</div>
+</div>
+<div style="margin:8px;font-size:14px">
 <div id="main">
 <ol>
 <LI>Open your DeviReg(tm) Smart application and choose "Share house" function.</LI>
 <LI>Your answer to permissions question does not matter, OpenHAB does not support removing other users</LI>
 <LI>Enter the given pairingscode below and click "Receive"</LI>
 </ol>
+<div style="padding-left:25px;">
 <form>
-<input type="text" id="otp"/><input type="button" value="Receive" onclick="receive()"></input>
+<input type="text" id="otp" class="md-input"/>
+<input type="button" class="md-button md-ink-ripple" value="Receive" onclick="receive()"></input>
 </form>
 <div id="status"></div>
 </div>
+</div>
 <div id="progress" style="display:none;">
 <img src="colorful_loader.gif"/>
+</div>
 </div>
 </body>
 </html>
