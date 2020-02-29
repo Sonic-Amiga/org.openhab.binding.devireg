@@ -2,9 +2,12 @@
 
 This binding allows you to control DeviReg(tm) Smart smart floor thermostat (https://www.devismart.com/), produced by Danfoss company.
 
-This thermostat communicates over Wi-Fi using a proprietary cloud via a protocol called SecureDeviceGrid(tm) (http://securedevicegrid.com/).
+This thermostat communicates over Wi-Fi using a proprietary cloud via a protocol called SecureDeviceGrid(tm)
+(http://securedevicegrid.com/).
 
-The cloud solution is developed by Trifork company. This binding relies on OpenSDG (https://github.com/Sonic-Amiga/opensdg), the free and opensource implementation of this protocol. The library must be installed in your system in order for this binding to operate.
+The cloud solution is developed by Trifork company. This binding relies on OpenSDG (https://github.com/Sonic-Amiga/opensdg), the
+free and opensource implementation of this protocol. The library must be installed in your system in order for this binding to
+operate.
 
 ## Supported Things
 
@@ -24,17 +27,26 @@ application according to product manual; and then share the configuration with O
 
 ## Binding Configuration
 
+| Parameter  | Meaning                                                                                  |
+|-------------------------------------------------------------------------------------------------------|
 | privateKey | Private key, used for communication.                                                     |
 | publicKey  | Public key, also known as Peer ID. All devices on the Grid are identified by these keys. |
-| userName   | User name, which will represent the OpenHAB in DeviReg(tm) Smart smartphone application. Used for configuration sharing. |
+| userName   | User name, which will represent the OpenHAB in DeviReg(tm) Smart smartphone application.
+               Used for configuration sharing.                                                          |
 
 User name is the only parameter to actually be set by the user.
 
-Keys are vital for functioning of the binding. A valid key pair is generated automatically upon first run and stored in the configuration. Unless you exactly know what you're doing and why, do not modify the private key, or you'll lose access to all your thermostats and will have to perform configuration sharing again!!! For the sake of safety, keys are made read-only in the interface, but you still can freely edit them in expert mode. A public key is always derived from the private key and any attempts to modify it will be reverted. It is provided for information purposes only, should there arise such a need.
+Keys are vital for functioning of the binding. A valid key pair is generated automatically upon first run and stored in the
+configuration. Unless you exactly know what you're doing and why, do not modify the private key, or you'll lose access to all
+your thermostats and will have to perform configuration sharing again!!! For the sake of safety, keys are made read-only in the
+interface, but you still can freely edit them in expert mode. A public key is always derived from the private key and any attempts
+to modify it will be reverted. It is provided for information purposes only, should there arise such a need.
 
 ## Thing Configuration
 
-The only parameter here is peerId. Being thermostat's public key, it identifies the thermostat on the Grid. It is made read-only in the interface in order to prevent accidental damage. Unfortunately it is not written on the device, nor in the manual. The only way to obtain this ID is to receive the configuration from the original smartphone application.
+The only parameter here is peerId. Being thermostat's public key, it identifies the thermostat on the Grid. It is made read-only in
+the interface in order to prevent accidental damage. Unfortunately it is not written on the device, nor in the manual. The only way
+to obtain this ID is to receive the configuration from the original smartphone application.
 
 ## Channels
 
@@ -58,4 +70,5 @@ NOTES:
 
 1. Push notifications are sent directly by the thermostat via original Danfoss cloud infrastructure,
 this is part of the original service. OpenHAB takes no part in this process.
-2. If there's no "at home" time configured in the schedule for the given day, OVERRIDE mode does not work and immediately falls back to SCHEDULE. This is a bug in thermostat's firmware, OpenHAB does not affect this.
+2. If there's no "at home" time configured in the schedule for the given day, OVERRIDE mode does not work and immediately falls
+back to SCHEDULE. This is a bug in thermostat's firmware, OpenHAB does not affect this.
