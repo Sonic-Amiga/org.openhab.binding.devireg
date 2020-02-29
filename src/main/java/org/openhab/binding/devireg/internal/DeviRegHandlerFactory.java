@@ -27,6 +27,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
+import org.openhab.binding.devireg.discovery.DeviRegDiscoveryServlet;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -34,6 +35,9 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.http.HttpService;
 
 /**
  * The {@link DeviRegHandlerFactory} is responsible for creating things and thing
@@ -52,6 +56,12 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
     @NonNullByDefault({})
     ConfigurationAdmin configurationAdmin;
 
+    @Nullable
+    private HttpService httpService;
+
+    @Nullable
+    private DeviRegDiscoveryServlet servlet;
+
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
         return SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID);
@@ -62,11 +72,19 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
     protected void activate(ComponentContext componentContext, Map<String, Object> config) {
         super.activate(componentContext);
         DeviRegBindingConfig.update(config, configurationAdmin);
+        if (servlet == null) {
+            servlet = new DeviRegDiscoveryServlet(httpService);
+        }
+
     }
 
     @Override
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
+        if (servlet != null) {
+            servlet.dispose();
+            servlet = null;
+        }
         super.deactivate(componentContext);
     }
 
@@ -87,5 +105,14 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
         }
 
         return null;
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC)
+    protected void setHttpService(HttpService svc) {
+        httpService = svc;
+    }
+
+    protected void unsetHttpService(HttpService svc) {
+        httpService = null;
     }
 }

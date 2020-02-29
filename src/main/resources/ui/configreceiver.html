@@ -1,0 +1,29 @@
+<html>
+<head>
+<meta charset="utf-8" />
+<script>
+var msg_ok = "Successfully received {0} things. Please check your <a href='/paperui/#/inbox'>Inbox</a>";
+var msg_error = "HTTP error {0}";
+var bad_otp = "Invalid OTP supplied. Must be at least 7 digits."
+</script>
+<script src="configreceiver.js"></script>
+<title>DeviSmart configuration receiver</title>
+</head>
+<body>
+<H1>DeviSmart configuration receiving utility</H1>
+<div id="main">
+<ol>
+<LI>Open your DeviReg(tm) Smart application and choose "Share house" function.</LI>
+<LI>Your answer to permissions question does not matter, OpenHAB does not support removing other users</LI>
+<LI>Enter the given pairingscode below and click "Receive"</LI>
+</ol>
+<form>
+<input type="text" id="otp"/><input type="button" value="Receive" onclick="receive()"></input>
+</form>
+<div id="status"></div>
+</div>
+<div id="progress" style="display:none;">
+<img src="colorful_loader.gif"/>
+</div>
+</body>
+</html>

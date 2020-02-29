@@ -27,6 +27,14 @@ import org.slf4j.LoggerFactory;
 @Component(service = DiscoveryService.class)
 public class DeviRegDiscoveryService extends AbstractDiscoveryService {
 
+    private static class OKResponse {
+        public int thingCount;
+
+        public OKResponse(int count) {
+            thingCount = count;
+        }
+    }
+
     private static DeviRegDiscoveryService instance;
 
     public static DeviRegDiscoveryService get() {
@@ -188,6 +196,7 @@ public class DeviRegDiscoveryService extends AbstractDiscoveryService {
 
         }
 
-        return Response.ok("Received " + rooms.length() + " things, check your Inbox").build();
+        OKResponse response = new OKResponse(rooms.length());
+        return JSONResponse.createResponse(Status.OK, response, "OK");
     }
 }
