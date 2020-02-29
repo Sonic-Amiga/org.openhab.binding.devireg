@@ -1,39 +1,40 @@
 # DeviReg Binding
 
-This binding allows you to control DeviReg Smart(tm) smart floor thermostat (https://www.devismart.com/), produced by Danfoss company.
+This binding allows you to control DeviReg(tm) Smart smart floor thermostat (https://www.devismart.com/), produced by Danfoss company.
+
 This thermostat communicates over Wi-Fi using a proprietary cloud via a protocol called SecureDeviceGrid(tm) (http://securedevicegrid.com/).
+
 The cloud solution is developed by Trifork company. This binding relies on OpenSDG (https://github.com/Sonic-Amiga/opensdg), the free and opensource implementation of this protocol. The library must be installed in your system in order for this binding to operate.
 
 ## Supported Things
 
-At least currently only DeviReg Smart(tm) is supported.
+- DeviReg(tm) Smart floor thermostat
 
 ## Discovery
 
-_Describe the available auto-discovery features here. Mention for what it works and what needs to be kept in mind when using it._
+Unfortunately automatic discovery of DeviReg Smart(tm) devices is technically very problematic and cannot be reliably performed in
+OpenHAB (or any other home automation) environment. Instead, it is supposed to set thermostats up using original smartphone
+application according to product manual; and then share the configuration with OpenHAB.   
+
+1. Navigate to http://YOUR_OPENHAB_HOST:8080/devireg/
+2. According to instructions in the form, use "Share house" function in your DeviReg(tm) Smart smartphone application.
+3. Enter the One Time Password, issued by the phone, in the form and click "Receive"
+4. On success a message is displayed, telling number of things received.
+5. Navigate to Inbox, review and approve your Things
 
 ## Binding Configuration
 
-_If your binding requires or supports general configuration settings, please create a folder ```cfg``` and place the configuration file ```<bindingId>.cfg``` inside it. In this section, you should link to this file and provide some information about the options. The file could e.g. look like:_
+| privateKey | Private key, used for communication.                                                     |
+| publicKey  | Public key, also known as Peer ID. All devices on the Grid are identified by these keys. |
+| userName   | User name, which will represent the OpenHAB in DeviReg(tm) Smart smartphone application. Used for configuration sharing. |
 
-```
-# Configuration for the Philips Hue Binding
-#
-# Default secret key for the pairing of the Philips Hue Bridge.
-# It has to be between 10-40 (alphanumeric) characters
-# This may be changed by the user for security reasons.
-secret=openHABSecret
-```
+User name is the only parameter to actually be set by the user.
 
-_Note that it is planned to generate some part of this based on the information that is available within ```src/main/resources/ESH-INF/binding``` of your binding._
-
-_If your binding does not offer any generic configurations, you can remove this section completely._
+Keys are vital for functioning of the binding. A valid key pair is generated automatically upon first run and stored in the configuration. Unless you exactly know what you're doing and why, do not modify the private key, or you'll lose access to all your thermostats and will have to perform configuration sharing again!!! For the sake of safety, keys are made read-only in the interface, but you still can freely edit them in expert mode. A public key is always derived from the private key and any attempts to modify it will be reverted. It is provided for information purposes only, should there arise such a need.
 
 ## Thing Configuration
 
-_Describe what is needed to manually configure a thing, either through the (Paper) UI or via a thing-file. This should be mainly about its mandatory and optional configuration parameters. A short example entry for a thing file can help!_
-
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/ESH-INF/thing``` of your binding._
+The only parameter here is peerId. Being thermostat's public key, it identifies the thermostat on the Grid. It is made read-only in the interface in order to prevent accidental damage. Unfortunately it is not written on the device, nor in the manual. The only way to obtain this ID is to receive the configuration from the original smartphone application.
 
 ## Channels
 
@@ -58,11 +59,3 @@ NOTES:
 1. Push notifications are sent directly by the thermostat via original Danfoss cloud infrastructure,
 this is part of the original service. OpenHAB takes no part in this process.
 2. If there's no "at home" time configured in the schedule for the given day, OVERRIDE mode does not work and immediately falls back to SCHEDULE. This is a bug in thermostat's firmware, OpenHAB does not affect this.
-
-## Full Example
-
-_Provide a full usage example based on textual configuration files (*.things, *.items, *.sitemap)._
-
-## Any custom content here!
-
-_Feel free to add additional sections for whatever you think should also be mentioned about your binding!_
