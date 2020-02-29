@@ -61,6 +61,14 @@ public class DeviRegBindingConfig {
     public static void update(@NonNull Map<String, Object> config, ConfigurationAdmin admin) {
         DeviRegBindingConfig newConfig = new Configuration(config).as(DeviRegBindingConfig.class);
 
+        // Kludge for OpenHAB 2.4. Early development versions of this binding didn't have
+        // this parameter. OpenHAB apparently cached parameter structure and doesn't present
+        // the new option in binding config. Consequently, the field in DeviRegBindingConfig
+        // object stays null.
+        if (newConfig.userName == null) {
+            newConfig.userName = "OpenHAB";
+        }
+
         g_Config.update(newConfig);
 
         if (!(g_Config.privateKey.equals(newConfig.privateKey) && g_Config.publicKey.equals(newConfig.publicKey)
