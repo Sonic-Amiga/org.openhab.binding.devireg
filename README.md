@@ -31,8 +31,7 @@ application according to product manual; and then share the configuration with O
 |------------|------------------------------------------------------------------------------------------|
 | privateKey | Private key, used for communication.                                                     |
 | publicKey  | Public key, also known as Peer ID. All devices on the Grid are identified by these keys. |
-| userName   | User name, which will represent the OpenHAB in DeviReg(tm) Smart smartphone application.
-               Used for configuration sharing.                                                          |
+| userName   | User name, which will represent the OpenHAB in DeviReg(tm) Smart smartphone application. Used for configuration sharing. |
 
 User name is the only parameter to actually be set by the user.
 
