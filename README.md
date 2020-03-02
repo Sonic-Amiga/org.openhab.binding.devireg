@@ -13,6 +13,18 @@ operate.
 
 - DeviReg(tm) Smart floor thermostat
 
+## Installation and supported architectures
+
+This binding relies on OpenSDG library (https://github.com/Sonic-Amiga/opensdg/releases) for communicating with the hardware.
+On Linux OS It is necessary to manually install the library in your system before using this binding. On Windows no extra
+components need to be installed.
+
+Currently the following architectures / operating systems are supported:
+
+- Windows / x86_64
+- Linux / x86_64
+- Linux / ARM hardfloat (armhf) 32-bit
+
 ## Discovery
 
 Unfortunately automatic discovery of DeviReg Smart(tm) devices is technically very problematic and cannot be reliably performed in
@@ -71,3 +83,6 @@ NOTES:
 this is part of the original service. OpenHAB takes no part in this process.
 2. If there's no "at home" time configured in the schedule for the given day, OVERRIDE mode does not work and immediately falls
 back to SCHEDULE. This is a bug in thermostat's firmware, OpenHAB does not affect this.
+3. Communication with thermostats is possible only via the cloud infrastructure. Therefore a working Internet connection is
+required for the binding to operate, even if the OpenHAB installation resides on the same network with thermostats. This is
+a restriction of thermostat's firmware and cannot be fixed.
