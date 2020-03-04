@@ -23,7 +23,9 @@ Currently the following architectures / operating systems are supported:
 
 - Windows / x86_64
 - Linux / x86_64
+- Linux / i386
 - Linux / ARM hardfloat (armhf) 32-bit
+- Linux / arm64
 
 ## Discovery
 

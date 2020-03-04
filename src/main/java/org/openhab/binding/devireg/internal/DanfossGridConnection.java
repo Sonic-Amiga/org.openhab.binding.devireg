@@ -3,6 +3,7 @@ package org.openhab.binding.devireg.internal;
 import org.opensdg.OSDGConnection;
 import org.opensdg.OSDGResult;
 import org.opensdg.OSDGState;
+import org.opensdg.OpenSDG;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +13,10 @@ public class DanfossGridConnection extends OSDGConnection {
     private static int numUsers = 0;
 
     private String privateKey;
+
+    static {
+        logger.info("Using libopensdg " + OpenSDG.GetVersion());
+    }
 
     public synchronized static DanfossGridConnection get() {
         if (g_Conn == null) {
