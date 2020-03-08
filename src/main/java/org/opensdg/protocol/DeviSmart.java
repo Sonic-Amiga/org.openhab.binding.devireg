@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import javax.xml.bind.DatatypeConverter;
+
 public class DeviSmart {
     public static class Packet {
         /*
@@ -115,8 +117,12 @@ public class DeviSmart {
             return Short.toUnsignedInt(m_Buffer.getShort(m_Start + 1));
         }
 
+        public int getPayloadLength() {
+            return Byte.toUnsignedInt(m_Buffer.get(m_Start + 3));
+        }
+
         public int getLength() {
-            return Byte.toUnsignedInt(m_Buffer.get(m_Start + 3)) + HeaderSize;
+            return getPayloadLength() + HeaderSize;
         }
 
         // Following methods return payload, interpreted as respective format
@@ -146,7 +152,8 @@ public class DeviSmart {
             int length = Byte.toUnsignedInt(getByte());
             byte[] data = new byte[length];
 
-            m_Buffer.get(data, m_Start + HeaderSize + 1, length);
+            position(1);
+            m_Buffer.get(data, 0, length);
             return data;
         }
 
@@ -175,6 +182,17 @@ public class DeviSmart {
 
         public Version getVersion() {
             return new Version(getShort());
+        }
+
+        @Override
+        public String toString() {
+            int length = getPayloadLength();
+            byte[] data = new byte[length];
+
+            position(0);
+            m_Buffer.get(data, 0, length);
+            return String.format("%3d %5d %3d %s", getMsgClass(), getMsgCode(), length,
+                    DatatypeConverter.printHexBinary(data));
         }
     }
 

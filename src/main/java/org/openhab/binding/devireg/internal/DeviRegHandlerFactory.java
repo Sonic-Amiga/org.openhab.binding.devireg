@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.devireg.internal;
 
-import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.THING_TYPE_DEVIREG_SMART;
+import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.*;
 
 import java.util.Collections;
 import java.util.Map;
@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
@@ -50,7 +51,7 @@ import org.osgi.service.http.HttpService;
 public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections
-            .unmodifiableSet(Stream.of(THING_TYPE_DEVIREG_SMART).collect(Collectors.toSet()));
+            .unmodifiableSet(Stream.of(THING_TYPE_DEVIREG_SMART, THING_TYPE_ICON_WIFI).collect(Collectors.toSet()));
 
     @Reference
     @NonNullByDefault({})
@@ -102,6 +103,8 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
 
         if (THING_TYPE_DEVIREG_SMART.equals(thingTypeUID)) {
             return new DeviRegHandler(thing);
+        } else if (THING_TYPE_ICON_WIFI.equals(thingTypeUID)) {
+            return new IconMasterHandler((Bridge) thing);
         }
 
         return null;

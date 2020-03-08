@@ -130,5 +130,16 @@
             </options>
         </state>
     </channel-type>
+    <bridge-type id="icon_wifi">
+    	<label>Icon controller</label>
+    	<description>WiFi app module on an Icon master controller</description>
+    	<config-description>
+            <parameter name="peerId" type="text" pattern="[0-9A-Fa-f]{64}" required="true">
+                <label>Peer ID</label>
+                <description>Peer ID (AKA public key)</description>
+                <verify>true</verify>
+            </parameter>
+    	</config-description>
+    </bridge-type>
 
 </thing:thing-descriptions>
