@@ -10,6 +10,7 @@ import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
 import org.eclipse.smarthome.config.discovery.DiscoveryResult;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
 import org.eclipse.smarthome.config.discovery.DiscoveryService;
+import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.io.rest.JSONResponse;
 import org.json.JSONArray;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 public class DeviRegDiscoveryService extends AbstractDiscoveryService {
 
     private static class OKResponse {
+        @SuppressWarnings("unused") // Used by JSONResponse for serialization
         public int thingCount;
 
         public OKResponse(int count) {
@@ -149,8 +151,9 @@ public class DeviRegDiscoveryService extends AbstractDiscoveryService {
         }
 
         /*
-         * Configuration description is a JSON of the following self-explanatory format:
+         * Configuration description is a JSON of the following self-explanatory format.
          * @formatter:off
+         * Example from DeviSmart:
          * {
          *   "houseName":"My Flat",
          *   "houseEditUsers":false,
@@ -169,6 +172,12 @@ public class DeviRegDiscoveryService extends AbstractDiscoveryService {
          *      }
          *   ]
          * }
+         * Example from Icon:
+         * {
+         *   "houseName":"MyHouse",
+         *   "housePeerId":" xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx ",
+         *   "houseEditUsers":false
+         * }
          * @formatter:on
          * "houseEditUsers", "zone" and "sortOrder" are used by the smartphone app only. Thermostats
          * are not aware of them.
@@ -176,27 +185,44 @@ public class DeviRegDiscoveryService extends AbstractDiscoveryService {
 
         JSONObject parsedConfig = new JSONObject(configJSON);
         String houseName = parsedConfig.getString("houseName");
-        JSONArray rooms = parsedConfig.getJSONArray("rooms");
+        int thingCount = 0;
 
         logger.debug("Received house: " + houseName);
 
-        for (int i = 0; i < rooms.length(); i++) {
-            JSONObject room = rooms.getJSONObject(i);
-            String roomName = room.getString("roomName");
-            String peerId = room.getString("peerId");
+        if (parsedConfig.has("rooms")) {
+            JSONArray rooms = parsedConfig.getJSONArray("rooms");
 
-            logger.debug("Received peer: " + peerId + " " + roomName);
+            thingCount = rooms.length();
+            for (int i = 0; i < thingCount; i++) {
+                JSONObject room = rooms.getJSONObject(i);
+                String roomName = room.getString("roomName");
+                String peerId = room.getString("peerId");
 
-            ThingUID thingUID = new ThingUID(DeviRegBindingConstants.THING_TYPE_DEVIREG_SMART, peerId);
-            DiscoveryResult result = DiscoveryResultBuilder.create(thingUID)
-                    .withProperty(DeviRegConfiguration.PEER_ID, peerId)
-                    .withLabel("DeviReg Smart (" + houseName + " / " + roomName + ")").build();
+                logger.debug("Received DeviSmart thing: " + peerId + " " + roomName);
 
-            thingDiscovered(result);
-
+                addThing(DeviRegBindingConstants.THING_TYPE_DEVIREG_SMART, peerId,
+                        "DeviReg Smart (" + houseName + " / " + roomName + ")");
+            }
         }
 
-        OKResponse response = new OKResponse(rooms.length());
+        if (parsedConfig.has("housePeerId")) {
+            String peerId = parsedConfig.getString("housePeerId");
+
+            logger.debug("Received IconWifi thing: " + peerId);
+
+            thingCount = 1;
+            addThing(DeviRegBindingConstants.THING_TYPE_ICON_WIFI, peerId, "Danfoss Icon Wifi (" + houseName + ")");
+        }
+
+        OKResponse response = new OKResponse(thingCount);
         return JSONResponse.createResponse(Status.OK, response, "OK");
+    }
+
+    private void addThing(ThingTypeUID typeId, String peerId, String label) {
+        ThingUID thingUID = new ThingUID(typeId, peerId);
+        DiscoveryResult result = DiscoveryResultBuilder.create(thingUID)
+                .withProperty(DeviRegConfiguration.PEER_ID, peerId).withLabel(label).build();
+
+        thingDiscovered(result);
     }
 }
