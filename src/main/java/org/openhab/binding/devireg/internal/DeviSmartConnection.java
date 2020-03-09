@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 public class DeviSmartConnection extends OSDGConnection {
     private final Logger logger = LoggerFactory.getLogger(DeviSmartConnection.class);
 
-    private DeviRegHandler m_Handler;
+    private PeerConnectionHandler m_Handler;
 
-    DeviSmartConnection(DeviRegHandler handler) {
+    DeviSmartConnection(PeerConnectionHandler handler) {
         m_Handler = handler;
     }
 
