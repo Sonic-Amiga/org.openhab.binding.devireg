@@ -52,7 +52,7 @@ public class PeerConnectionHandler {
         connection = new DeviSmartConnection(this);
 
         watchdog = thingHandler.getScheduler().scheduleAtFixedRate(() -> {
-            if (connection.getState() != OSDGState.CONNECTED) {
+            if (connection == null || connection.getState() != OSDGState.CONNECTED) {
                 return;
             }
             if (System.currentTimeMillis() - lastPacket > 15000) {
@@ -69,7 +69,7 @@ public class PeerConnectionHandler {
 
         singleThread.execute(() -> {
             DeviSmartConnection conn = connection;
-            connection = null;
+            connection = null; // This signals we are being disposed
 
             if (reconnectReq != null) {
                 reconnectReq.cancel(false);
@@ -114,13 +114,19 @@ public class PeerConnectionHandler {
 
     public void setOnlineStatus() {
         logger.info("Connection established");
-        thingHandler.reportStatus(ThingStatus.ONLINE);
+
+        if (connection != null) {
+            thingHandler.reportStatus(ThingStatus.ONLINE);
+        }
     }
 
     public void setOfflineStatus(String reason) {
         logger.error("Device went offline: " + reason);
-        thingHandler.reportStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, reason);
-        scheduleReconnect();
+
+        if (connection != null) {
+            thingHandler.reportStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, reason);
+            scheduleReconnect();
+        }
     }
 
     private void scheduleReconnect() {
