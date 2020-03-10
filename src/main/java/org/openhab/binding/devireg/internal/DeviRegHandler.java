@@ -234,13 +234,9 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     @SuppressWarnings("null")
     @Override
     public void initialize() {
-<<<<<<< HEAD
-        connHandler.initialize(getConfigAs(DeviRegConfiguration.class));
-=======
         DeviRegConfiguration config = getConfigAs(DeviRegConfiguration.class);
 
         connHandler.initialize(config.peerId);
->>>>>>> aa168e57701e6db1177f3dff67b635f16549a29e
     }
 
     @Override

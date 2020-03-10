@@ -32,7 +32,9 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
 
     @Override
     public void initialize() {
-        connHandler.initialize(getConfigAs(DeviRegConfiguration.class));
+        DeviRegConfiguration config = getConfigAs(DeviRegConfiguration.class);
+
+        connHandler.initialize(config.peerId);
     }
 
     @Override
@@ -68,5 +70,10 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
     @Override
     public ScheduledExecutorService getScheduler() {
         return scheduler;
+    }
+
+    @Override
+    public void ping() {
+        // TODO Auto-generated method stub
     }
 }

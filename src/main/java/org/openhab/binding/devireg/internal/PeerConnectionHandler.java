@@ -10,10 +10,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-<<<<<<< HEAD
-=======
 import org.opensdg.OSDGState;
->>>>>>> aa168e57701e6db1177f3dff67b635f16549a29e
 import org.opensdg.protocol.DeviSmart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
