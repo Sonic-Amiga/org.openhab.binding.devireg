@@ -10,6 +10,10 @@ import javax.xml.bind.DatatypeConverter;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
+<<<<<<< HEAD
+=======
+import org.opensdg.OSDGState;
+>>>>>>> aa168e57701e6db1177f3dff67b635f16549a29e
 import org.opensdg.protocol.DeviSmart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,18 +26,20 @@ public class PeerConnectionHandler {
     private byte[] peerId;
     private DeviSmartConnection connection;
     private @Nullable Future<?> reconnectReq;
+    private @Nullable Future<?> watchdog;
+    private long lastPacket = 0;
 
     PeerConnectionHandler(ISDGPeerHandler handler) {
         this.thingHandler = handler;
         logger = LoggerFactory.getLogger(handler.getClass());
     }
 
-    public void initialize(DeviRegConfiguration config) {
+    public void initialize(String peerIdStr) {
         logger.trace("initialize()");
 
         DanfossGridConnection.AddUser();
 
-        peerId = SDGUtils.ParseKey(config.peerId);
+        peerId = SDGUtils.ParseKey(peerIdStr);
         if (peerId == null) {
             logger.error("Peer ID is not set");
             thingHandler.reportStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR,
@@ -47,6 +53,17 @@ public class PeerConnectionHandler {
         thingHandler.reportStatus(ThingStatus.UNKNOWN);
 
         connection = new DeviSmartConnection(this);
+
+        watchdog = thingHandler.getScheduler().scheduleAtFixedRate(() -> {
+            if (connection == null || connection.getState() != OSDGState.CONNECTED) {
+                return;
+            }
+            if (System.currentTimeMillis() - lastPacket > 15000) {
+                logger.warn("Device is inactive during 15 seconds, sending PING");
+                thingHandler.ping();
+            }
+        }, 10, 10, TimeUnit.SECONDS);
+
         connect();
     }
 
@@ -55,11 +72,16 @@ public class PeerConnectionHandler {
 
         singleThread.execute(() -> {
             DeviSmartConnection conn = connection;
-            connection = null;
+            connection = null; // This signals we are being disposed
 
             if (reconnectReq != null) {
                 reconnectReq.cancel(false);
                 reconnectReq = null;
+            }
+
+            if (watchdog != null) {
+                watchdog.cancel(false);
+                watchdog = null;
             }
 
             if (conn != null) {
@@ -95,13 +117,19 @@ public class PeerConnectionHandler {
 
     public void setOnlineStatus() {
         logger.info("Connection established");
-        thingHandler.reportStatus(ThingStatus.ONLINE);
+
+        if (connection != null) {
+            thingHandler.reportStatus(ThingStatus.ONLINE);
+        }
     }
 
     public void setOfflineStatus(String reason) {
-        logger.error(reason);
-        thingHandler.reportStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, reason);
-        scheduleReconnect();
+        logger.error("Device went offline: " + reason);
+
+        if (connection != null) {
+            thingHandler.reportStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, reason);
+            scheduleReconnect();
+        }
     }
 
     private void scheduleReconnect() {
@@ -123,6 +151,7 @@ public class PeerConnectionHandler {
     }
 
     public void handlePacket(DeviSmart.Packet pkt) {
+        lastPacket = System.currentTimeMillis();
         thingHandler.handlePacket(pkt);
     }
 }

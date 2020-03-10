@@ -234,7 +234,13 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     @SuppressWarnings("null")
     @Override
     public void initialize() {
+<<<<<<< HEAD
         connHandler.initialize(getConfigAs(DeviRegConfiguration.class));
+=======
+        DeviRegConfiguration config = getConfigAs(DeviRegConfiguration.class);
+
+        connHandler.initialize(config.peerId);
+>>>>>>> aa168e57701e6db1177f3dff67b635f16549a29e
     }
 
     @Override
@@ -342,6 +348,18 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
                 updateProperty("connectionCount", String.valueOf(pkt.getByte()));
                 break;
         }
+    }
+
+    @Override
+    public void ping() {
+        // Ping our device. Just request anything.
+        // This method is called from within PeerConnectionHandler when
+        // it notices that the communication seems to have stalled. If there is
+        // a link interruption (e. g. router reboot or uplink fault), this will
+        // eventually trigger error on libopensdg's socket.
+        // Without this the communication just stalls with no way to detect this
+        // and recover.
+        connHandler.SendPacket(new DeviSmart.Packet((byte) DOMINION_HEATING, HEATING_TEMPERATURE_FLOOR, 0));
     }
 
     // Support methods for PeerConnectionHandler

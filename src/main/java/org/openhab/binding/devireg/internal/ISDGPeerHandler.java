@@ -15,6 +15,8 @@ public interface ISDGPeerHandler {
 
     public void handlePacket(DeviSmart.@NonNull Packet pkt);
 
+    public void ping();
+
     ScheduledExecutorService getScheduler();
 
 }
