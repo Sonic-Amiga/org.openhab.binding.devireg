@@ -55,7 +55,18 @@ public class PeerConnectionHandler {
             if (connection == null || connection.getState() != OSDGState.CONNECTED) {
                 return;
             }
-            if (System.currentTimeMillis() - lastPacket > 15000) {
+            if (System.currentTimeMillis() - lastPacket > 30000) {
+                logger.warn("Device is inactive during 30 seconds, reconnecting");
+                thingHandler.reportStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                        "Communication timeout");
+                singleThread.execute(() -> {
+                    if (connection == null) {
+                        return; // We are being disposed
+                    }
+                    connection.blockingClose();
+                    scheduleReconnect();
+                });
+            } else if (System.currentTimeMillis() - lastPacket > 15000) {
                 logger.warn("Device is inactive during 15 seconds, sending PING");
                 thingHandler.ping();
             }
@@ -82,9 +93,7 @@ public class PeerConnectionHandler {
             }
 
             if (conn != null) {
-                conn.SetBlockingMode(true);
-                conn.Close();
-                logger.info("Connection closed");
+                conn.blockingClose();
                 conn.Dispose();
             }
         });
@@ -136,15 +145,17 @@ public class PeerConnectionHandler {
     }
 
     public void Send(byte[] data) {
-        if (connection != null) {
-            connection.Send(data);
+        // Cache "connection" in order to avoid possible race condition
+        // with dispose() zeroing it between test and usage
+        DeviSmartConnection conn = connection;
+
+        if (conn != null) {
+            conn.Send(data);
         }
     }
 
     public void SendPacket(DeviSmart.Packet pkt) {
-        if (connection != null) {
-            connection.Send(pkt.getBuffer());
-        }
+        Send(pkt.getBuffer());
     }
 
     public void handlePacket(DeviSmart.Packet pkt) {
