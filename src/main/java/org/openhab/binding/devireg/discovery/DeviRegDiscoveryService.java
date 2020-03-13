@@ -66,82 +66,84 @@ public class DeviRegDiscoveryService extends AbstractDiscoveryService {
 
     public Response receiveConfig(String otp) {
         String userName = DeviRegBindingConfig.get().userName;
+        OSDGConnection grid;
 
         if (userName == null || userName.isEmpty()) {
             return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR,
                     "Username is not set in binding configuration");
         }
 
+        DanfossGridConnection.AddUser();
+
+        try {
+            grid = DanfossGridConnection.get();
+        } catch (Exception e) {
+            DanfossGridConnection.RemoveUser();
+            return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+
         String configJSON = null;
         Status errorCode = Status.INTERNAL_SERVER_ERROR;
         String errorStr = null;
 
-        DanfossGridConnection.AddUser();
-        OSDGConnection grid = DanfossGridConnection.get();
+        OSDGConnection pairing = new OSDGConnection();
+        pairing.SetBlockingMode(true);
 
-        if (grid != null) {
-            OSDGConnection pairing = new OSDGConnection();
-            pairing.SetBlockingMode(true);
+        OSDGResult r = pairing.PairRemote(grid, otp);
 
-            OSDGResult r = pairing.PairRemote(grid, otp);
+        switch (r) {
+            case NO_ERROR:
+                logger.debug("Pairing successful");
 
-            switch (r) {
-                case NO_ERROR:
-                    logger.debug("Pairing successful");
+                // Our peer is the sending phone. Once we know the ID, we can establish data connection
+                byte[] phoneId = pairing.getPeerId();
+                DeviSmartConfigConnection cfg = new DeviSmartConfigConnection();
 
-                    // Our peer is the sending phone. Once we know the ID, we can establish data connection
-                    byte[] phoneId = pairing.getPeerId();
-                    DeviSmartConfigConnection cfg = new DeviSmartConfigConnection();
+                cfg.SetBlockingMode(true);
 
-                    cfg.SetBlockingMode(true);
+                if (cfg.ConnectToRemote(grid, phoneId, "dominion-config-1.0") == OSDGResult.NO_ERROR) {
+                    JSONObject request = new JSONObject();
 
-                    if (cfg.ConnectToRemote(grid, phoneId, "dominion-config-1.0") == OSDGResult.NO_ERROR) {
-                        JSONObject request = new JSONObject();
+                    // Request the data from the phone. chunkedMessage is important
+                    // because if the data is too long, it wouldn't fit into fixed length
+                    // buffer (approx. 1536 bytes) of phone's mdglib version. See comments
+                    // in DeviSmartConfigConnection for more insight on this.
+                    request.put("phoneName", userName);
+                    request.put("phonePublicKey", DatatypeConverter.printHexBinary(grid.GetMyPeerId()));
+                    request.put("chunkedMessage", true);
 
-                        // Request the data from the phone. chunkedMessage is important
-                        // because if the data is too long, it wouldn't fit into fixed length
-                        // buffer (approx. 1536 bytes) of phone's mdglib version. See comments
-                        // in DeviSmartConfigConnection for more insight on this.
-                        request.put("phoneName", userName);
-                        request.put("phonePublicKey", DatatypeConverter.printHexBinary(grid.GetMyPeerId()));
-                        request.put("chunkedMessage", true);
+                    cfg.Send(request.toString().getBytes());
+                    configJSON = cfg.Receive();
 
-                        cfg.Send(request.toString().getBytes());
-                        configJSON = cfg.Receive();
-
-                        if (configJSON == null) {
-                            errorStr = "Failed to receive config: " + cfg.getLastResultStr();
-                        }
-
-                        cfg.Close();
-
-                    } else {
-                        errorStr = "Failed to connect to the sender: " + cfg.getLastResultStr();
+                    if (configJSON == null) {
+                        errorStr = "Failed to receive config: " + cfg.getLastResultStr();
                     }
 
-                    cfg.Dispose();
-                    break;
+                    cfg.Close();
 
-                case INVALID_PARAMETERS:
-                    errorStr = "Invalid OTP supplied";
-                    errorCode = Status.BAD_REQUEST;
-                    break;
+                } else {
+                    errorStr = "Failed to connect to the sender: " + cfg.getLastResultStr();
+                }
 
-                case CONNECTION_REFUSED:
-                    errorStr = "Connection refused by peer; likely wrong OTP";
-                    errorCode = Status.NOT_FOUND;
-                    break;
+                cfg.Dispose();
+                break;
 
-                default:
-                    errorStr = "Pairing failed: " + pairing.getLastResultStr();
-                    break;
-            }
+            case INVALID_PARAMETERS:
+                errorStr = "Invalid OTP supplied";
+                errorCode = Status.BAD_REQUEST;
+                break;
 
-            pairing.Dispose();
-        } else {
-            errorStr = "Failed to connect to Danfoss grid";
+            case CONNECTION_REFUSED:
+                errorStr = "Connection refused by peer; likely wrong OTP";
+                errorCode = Status.NOT_FOUND;
+                break;
+
+            default:
+                errorStr = "Pairing failed: " + pairing.getLastResultStr();
+                break;
         }
 
+        pairing.Dispose();
         DanfossGridConnection.RemoveUser();
 
         if (errorStr != null) {

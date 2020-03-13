@@ -18,7 +18,7 @@ public class DanfossGridConnection extends OSDGConnection {
         logger.info("Using libopensdg " + OpenSDG.GetVersion());
     }
 
-    public synchronized static DanfossGridConnection get() {
+    public synchronized static DanfossGridConnection get() throws Exception {
         if (g_Conn == null) {
             g_Conn = new DanfossGridConnection();
             g_Conn.SetBlockingMode(true);
@@ -28,8 +28,10 @@ public class DanfossGridConnection extends OSDGConnection {
         if (g_Conn.getState() != OSDGState.CONNECTED) {
             OSDGResult res = g_Conn.ConnectToDanfoss();
             if (res != OSDGResult.NO_ERROR) {
-                logger.error("Could not connect to Danfoss grid");
-                return null; // TODO: throw
+                String msg = "Danfoss grid connection failed: " + g_Conn.getLastResultStr();
+
+                logger.error(msg);
+                throw new Exception(msg);
             }
             logger.info("Successfully connected to Danfoss grid");
         }

@@ -110,13 +110,13 @@ public class PeerConnectionHandler {
                 return; // Stale Reconnect request from deleted/disabled Thing
             }
 
-            DanfossGridConnection grid = DanfossGridConnection.get();
+            try {
+                DanfossGridConnection grid = DanfossGridConnection.get();
 
-            if (grid == null) {
-                setOfflineStatus("Danfoss grid connection failed");
-            } else {
                 logger.info("Connecting to peer " + DatatypeConverter.printHexBinary(peerId));
                 connection.ConnectToRemote(grid, peerId, DeviSmart.ProtocolName);
+            } catch (Exception e) {
+                setOfflineStatus(e.getMessage());
             }
         });
     }
