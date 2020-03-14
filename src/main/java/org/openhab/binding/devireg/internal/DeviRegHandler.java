@@ -68,6 +68,8 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     public void handleCommand(ChannelUID channelUID, Command command) {
         String ch = channelUID.getId();
 
+        logger.trace("Sending {} = {}", ch, command);
+
         switch (ch) {
             case CHANNEL_SETPOINT_WARNING:
                 setTemperature(DOMINION_HEATING, HEATING_LOW_TEMPERATURE_WARNING, command);
@@ -268,10 +270,12 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     }
 
     private void reportTemperature(String ch, double temp) {
+        logger.trace("Received {} = {}", ch, temp);
         updateState(ch, new QuantityType<Temperature>(new DecimalType(temp), SIUnits.CELSIUS));
     }
 
     private void reportSwitch(String ch, boolean on) {
+        logger.trace("Received {} = {}", ch, on);
         updateState(ch, OnOffType.from(on));
     }
 
@@ -287,6 +291,8 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
             mode = "";
             state = "";
         }
+
+        logger.trace("Received {} = {}", CHANNEL_CONTROL_STATE, state);
 
         updateState(CHANNEL_CONTROL_MODE, StringType.valueOf(mode));
         updateState(CHANNEL_CONTROL_STATE, StringType.valueOf(state));
