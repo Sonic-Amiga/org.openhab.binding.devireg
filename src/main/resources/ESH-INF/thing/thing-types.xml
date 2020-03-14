@@ -21,6 +21,11 @@
 			<channel typeId="setpoint_warning" id="setpoint_warning" />
             <channel typeId="control_mode" id="control_mode" />
 			<channel typeId="control_state" id="control_state" />
+			<channel typeId="window_detection" id="window_detection" />
+			<channel typeId="window_open" id="window_open" />
+			<channel typeId="forecast" id="forecast" />
+			<channel typeId="screen_lock" id="screen_lock" />
+			<channel typeId="brightness" id="brightness" />
 		</channels>
 
 		<config-description>
@@ -74,28 +79,28 @@
         <description>Temperature setting for frost protection mode</description>
         <state pattern="%.1f %unit%" min="5" max="9" step="0.5" />
     </channel-type>
-    <channel-type id="setpoint_min_floor">
-        <item-type>Number:Temperature</item-type>
-        <label>Minimum floor temperature</label>
-        <description>Minimum allowed floor temperature</description>
-        <state pattern="%.1f %unit%" min="7" max="28" step="0.5" />
+    <channel-type id="setpoint_min_floor" advanced="true">
+    	<item-type>Number:Temperature</item-type>
+    	<label>Minimum floor temperature</label>
+    	<description>Minimum allowed floor temperature</description>
+    	<state pattern="%.1f %unit%" min="7" max="28" step="0.5" />
     </channel-type>
-    <channel-type id="setpoint_min_floor_enable">
-        <item-type>Switch</item-type>
-        <label>Enable minimum floor temperature</label>
-        <description>Keep floor temperature above the minimum</description>
+    <channel-type id="setpoint_min_floor_enable" advanced="true">
+    	<item-type>Switch</item-type>
+    	<label>Enable minimum floor temperature</label>
+    	<description>Keep floor temperature above the minimum</description>
     </channel-type>
-    <channel-type id="setpoint_max_floor">
-        <item-type>Number:Temperature</item-type>
-        <label>Maximum floor temperature</label>
-        <description>Maximum allowed floor temperature</description>
-        <state pattern="%.1f %unit%" min="7" max="33" step="0.5" />
+    <channel-type id="setpoint_max_floor" advanced="true">
+    	<item-type>Number:Temperature</item-type>
+    	<label>Maximum floor temperature</label>
+    	<description>Maximum allowed floor temperature</description>
+    	<state pattern="%.1f %unit%" min="7" max="33" step="0.5" />
     </channel-type>
-    <channel-type id="setpoint_warning">
-        <item-type>Number:Temperature</item-type>
-        <label>Warning temperature</label>
-        <description>Send warning notification to your phones if the temperature drops below this value</description>
-        <state pattern="%.1f %unit%" min="0" max="10" step="0.5" />
+    <channel-type id="setpoint_warning" advanced="true">
+    	<item-type>Number:Temperature</item-type>
+    	<label>Warning temperature</label>
+    	<description>Send warning notification to your phones if the temperature drops below this value</description>
+    	<state pattern="%.1f %unit%" min="0" max="10" step="0.5" />
     </channel-type>
     <channel-type id="control_mode">
         <item-type>String</item-type>
@@ -129,6 +134,33 @@
                 <option value="OVERRIDE">At home override</option>
             </options>
         </state>
+    </channel-type>
+    <channel-type id="window_detection" advanced="true">
+    	<item-type>Switch</item-type>
+    	<label>Open window detection</label>
+    	<description>Turn off heating when sudden temperature drop is detected</description>
+    </channel-type>
+    <channel-type id="window_open" advanced="true">
+    	<item-type>Switch</item-type>
+    	<label>Window open</label>
+    	<description>Heating interrupted due to open window</description>
+    	<state readOnly="true" />
+    </channel-type>
+    <channel-type id="forecast" advanced="true">
+    	<item-type>Switch</item-type>
+    	<label>Temperature forecasting</label>
+    	<description>Attempt to forecast heating and provide desired temperature at desired time</description>
+    </channel-type>
+    <channel-type id="screen_lock" advanced="true">
+    	<item-type>Switch</item-type>
+    	<label>Screen lock</label>
+    	<description>Enable thermostat screen locking</description>
+    </channel-type>
+    <channel-type id="brightness" advanced="true">
+    	<item-type>Number</item-type>
+    	<label>Display brightness</label>
+    	<description>Thermostat display brightness</description>
+    	<state min="10" max="100" />
     </channel-type>
 
 </thing:thing-descriptions>

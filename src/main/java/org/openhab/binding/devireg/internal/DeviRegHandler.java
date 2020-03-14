@@ -101,15 +101,30 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
             case CHANNEL_CONTROL_MODE:
                 setMode(command);
                 break;
+            case CHANNEL_WINDOW_DETECTION:
+                setSwitch(DOMINION_SYSTEM, SYSTEM_WINDOW_OPEN, command);
+                break;
+            case CHANNEL_FORECAST:
+                setSwitch(DOMINION_SYSTEM, SYSTEM_INFO_FORECAST_ENABLED, command);
+                break;
+            case CHANNEL_SCREEN_LOCK:
+                setSwitch(DOMINION_SYSTEM, SYSTEM_UI_SAFETY_LOCK, command);
+                break;
+            case CHANNEL_BRIGHTNESS:
+                setByte(DOMINION_SYSTEM, SYSTEM_UI_BRIGTHNESS, command);
+                break;
             // Read-only channels may send refreshType command
             case CHANNEL_TEMPERATURE_FLOOR:
-                requestTemperature(DOMINION_HEATING, HEATING_TEMPERATURE_FLOOR, command);
+                sendRefresh(DOMINION_HEATING, HEATING_TEMPERATURE_FLOOR, command);
                 break;
             case CHANNEL_TEMPERATURE_ROOM:
-                requestTemperature(DOMINION_HEATING, HEATING_TEMPERATURE_ROOM, command);
+                sendRefresh(DOMINION_HEATING, HEATING_TEMPERATURE_ROOM, command);
                 break;
             case CHANNEL_CONTROL_STATE:
-                requestState(command);
+                sendRefresh(DOMINION_SCHEDULER, SCHEDULER_CONTROL_INFO, command);
+                break;
+            case CHANNEL_WINDOW_OPEN:
+                sendRefresh(DOMINION_SYSTEM, SYSTEM_INFO_WINDOW_OPEN_DETECTION, command);
                 break;
         }
     }
@@ -127,7 +142,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
             }
             newTemperature = celsius.doubleValue();
         } else {
-            requestTemperature(msgClass, msgCode, command);
+            sendRefresh(msgClass, msgCode, command);
             return;
         }
 
@@ -135,17 +150,19 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     }
 
     private void setSwitch(int msgClass, int msgCode, Command command) {
-        DeviSmart.Packet pkt;
-
-        if (command instanceof RefreshType) {
-            pkt = new DeviSmart.Packet(msgClass, msgCode);
-        } else if (command instanceof OnOffType) {
-            pkt = new DeviSmart.Packet(msgClass, msgCode, command.equals(OnOffType.ON));
+        if (command instanceof OnOffType) {
+            connHandler.SendPacket(new DeviSmart.Packet(msgClass, msgCode, command.equals(OnOffType.ON)));
         } else {
-            return;
+            sendRefresh(msgClass, msgCode, command);
         }
+    }
 
-        connHandler.SendPacket(pkt);
+    private void setByte(int msgClass, int msgCode, Command command) {
+        if (command instanceof DecimalType) {
+            connHandler.SendPacket(new DeviSmart.Packet(msgClass, msgCode, ((DecimalType) command).byteValue()));
+        } else {
+            sendRefresh(msgClass, msgCode, command);
+        }
     }
 
     private void setMode(Command command) {
@@ -240,19 +257,13 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
                 logger.error("Error building control mode packet(s): " + e.toString());
             }
         } else {
-            requestState(command);
+            sendRefresh(DOMINION_SCHEDULER, SCHEDULER_CONTROL_INFO, command);
         }
     }
 
-    private void requestTemperature(int msgClass, int msgCode, Command command) {
+    private void sendRefresh(int msgClass, int msgCode, Command command) {
         if (command instanceof RefreshType) {
             connHandler.SendPacket(new DeviSmart.Packet(msgClass, msgCode));
-        }
-    }
-
-    private void requestState(Command command) {
-        if (command instanceof RefreshType) {
-            connHandler.SendPacket(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_INFO));
         }
     }
 
@@ -277,6 +288,11 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     private void reportSwitch(String ch, boolean on) {
         logger.trace("Received {} = {}", ch, on);
         updateState(ch, OnOffType.from(on));
+    }
+
+    private void reportDecimal(String ch, long value) {
+        logger.trace("Received {} = {}", ch, value);
+        updateState(ch, new DecimalType(value));
     }
 
     private void reportControlInfo(byte info) {
@@ -343,6 +359,21 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
                 break;
             case SCHEDULER_CONTROL_INFO:
                 reportControlInfo(pkt.getByte());
+                break;
+            case SYSTEM_WINDOW_OPEN:
+                reportSwitch(CHANNEL_WINDOW_DETECTION, pkt.getBoolean());
+                break;
+            case SYSTEM_INFO_WINDOW_OPEN_DETECTION:
+                reportSwitch(CHANNEL_WINDOW_OPEN, pkt.getBoolean());
+                break;
+            case SYSTEM_INFO_FORECAST_ENABLED:
+                reportSwitch(CHANNEL_FORECAST, pkt.getBoolean());
+                break;
+            case SYSTEM_UI_SAFETY_LOCK:
+                reportSwitch(CHANNEL_SCREEN_LOCK, pkt.getBoolean());
+                break;
+            case SYSTEM_UI_BRIGTHNESS:
+                reportDecimal(CHANNEL_BRIGHTNESS, pkt.getByte());
                 break;
             case GLOBAL_HARDWAREREVISION:
                 updateProperty(Thing.PROPERTY_HARDWARE_VERSION, pkt.getVersion().toString());
