@@ -19,7 +19,6 @@ import static org.opensdg.protocol.DeviSmart.MsgCode.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.util.Hashtable;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.measure.quantity.Temperature;
@@ -39,7 +38,6 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
 import org.opensdg.protocol.DeviSmart;
 import org.opensdg.protocol.DeviSmart.ControlMode;
 import org.opensdg.protocol.DeviSmart.ControlState;
@@ -58,7 +56,6 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     private final Logger logger = LoggerFactory.getLogger(DeviRegHandler.class);
     private PeerConnectionHandler connHandler = new PeerConnectionHandler(this);
     private byte currentMode = -1;
-    private Hashtable<String, State> lastState = new Hashtable<String, State>();
     private DeviSmart.@Nullable Version firmwareVer;
     private int firmwareBuild = -1;
 
@@ -70,45 +67,48 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
         String ch = channelUID.getId();
-        if (command instanceof RefreshType) {
-            State value = lastState.get(ch);
 
-            if (value != null) {
-                updateState(ch, value);
-            }
-        } else {
-            switch (ch) {
-                case CHANNEL_SETPOINT_WARNING:
-                    setTemperature(DOMINION_HEATING, HEATING_LOW_TEMPERATURE_WARNING, command);
-                    break;
-                case CHANNEL_SETPOINT_COMFORT:
-                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_COMFORT, command);
-                    break;
-                case CHANNEL_SETPOINT_ECONOMY:
-                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_ECONOMY, command);
-                    break;
-                case CHANNEL_SETPOINT_MANUAL:
-                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MANUAL, command);
-                    break;
-                case CHANNEL_SETPOINT_AWAY:
-                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_AWAY, command);
-                    break;
-                case CHANNEL_SETPOINT_ANTIFREEZE:
-                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FROST_PROTECTION, command);
-                    break;
-                case CHANNEL_SETPOINT_MIN_FLOOR:
-                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FLOOR_COMFORT, command);
-                    break;
-                case CHANNEL_SETPOINT_MIN_FLOOR_ENABLE:
-                    setSwitch(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FLOOR_COMFORT_ENABLED, command);
-                    break;
-                case CHANNEL_SETPOINT_MAX_FLOOR:
-                    setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MAX_FLOOR, command);
-                    break;
-                case CHANNEL_CONTROL_MODE:
-                    setMode(command);
-                    break;
-            }
+        switch (ch) {
+            case CHANNEL_SETPOINT_WARNING:
+                setTemperature(DOMINION_HEATING, HEATING_LOW_TEMPERATURE_WARNING, command);
+                break;
+            case CHANNEL_SETPOINT_COMFORT:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_COMFORT, command);
+                break;
+            case CHANNEL_SETPOINT_ECONOMY:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_ECONOMY, command);
+                break;
+            case CHANNEL_SETPOINT_MANUAL:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MANUAL, command);
+                break;
+            case CHANNEL_SETPOINT_AWAY:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_AWAY, command);
+                break;
+            case CHANNEL_SETPOINT_ANTIFREEZE:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FROST_PROTECTION, command);
+                break;
+            case CHANNEL_SETPOINT_MIN_FLOOR:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FLOOR_COMFORT, command);
+                break;
+            case CHANNEL_SETPOINT_MIN_FLOOR_ENABLE:
+                setSwitch(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FLOOR_COMFORT_ENABLED, command);
+                break;
+            case CHANNEL_SETPOINT_MAX_FLOOR:
+                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MAX_FLOOR, command);
+                break;
+            case CHANNEL_CONTROL_MODE:
+                setMode(command);
+                break;
+            // Read-only channels may send refreshType command
+            case CHANNEL_TEMPERATURE_FLOOR:
+                requestTemperature(DOMINION_HEATING, HEATING_TEMPERATURE_FLOOR, command);
+                break;
+            case CHANNEL_TEMPERATURE_ROOM:
+                requestTemperature(DOMINION_HEATING, HEATING_TEMPERATURE_ROOM, command);
+                break;
+            case CHANNEL_CONTROL_STATE:
+                requestState(command);
+                break;
         }
     }
 
@@ -125,6 +125,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
             }
             newTemperature = celsius.doubleValue();
         } else {
+            requestTemperature(msgClass, msgCode, command);
             return;
         }
 
@@ -132,9 +133,17 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     }
 
     private void setSwitch(int msgClass, int msgCode, Command command) {
-        if (command instanceof OnOffType) {
-            connHandler.SendPacket(new DeviSmart.Packet(msgClass, msgCode, command.equals(OnOffType.ON)));
+        DeviSmart.Packet pkt;
+
+        if (command instanceof RefreshType) {
+            pkt = new DeviSmart.Packet(msgClass, msgCode);
+        } else if (command instanceof OnOffType) {
+            pkt = new DeviSmart.Packet(msgClass, msgCode, command.equals(OnOffType.ON));
+        } else {
+            return;
         }
+
+        connHandler.SendPacket(pkt);
     }
 
     private void setMode(Command command) {
@@ -228,6 +237,20 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
                 // We should never get here
                 logger.error("Error building control mode packet(s): " + e.toString());
             }
+        } else {
+            requestState(command);
+        }
+    }
+
+    private void requestTemperature(int msgClass, int msgCode, Command command) {
+        if (command instanceof RefreshType) {
+            connHandler.SendPacket(new DeviSmart.Packet(msgClass, msgCode));
+        }
+    }
+
+    private void requestState(Command command) {
+        if (command instanceof RefreshType) {
+            connHandler.SendPacket(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_INFO));
         }
     }
 
@@ -245,11 +268,11 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     }
 
     private void reportTemperature(String ch, double temp) {
-        reportState(ch, new QuantityType<Temperature>(new DecimalType(temp), SIUnits.CELSIUS));
+        updateState(ch, new QuantityType<Temperature>(new DecimalType(temp), SIUnits.CELSIUS));
     }
 
     private void reportSwitch(String ch, boolean on) {
-        reportState(ch, OnOffType.from(on));
+        updateState(ch, OnOffType.from(on));
     }
 
     private void reportControlInfo(byte info) {
@@ -265,16 +288,8 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
             state = "";
         }
 
-        reportState(CHANNEL_CONTROL_MODE, StringType.valueOf(mode));
-        reportState(CHANNEL_CONTROL_STATE, StringType.valueOf(state));
-    }
-
-    private void reportState(String ch, State value) {
-        // Unfortunately we seem to have no way to request arbitrary value
-        // from the thermostat, so we remember all the values in a dictionary
-        // in order to be able to handle RefreshType command
-        lastState.put(ch, value);
-        updateState(ch, value);
+        updateState(CHANNEL_CONTROL_MODE, StringType.valueOf(mode));
+        updateState(CHANNEL_CONTROL_STATE, StringType.valueOf(state));
     }
 
     private void reportFirmware() {
@@ -350,12 +365,8 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     public void ping() {
         // Ping our device. Just request anything.
         // This method is called from within PeerConnectionHandler when
-        // it notices that the communication seems to have stalled. If there is
-        // a link interruption (e. g. router reboot or uplink fault), this will
-        // eventually trigger error on libopensdg's socket.
-        // Without this the communication just stalls with no way to detect this
-        // and recover.
-        connHandler.SendPacket(new DeviSmart.Packet((byte) DOMINION_HEATING, HEATING_TEMPERATURE_FLOOR, 0));
+        // it notices that the communication seems to have stalled.
+        connHandler.SendPacket(new DeviSmart.Packet(DOMINION_HEATING, HEATING_TEMPERATURE_FLOOR));
     }
 
     // Support methods for PeerConnectionHandler

@@ -29,8 +29,7 @@ public class DeviSmart {
         // Constructors below are used for outgoing packets
         public Packet(byte msgClass, int msgCode, int payloadLength) {
             // Outgoing packet is always prefixed with one byte.
-            // Original app sets it to 1 for packets with no payload (used e.g. for pings);
-            // and 0 for all other packets.
+            // 0 means write data, 1 means request data.
             m_Buffer = ByteBuffer.allocate(1 + HeaderSize + payloadLength);
             m_Start = 1;
             m_Buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -38,6 +37,10 @@ public class DeviSmart {
             m_Buffer.put(msgClass);
             m_Buffer.putShort((short) msgCode);
             m_Buffer.put((byte) payloadLength);
+        }
+
+        public Packet(int msgClass, int msgCode) {
+            this((byte) msgClass, msgCode, 0);
         }
 
         public Packet(int msgClass, int msgCode, byte data) {
