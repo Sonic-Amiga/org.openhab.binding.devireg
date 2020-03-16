@@ -258,7 +258,7 @@ public class DeviSmart {
       public static final int GLOBAL_NUMBEROFENDPOINTS                     = 16;    /* 1   byte      ??? */
       public static final int GLOBAL_DIVISIONID                            = 17;    /* 1   byte      ??? */
       public static final int GLOBAL_BRANDID                               = 18;    /* 1   byte      Brand ID ? Were they going to sell the infrastructure to OEMs ? Used for pings by app */
-      public static final int GLOBAL_PRODUCTID                             = 19;    /* 1   short     Some product code? 0x1001 for my DEVIReg Smart */
+      public static final int GLOBAL_PRODUCTID                             = 19;    /* 2   short     Some product code? 0x1001 for my DEVIReg Smart */
       public static final int GLOBAL_COUNTRYISOCODE                        = 20;    /* 4   String ?  Reads "00 " (with space) on device sold in Russia. Unused ? */
       public static final int GLOBAL_REVISION                              = 21;    /* 4   int       ??? */
       public static final int GLOBAL_SERIALNUMBER                          = 22;    /* 4   int       Device serial number */
