@@ -44,6 +44,11 @@ public class DeviRegBindingConstants {
     public static final String CHANNEL_SETPOINT_WARNING = "setpoint_warning";
     public static final String CHANNEL_CONTROL_STATE = "control_state";
     public static final String CHANNEL_CONTROL_MODE = "control_mode";
+    public static final String CHANNEL_WINDOW_DETECTION = "window_detection";
+    public static final String CHANNEL_WINDOW_OPEN = "window_open";
+    public static final String CHANNEL_FORECAST = "forecast";
+    public static final String CHANNEL_SCREEN_LOCK = "screen_lock";
+    public static final String CHANNEL_BRIGHTNESS = "brightness";
 
     public static final String CONTROL_MODE_MANUAL = "MANUAL";
     public static final String CONTROL_MODE_OVERRIDE = "OVERRIDE";

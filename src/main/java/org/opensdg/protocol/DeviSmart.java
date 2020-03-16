@@ -31,8 +31,7 @@ public class DeviSmart {
         // Constructors below are used for outgoing packets
         public Packet(byte msgClass, int msgCode, int payloadLength) {
             // Outgoing packet is always prefixed with one byte.
-            // Original app sets it to 1 for packets with no payload (used e.g. for pings);
-            // and 0 for all other packets.
+            // 0 means write data, 1 means request data.
             m_Buffer = ByteBuffer.allocate(1 + HeaderSize + payloadLength);
             m_Start = 1;
             m_Buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -40,6 +39,10 @@ public class DeviSmart {
             m_Buffer.put(msgClass);
             m_Buffer.putShort((short) msgCode);
             m_Buffer.put((byte) payloadLength);
+        }
+
+        public Packet(int msgClass, int msgCode) {
+            this((byte) msgClass, msgCode, 0);
         }
 
         public Packet(int msgClass, int msgCode, byte data) {
@@ -410,17 +413,17 @@ public class DeviSmart {
       public static final int SYSTEM_TIME_ISVALID                          = 29236; // 1   boolean   Self-descriptive. Reads 1 = true on my device.
       public static final int SYSTEM_TIME                                  = 29237; // 6   DateTime  Current time
       public static final int SYSTEM_TIME_OFFSET                           = 29238; // 2   short     GMT offset in minutes
-      public static final int SYSTEM_WIZARD_INFO                           = 29239;
-      public static final int SYSTEM_HEATING_INFO                          = 29240;
-      public static final int SYSTEM_ALARM_INFO                            = 29241;
-      public static final int SYSTEM_WINDOW_OPEN                           = 29242;
-      public static final int SYSTEM_INFO_FLOOR_SENSOR_CONNECTED           = 29243;
-      public static final int SYSTEM_INFO_FORECAST_ENABLED                 = 29244;
-      public static final int SYSTEM_INFO_BREAKOUT                         = 29245;
-      public static final int SYSTEM_INFO_WINDOW_OPEN_DETECTION            = 29246;
-      public static final int SYSTEM_UI_BRIGTHNESS                         = 29247;
-      public static final int SYSTEM_UI_SCREEN_OFF                         = 29248;
-      public static final int SYSTEM_LOCAL_CONFIRM_REQUEST                 = 29249;
+      public static final int SYSTEM_WIZARD_INFO                           = 29239; // 7   ?         Technician setup data
+      public static final int SYSTEM_HEATING_INFO                          = 29240; // 1   boolean   Current relay state on / off
+      public static final int SYSTEM_ALARM_INFO                            = 29241; // 1   boolean   Error flag ???
+      public static final int SYSTEM_WINDOW_OPEN                           = 29242; // 1   boolean   Window open detection enable / disable
+      public static final int SYSTEM_INFO_FLOOR_SENSOR_CONNECTED           = 29243; // 1   boolean   Floor sensor connection status
+      public static final int SYSTEM_INFO_FORECAST_ENABLED                 = 29244; // 1   boolean   Forecast mode enable / disable
+      public static final int SYSTEM_INFO_BREAKOUT                         = 29245; // 1   boolean   true if breakout tab has been removed
+      public static final int SYSTEM_INFO_WINDOW_OPEN_DETECTION            = 29246; // 1   boolean   Window open detected (if enabled)
+      public static final int SYSTEM_UI_BRIGTHNESS                         = 29247; // 1   byte      Display brightness 10 - 100
+      public static final int SYSTEM_UI_SCREEN_OFF                         = 29248; // 1   byte      Perhaps display off timeout ?
+      public static final int SYSTEM_LOCAL_CONFIRM_REQUEST                 = 29249; // 1   ?         ?
       public static final int SYSTEM_ROOM_NAME                             = 29250; // 33  String    Room name for this thermostat
       public static final int SYSTEM_HOUSE_NAME                            = 29251; // 33  String    House name for this thermostat
       public static final int SYSTEM_ZONE_NAME                             = 29252; // 33  String    Zone name for this thermostat

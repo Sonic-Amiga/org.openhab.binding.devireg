@@ -62,4 +62,10 @@ public class DeviSmartConnection extends OSDGConnection {
 
         return OSDGResult.NO_ERROR;
     }
+
+    public void blockingClose() {
+        SetBlockingMode(true);
+        Close();
+        logger.info("Connection closed");
+    }
 }

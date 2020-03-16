@@ -1,59 +1,121 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-<meta charset="utf-8" />
-<!-- Borrow some styles and font from PaperUI -->
-<link type="text/css" href="/paperui/css/bootstrap.min.css" rel="stylesheet">
-<link type="text/css" href="/paperui/css/angular-material.min.css" rel="stylesheet">
-<link type="text/css" href="/paperui/css/components.css" rel="stylesheet">
-<link type="text/css" href="/paperui/css/roboto-fontface.css" rel="stylesheet" media="all">
-<style>
-body {
-  font-family: "Roboto", Helvetica, Arial, sans-serif;
-  font-weight:300;
-  margin:0px;
-  background-color:#F9F9F9
-}
-.headerCell {
-  vertical-align: middle;
-  display:table-cell;
-  font-size:25px;
-}
-</style>
-<script>
-var msg_ok = "Successfully received {0} things. Please check your <a href='/paperui/#/inbox'>Inbox</a>";
-var msg_error = "HTTP error {0}";
-var bad_otp = "Invalid OTP supplied. Must be at least 7 digits."
-</script>
-<script src="configreceiver.js"></script>
-<title>DeviSmart configuration receiver</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>DeviSmart configuration receiving utility</title>
+
+    <link rel="shortcut icon" href="/paperui/img/logo.ico" />
+
+    <link type="text/css" href="/paperui/css/bootstrap.min.css" rel="stylesheet">
+    <link type="text/css" href="/paperui/css/angular-material.min.css" rel="stylesheet">
+    <link type="text/css" href="/paperui/css/md-expansion-panel.min.css" rel="stylesheet">
+
+    <!-- custom css files -->
+    <link type="text/css" href="/paperui/css/components.css" rel="stylesheet">
+    <link type="text/css" href="/paperui/css/layout.css" rel="stylesheet">
+    <link type="text/css" href="/paperui/css/views.css" rel="stylesheet">
+    <link type="text/css" href="/paperui/css/theme.css" rel="stylesheet">
+    <link type="text/css" href="/paperui/css/parameterDescription.css" rel="stylesheet">
+    <link type="text/css" href="/paperui/css/ol.css" rel="stylesheet">
+
+    <!-- Icons/Fonts -->
+    <link type="text/css" href="/paperui/css/roboto-fontface.css" rel="stylesheet" media="all">
+    <link type="text/css" href="/paperui/css/material-icons.css" rel="stylesheet" media="all">
+
+    <!-- lib js files -->
+    <script src="/paperui/js/jquery.min.js"></script>
+    <script src="/paperui/js/angular.min.js"></script>
+    <script src="/paperui/js/jquery-ui.min.js"></script>
+    <script src="/paperui/js/angular-bundle.min.js"></script>
+    <script src="/paperui/js/bootstrap.min.js"></script>
+
+
+
+    <noscript>
+        <div class="jsDisabled">Sorry! paperui requires JavaScript to run. Please enable it in your browser.</div>
+        <style>
+            .jsEnabled {
+                display: none;
+            }
+        </style>
+    </noscript>
+
+    <script src="configreceiver.js"></script>
 </head>
-<body>
-<div style="background-color:#ff6600;border-bottom:1px solid #CCC;">
-<div style="display:table;">
-<span class="headerCell" style="background-color:white;width:239px">
-<img src="/paperui/img/logo.png" style="display:block;margin-left:auto;margin-right:auto;"/>
-</span>
-<span class="headerCell" style="color:white;padding:20px;">DeviSmart configuration receiving utility</span>
-</div>
-</div>
-<div style="margin:8px;font-size:14px">
-<div id="main">
-<ol>
-<LI>Open your DeviReg(tm) Smart application and choose "Share house" function.</LI>
-<LI>Your answer to permissions question does not matter, OpenHAB does not support removing other users</LI>
-<LI>Enter the given pairingscode below and click "Receive"</LI>
-</ol>
-<div style="padding-left:25px;">
-<form>
-<input type="text" id="otp" class="md-input"/>
-<input type="button" class="md-button md-ink-ripple" value="Receive" onclick="receive()"></input>
-</form>
-<div id="status"></div>
-</div>
-</div>
-<div id="progress" style="display:none;">
-<img src="colorful_loader.gif"/>
-</div>
-</div>
+
+<body ng-app="deviRegApp">
+    <nav class="menu">
+        <div class="top">
+            <img id="logo" alt="Eclipse SmartHome Logo" src="/paperui/img/logo.png">
+        </div>
+    </nav>
+    <div id="wrapper">
+        <header>
+            <div class="title">
+                <h1 flex="100">
+                    DeviSmart configuration receiving utility
+                </h1>
+            </div>
+        </header>
+        <div class="container">
+            <div class="row">
+                <div class="col-12">&nbsp;</div>
+                <div class="col-12">
+                    <ol style="list-style-position: inside; padding-left: 0;">
+                        <LI>Open your Danfoss<sup>tm</sup> Smart application and choose "Share house" function.</LI>
+                        <LI>Your answer to permissions question does not matter, OpenHAB does not support removing other
+                            users</LI>
+                        <LI>Enter the given pairingscode below and click "Pair"</LI>
+                    </ol>
+                </div>
+                <div class="col-12">&nbsp;</div>
+                <div class="col-12">
+                    <div layout="row" ng-cloak>
+                        <form name="otpForm" ng-controller="deviRegFormController" novalidate ng-submit="processForm()"
+                            flex>
+                            <div layout="row" layout-align="start start" flex>
+                                <md-input-container class="flex-33">
+                                    <label for="otp">Pairingscode</label>
+                                    <input name="otp" id="otp" placeholder="123-123-1" ng-model="otpFormData.otp"
+                                        required ng-pattern="/^[0-9]{3}\-?[0-9]{3}\-?[0-9]{1}$/" flex
+                                        ng-disabled="processing || result_success" />
+                                    <div ng-messages="otpForm.otp.$error" role="alert" md-auto-hide="false"
+                                        ng-if="otpForm.otp.$touched">
+                                        <div ng-message="required">This is required!</div>
+                                        <div ng-message="pattern">Please enter a valid pairingscode.</div>
+                                    </div>
+                                </md-input-container>
+                                <md-input-container flex ng-show="!processing">
+                                    <md-button type="submit" class="md-primary md-raised" aria-label="Pair"
+                                        ng-disabled="result_success || (otpForm.$invalid && !result_success)"
+                                        style="margin-top: -10px;">
+                                        Pair
+                                    </md-button>
+                                </md-input-container>
+                                <md-input-container flex ng-show="processing" style="margin-top: -10px;">
+                                    <md-progress-circular md-mode="indeterminate" md-diameter="100">
+                                    </md-progress-circular>
+                                </md-input-container>
+                            </div>
+                            <div class="alert alert-success" role="alert" ng-show="result_success">
+                                <div ng-bind-html="result_success"></div>
+                            </div>
+                            <div class="alert alert-danger alert-dismissible" role="alert" ng-show="result_error">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <div ng-bind-html="result_error"></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
+
 </html>
