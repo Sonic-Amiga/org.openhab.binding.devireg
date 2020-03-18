@@ -50,8 +50,8 @@ import org.osgi.service.http.HttpService;
 @Component(configurationPid = "binding.devireg", service = ThingHandlerFactory.class)
 public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections
-            .unmodifiableSet(Stream.of(THING_TYPE_DEVIREG_SMART, THING_TYPE_ICON_WIFI).collect(Collectors.toSet()));
+    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.unmodifiableSet(Stream
+            .of(THING_TYPE_DEVIREG_SMART, THING_TYPE_ICON_WIFI, THING_TYPE_ICON_ROOM).collect(Collectors.toSet()));
 
     @Reference
     @NonNullByDefault({})
@@ -105,6 +105,8 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
             return new DeviRegHandler(thing);
         } else if (THING_TYPE_ICON_WIFI.equals(thingTypeUID)) {
             return new IconMasterHandler((Bridge) thing);
+        } else if (THING_TYPE_ICON_ROOM.equals(thingTypeUID)) {
+            return new IconRoomHandler(thing);
         }
 
         return null;

@@ -48,6 +48,29 @@
             </parameter>
         </config-description>
     </bridge-type>	
+    <thing-type id="icon_room">
+        <supported-bridge-type-refs>
+        	<bridge-type-ref id="icon_wifi" />
+        </supported-bridge-type-refs>
+        <label>Icon room</label>
+        <description>Icon room thermostat</description>
+        <channels>
+            <channel typeId="temperature_floor" id="temperature_floor" />
+            <channel typeId="temperature_room" id="temperature_room"></channel>
+            <channel typeId="setpoint_comfort" id="setpoint_comfort"></channel>
+            <channel typeId="setpoint_economy" id="setpoint_economy"></channel>
+            <channel typeId="setpoint_away" id="setpoint_away"></channel>
+            <channel typeId="setpoint_min_floor" id="setpoint_min_floor"></channel>
+            <channel typeId="setpoint_max_floor" id="setpoint_max_floor"></channel>
+        
+        </channels>
+        <config-description>
+            <parameter name="roomNumber" type="integer" required="true" min="0" max="44">
+            	<label>Room number</label>
+            	<description>Room number in the system</description>
+            </parameter>
+        </config-description>
+    </thing-type>
 	<channel-type id="temperature_floor">
 		<item-type>Number:Temperature</item-type>
 		<label>Floor temperature</label>

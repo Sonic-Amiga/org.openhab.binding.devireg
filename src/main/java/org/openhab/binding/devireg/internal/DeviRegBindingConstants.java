@@ -29,6 +29,9 @@ public class DeviRegBindingConstants {
     // List of all Thing Type UIDs
     public static final ThingTypeUID THING_TYPE_DEVIREG_SMART = new ThingTypeUID(BINDING_ID, "devismart");
     public static final ThingTypeUID THING_TYPE_ICON_WIFI = new ThingTypeUID(BINDING_ID, "icon_wifi");
+    public static final ThingTypeUID THING_TYPE_ICON_ROOM = new ThingTypeUID(BINDING_ID, "icon_room");
+
+    public static final int ICON_MAX_ROOMS = 45;
 
     // List of all Channel ids
     public static final String CHANNEL_TEMPERATURE_FLOOR = "temperature_floor";
