@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(DeviRegHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(IconMasterHandler.class);
     private PeerConnectionHandler connHandler = new PeerConnectionHandler(this);
     private DeviSmart.@Nullable Version firmwareVer;
     private int firmwareBuild = -1;

@@ -27,6 +27,7 @@ public class IconRoomHandler extends BaseThingHandler {
     private final Logger logger = LoggerFactory.getLogger(IconRoomHandler.class);
     private int roomNumber;
     private PeerConnectionHandler connHandler;
+    private boolean isOnline;
 
     public IconRoomHandler(Thing thing) {
         super(thing);
@@ -96,10 +97,16 @@ public class IconRoomHandler extends BaseThingHandler {
         roomNumber = config.roomNumber;
 
         logger.trace("Initializing room " + roomNumber);
+        isOnline = false;
         updateStatus(ThingStatus.UNKNOWN);
     }
 
     public void handlePacket(@NonNull Packet pkt) {
+        if (!isOnline) {
+            isOnline = true;
+            updateStatus(ThingStatus.ONLINE);
+        }
+
         switch (pkt.getMsgCode()) {
             case ROOM_FLOORTEMPERATURE:
                 reportTemperature(CHANNEL_TEMPERATURE_FLOOR, pkt.getDecimal());

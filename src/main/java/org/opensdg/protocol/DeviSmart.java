@@ -146,8 +146,11 @@ public class DeviSmart {
         }
 
         public double getDecimal() {
-            // Decimal values are 16-bit fixed-point with two decimal places
-            return getShort() / 100.0;
+            short fixed = getShort();
+
+            // Decimal values are 16-bit fixed-point with two decimal places.
+            // On Icon missing sensors report 0x8000
+            return (fixed == 0x8000) ? Double.NaN : fixed / 100.0;
         }
 
         public byte[] getArray() {
