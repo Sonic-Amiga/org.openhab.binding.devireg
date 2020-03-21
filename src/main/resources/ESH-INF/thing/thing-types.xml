@@ -40,6 +40,10 @@
     <bridge-type id="icon_wifi">
         <label>Icon controller</label>
         <description>WiFi app module on an Icon master controller</description>
+        <channels>
+            <channel typeId="setpoint_away" id="setpoint_away"></channel>
+            <channel typeId="setpoint_antifreeze" id="setpoint_antifreeze"></channel>       
+        </channels>
         <config-description>
             <parameter name="peerId" type="text" pattern="[0-9A-Fa-f]{64}" required="true">
                 <label>Peer ID</label>
@@ -59,10 +63,9 @@
             <channel typeId="temperature_room" id="temperature_room"></channel>
             <channel typeId="setpoint_comfort" id="setpoint_comfort"></channel>
             <channel typeId="setpoint_economy" id="setpoint_economy"></channel>
-            <channel typeId="setpoint_away" id="setpoint_away"></channel>
+            <channel typeId="setpoint_asleep" id="setpoint_asleep"></channel>
             <channel typeId="setpoint_min_floor" id="setpoint_min_floor"></channel>
             <channel typeId="setpoint_max_floor" id="setpoint_max_floor"></channel>
-        
         </channels>
         <config-description>
             <parameter name="roomNumber" type="integer" required="true" min="0" max="44">
@@ -91,8 +94,14 @@
     </channel-type>
     <channel-type id="setpoint_economy">
         <item-type>Number:Temperature</item-type>
-        <label>Night / away temperature</label>
+        <label>Away temperature</label>
         <description>Temperature setting when you are away (according to schedule)</description>
+        <state pattern="%.1f %unit%" min="5" max="28" step="0.5" />
+    </channel-type>
+    <channel-type id="setpoint_asleep">
+        <item-type>Number:Temperature</item-type>
+        <label>Night temperature</label>
+        <description>Temperature setting when you are asleep (according to schedule)</description>
         <state pattern="%.1f %unit%" min="5" max="28" step="0.5" />
     </channel-type>
     <channel-type id="setpoint_manual">
@@ -195,6 +204,12 @@
     	<label>Display brightness</label>
     	<description>Thermostat display brightness</description>
     	<state min="10" max="100" />
+    </channel-type>
+    <channel-type id="battery" advanced="true">
+        <item-type>Number</item-type>
+        <label>Battery level</label>
+        <description>Wireless thermostat battery charge level</description>
+        <state readOnly="true" />
     </channel-type>
 
 </thing:thing-descriptions>

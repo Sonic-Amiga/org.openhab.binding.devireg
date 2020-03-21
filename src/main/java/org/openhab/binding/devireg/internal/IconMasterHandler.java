@@ -1,14 +1,19 @@
 package org.openhab.binding.devireg.internal;
 
-import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.ICON_MAX_ROOMS;
+import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.*;
 import static org.opensdg.protocol.Icon.MsgClass.*;
 import static org.opensdg.protocol.Icon.MsgCode.*;
 
 import java.text.DateFormat;
 import java.util.concurrent.ScheduledExecutorService;
 
+import javax.measure.quantity.Temperature;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.eclipse.smarthome.core.library.types.QuantityType;
+import org.eclipse.smarthome.core.library.unit.SIUnits;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
@@ -33,13 +38,22 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
 
     public IconMasterHandler(Bridge bridge) {
         super(bridge);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        // TODO Auto-generated method stub
+        String ch = channelUID.getId();
 
+        logger.trace("Sending {} = {}", ch, command);
+
+        switch (ch) {
+            case CHANNEL_SETPOINT_AWAY:
+                connHandler.setTemperature(ALL_ROOMS, VACATION_SETPOINT, command);
+                break;
+            case CHANNEL_SETPOINT_ANTIFREEZE:
+                connHandler.setTemperature(ALL_ROOMS, PAUSE_SETPOINT, command);
+                break;
+        }
     }
 
     @Override
@@ -76,6 +90,12 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
             }
         } else {
             switch (pkt.getMsgCode()) {
+                case VACATION_SETPOINT:
+                    reportTemperature(CHANNEL_SETPOINT_AWAY, pkt.getDecimal());
+                    break;
+                case PAUSE_SETPOINT:
+                    reportTemperature(CHANNEL_SETPOINT_ANTIFREEZE, pkt.getDecimal());
+                    break;
                 case GLOBAL_HARDWAREREVISION:
                     updateProperty(Thing.PROPERTY_HARDWARE_VERSION, pkt.getVersion().toString());
                     break;
@@ -100,6 +120,11 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
         }
     }
 
+    private void reportTemperature(String ch, double temp) {
+        logger.trace("Received {} = {}", ch, temp);
+        updateState(ch, new QuantityType<Temperature>(new DecimalType(temp), SIUnits.CELSIUS));
+    }
+
     private void reportFirmware() {
         if (firmwareVer != null && firmwareBuild != -1) {
             updateProperty(Thing.PROPERTY_FIRMWARE_VERSION,
@@ -114,7 +139,8 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
 
     @Override
     public void ping() {
-        // TODO Auto-generated method stub
+        // Need to request something small. Let's use VACATION_SETPOINT.
+        connHandler.SendPacket(new DeviSmart.Packet(ALL_ROOMS, VACATION_SETPOINT));
     }
 
     @Override
@@ -125,8 +151,14 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
             IconRoomHandler room = (IconRoomHandler) handler;
             int roomId = room.getNumber();
 
-            logger.trace("Room " + roomId + " initialized");
-            rooms[roomId] = room;
+            if (rooms[roomId] != null) {
+                logger.error("Room number " + roomId + " is already in use");
+                room.setConfigError("Room number is already in use");
+            } else {
+                logger.trace("Room " + roomId + " initialized");
+                room.setConnectionHandler(connHandler);
+                rooms[roomId] = room;
+            }
         }
     }
 

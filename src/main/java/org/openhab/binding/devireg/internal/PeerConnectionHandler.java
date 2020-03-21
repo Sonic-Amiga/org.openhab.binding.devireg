@@ -5,11 +5,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.measure.quantity.Temperature;
 import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.eclipse.smarthome.core.library.types.QuantityType;
+import org.eclipse.smarthome.core.library.unit.SIUnits;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
+import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.smarthome.core.types.RefreshType;
 import org.opensdg.OSDGState;
 import org.opensdg.protocol.DeviSmart;
 import org.slf4j.Logger;
@@ -161,5 +167,31 @@ public class PeerConnectionHandler {
     public void handlePacket(DeviSmart.Packet pkt) {
         lastPacket = System.currentTimeMillis();
         thingHandler.handlePacket(pkt);
+    }
+
+    public void setTemperature(int msgClass, int msgCode, Command command) {
+        double newTemperature;
+
+        if (command instanceof DecimalType) {
+            newTemperature = ((DecimalType) command).doubleValue();
+        } else if (command instanceof QuantityType) {
+            @SuppressWarnings("unchecked")
+            QuantityType<Temperature> celsius = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
+            if (celsius == null) {
+                return;
+            }
+            newTemperature = celsius.doubleValue();
+        } else {
+            sendRefresh(msgClass, msgCode, command);
+            return;
+        }
+
+        SendPacket(new DeviSmart.Packet(msgClass, msgCode, newTemperature));
+    }
+
+    public void sendRefresh(int msgClass, int msgCode, Command command) {
+        if (command instanceof RefreshType) {
+            SendPacket(new DeviSmart.Packet(msgClass, msgCode));
+        }
     }
 }

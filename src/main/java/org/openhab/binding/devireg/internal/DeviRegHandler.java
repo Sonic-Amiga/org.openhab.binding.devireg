@@ -37,7 +37,6 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
 import org.opensdg.protocol.DeviSmart;
 import org.opensdg.protocol.DeviSmart.ControlMode;
 import org.opensdg.protocol.DeviSmart.ControlState;
@@ -72,31 +71,31 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
 
         switch (ch) {
             case CHANNEL_SETPOINT_WARNING:
-                setTemperature(DOMINION_HEATING, HEATING_LOW_TEMPERATURE_WARNING, command);
+                connHandler.setTemperature(DOMINION_HEATING, HEATING_LOW_TEMPERATURE_WARNING, command);
                 break;
             case CHANNEL_SETPOINT_COMFORT:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_COMFORT, command);
+                connHandler.setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_COMFORT, command);
                 break;
             case CHANNEL_SETPOINT_ECONOMY:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_ECONOMY, command);
+                connHandler.setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_ECONOMY, command);
                 break;
             case CHANNEL_SETPOINT_MANUAL:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MANUAL, command);
+                connHandler.setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MANUAL, command);
                 break;
             case CHANNEL_SETPOINT_AWAY:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_AWAY, command);
+                connHandler.setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_AWAY, command);
                 break;
             case CHANNEL_SETPOINT_ANTIFREEZE:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FROST_PROTECTION, command);
+                connHandler.setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FROST_PROTECTION, command);
                 break;
             case CHANNEL_SETPOINT_MIN_FLOOR:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FLOOR_COMFORT, command);
+                connHandler.setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FLOOR_COMFORT, command);
                 break;
             case CHANNEL_SETPOINT_MIN_FLOOR_ENABLE:
                 setSwitch(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_FLOOR_COMFORT_ENABLED, command);
                 break;
             case CHANNEL_SETPOINT_MAX_FLOOR:
-                setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MAX_FLOOR, command);
+                connHandler.setTemperature(DOMINION_SCHEDULER, SCHEDULER_SETPOINT_MAX_FLOOR, command);
                 break;
             case CHANNEL_CONTROL_MODE:
                 setMode(command);
@@ -115,45 +114,25 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
                 break;
             // Read-only channels may send refreshType command
             case CHANNEL_TEMPERATURE_FLOOR:
-                sendRefresh(DOMINION_HEATING, HEATING_TEMPERATURE_FLOOR, command);
+                connHandler.sendRefresh(DOMINION_HEATING, HEATING_TEMPERATURE_FLOOR, command);
                 break;
             case CHANNEL_TEMPERATURE_ROOM:
-                sendRefresh(DOMINION_HEATING, HEATING_TEMPERATURE_ROOM, command);
+                connHandler.sendRefresh(DOMINION_HEATING, HEATING_TEMPERATURE_ROOM, command);
                 break;
             case CHANNEL_CONTROL_STATE:
-                sendRefresh(DOMINION_SCHEDULER, SCHEDULER_CONTROL_INFO, command);
+                connHandler.sendRefresh(DOMINION_SCHEDULER, SCHEDULER_CONTROL_INFO, command);
                 break;
             case CHANNEL_WINDOW_OPEN:
-                sendRefresh(DOMINION_SYSTEM, SYSTEM_INFO_WINDOW_OPEN_DETECTION, command);
+                connHandler.sendRefresh(DOMINION_SYSTEM, SYSTEM_INFO_WINDOW_OPEN_DETECTION, command);
                 break;
         }
-    }
-
-    private void setTemperature(int msgClass, int msgCode, Command command) {
-        double newTemperature;
-
-        if (command instanceof DecimalType) {
-            newTemperature = ((DecimalType) command).doubleValue();
-        } else if (command instanceof QuantityType) {
-            @SuppressWarnings("unchecked")
-            QuantityType<Temperature> celsius = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
-            if (celsius == null) {
-                return;
-            }
-            newTemperature = celsius.doubleValue();
-        } else {
-            sendRefresh(msgClass, msgCode, command);
-            return;
-        }
-
-        connHandler.SendPacket(new DeviSmart.Packet(msgClass, msgCode, newTemperature));
     }
 
     private void setSwitch(int msgClass, int msgCode, Command command) {
         if (command instanceof OnOffType) {
             connHandler.SendPacket(new DeviSmart.Packet(msgClass, msgCode, command.equals(OnOffType.ON)));
         } else {
-            sendRefresh(msgClass, msgCode, command);
+            connHandler.sendRefresh(msgClass, msgCode, command);
         }
     }
 
@@ -161,7 +140,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
         if (command instanceof DecimalType) {
             connHandler.SendPacket(new DeviSmart.Packet(msgClass, msgCode, ((DecimalType) command).byteValue()));
         } else {
-            sendRefresh(msgClass, msgCode, command);
+            connHandler.sendRefresh(msgClass, msgCode, command);
         }
     }
 
@@ -257,13 +236,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
                 logger.error("Error building control mode packet(s): " + e.toString());
             }
         } else {
-            sendRefresh(DOMINION_SCHEDULER, SCHEDULER_CONTROL_INFO, command);
-        }
-    }
-
-    private void sendRefresh(int msgClass, int msgCode, Command command) {
-        if (command instanceof RefreshType) {
-            connHandler.SendPacket(new DeviSmart.Packet(msgClass, msgCode));
+            connHandler.sendRefresh(DOMINION_SCHEDULER, SCHEDULER_CONTROL_INFO, command);
         }
     }
 
@@ -296,6 +269,11 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     }
 
     private void reportControlInfo(byte info) {
+        // Modes corresponding to states below
+        final String[] CONTROL_MODES = { "", CONTROL_MODE_MANUAL, CONTROL_MODE_SCHEDULE, CONTROL_MODE_SCHEDULE,
+                CONTROL_MODE_VACATION, "", CONTROL_MODE_PAUSE, CONTROL_MODE_OFF, CONTROL_MODE_OVERRIDE };
+        final String[] CONTROL_STATES = { "CONFIGURING", "MANUAL", "HOME", "AWAY", "VACATION", "FATAL", "PAUSE", "OFF",
+                "OVERRIDE" };
         String mode, state;
 
         currentMode = info;

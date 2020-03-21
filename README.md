@@ -12,6 +12,8 @@ operate.
 ## Supported Things
 
 - DeviReg(tm) Smart floor thermostat
+- Danfoss Icon controller
+- Danfors Icon room
 
 ## Installation and supported architectures
 
@@ -57,11 +59,19 @@ to modify it will be reverted. It is provided for information purposes only, sho
 
 ## Thing Configuration
 
+### DeviReg Smart and Icon Controller
+
 The only parameter here is peerId. Being thermostat's public key, it identifies the thermostat on the Grid. It is made read-only in
 the interface in order to prevent accidental damage. Unfortunately it is not written on the device, nor in the manual. The only way
 to obtain this ID is to receive the configuration from the original smartphone application.
 
+### Icon room
+
+roomNumber - ordinal number of the room in Icon system
+
 ## Channels
+
+Channels, supported by DeviReg Smart(tm) thermostat:
 
 | channel                   | type        | description                                    | Read-only |
 |---------------------------|-------------|------------------------------------------------|-----------|
@@ -79,12 +89,33 @@ to obtain this ID is to receive the configuration from the original smartphone a
 | control_mode              | String      | Chosen control mode: MANUAL, OVERRIDE, SCHEDULE, VACATION, PAUSE, OFF| N |
 | control_state             | String      | Current control state: CONFIGURING, MANUAL, HOME, AWAY, VACATION, FATAL, PAUSE, OFF, OVERRIDE | Y |
 
+Channels, supported by Icon Master:
+
+| channel                   | type        | description                                    | Read-only |
+|---------------------------|-------------|------------------------------------------------|-----------|
+| setpoint_away             | Temperature | Set point for vacation mode                    | N |
+| setpoint_antifreeze       | Temperature | Set point for frost protection (paused) mode   | N |
+
+Channels, supported by Icon Room:
+
+| channel                   | type        | description                                    | Read-only |
+|---------------------------|-------------|------------------------------------------------|-----------|
+| temperature_floor         | Temperature | Floor temperature sensor reading                      | Y |
+| temperature_room          | Temperature | Room temperature sensor reading                       | Y |
+| setpoint_comfort          | Temperature | Set point for "At home" period                        | N |
+| setpoint_economy          | Temperature | Set point for "Away" period                           | N |
+| setpoint_asleep           | Temperature | Set point for "Asleep" period                         | N |
+| setpoint_min_floor        | Temperature | Minimum floor temperature                             | N |
+| setpoint_max_floor        | Temperature | Maximum allowed floor temperature                     | N |
+| control_state             | String      | Current control state: HOME, AWAY, ASLEEP FATAL       | Y |
+| battery                   | Number      | Battery charge percentage for wireless thermostats    | Y |
+
 NOTES:
 
 1. Push notifications are sent directly by the thermostat via original Danfoss cloud infrastructure,
 this is part of the original service. OpenHAB takes no part in this process.
-2. If there's no "at home" time configured in the schedule for the given day, OVERRIDE mode does not work and immediately falls
-back to SCHEDULE. This is a bug in thermostat's firmware, OpenHAB does not affect this.
-3. Communication with thermostats is possible only via the cloud infrastructure. Therefore a working Internet connection is
-required for the binding to operate, even if the OpenHAB installation resides on the same network with thermostats. This is
+2. Communication with the hardware is currently possible only via the cloud infrastructure. Therefore a working Internet connection
+is required for the binding to operate, even if the OpenHAB installation resides on the same network with thermostats. This is
 a restriction of thermostat's firmware and cannot be fixed.
+3. For DeviReg Smart: If there's no "at home" time configured in the schedule for the given day, OVERRIDE mode does not work and
+immediately falls back to SCHEDULE. This is a bug in thermostat's firmware, OpenHAB does not affect this.

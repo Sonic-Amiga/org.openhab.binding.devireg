@@ -38,6 +38,7 @@ public class DeviRegBindingConstants {
     public static final String CHANNEL_TEMPERATURE_ROOM = "temperature_room";
     public static final String CHANNEL_SETPOINT_COMFORT = "setpoint_comfort";
     public static final String CHANNEL_SETPOINT_ECONOMY = "setpoint_economy";
+    public static final String CHANNEL_SETPOINT_ASLEEP = "setpoint_asleep";
     public static final String CHANNEL_SETPOINT_MANUAL = "setpoint_manual";
     public static final String CHANNEL_SETPOINT_AWAY = "setpoint_away";
     public static final String CHANNEL_SETPOINT_ANTIFREEZE = "setpoint_antifreeze";
@@ -52,6 +53,7 @@ public class DeviRegBindingConstants {
     public static final String CHANNEL_FORECAST = "forecast";
     public static final String CHANNEL_SCREEN_LOCK = "screen_lock";
     public static final String CHANNEL_BRIGHTNESS = "brightness";
+    public static final String CHANNEL_BATTERY = "battery";
 
     public static final String CONTROL_MODE_MANUAL = "MANUAL";
     public static final String CONTROL_MODE_OVERRIDE = "OVERRIDE";
@@ -59,13 +61,4 @@ public class DeviRegBindingConstants {
     public static final String CONTROL_MODE_VACATION = "VACATION";
     public static final String CONTROL_MODE_PAUSE = "PAUSE";
     public static final String CONTROL_MODE_OFF = "OFF";
-
-    // Modes corresponding to states below
-    public static final String[] CONTROL_MODES = { "", CONTROL_MODE_MANUAL, CONTROL_MODE_SCHEDULE,
-            CONTROL_MODE_SCHEDULE, CONTROL_MODE_VACATION, "", CONTROL_MODE_PAUSE, CONTROL_MODE_OFF,
-            CONTROL_MODE_OVERRIDE };
-
-    public static final String[] CONTROL_STATES = { "CONFIGURING", "MANUAL", "HOME", "AWAY", "VACATION", "FATAL",
-            "PAUSE", "OFF", "OVERRIDE" };
-
 }
