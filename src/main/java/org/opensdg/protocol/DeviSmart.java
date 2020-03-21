@@ -161,7 +161,11 @@ public class DeviSmart {
         }
 
         public String getString() {
-            return new String(getArray());
+            byte[] data = getArray();
+
+            // For some reason empty strings, which have never been set, have
+            // full length and all zero contents. At least on Icon.
+            return data[0] == 0 ? "" : new String(getArray());
         }
 
         public Date getDate(int offset) {

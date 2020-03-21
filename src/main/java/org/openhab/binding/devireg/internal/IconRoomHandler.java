@@ -128,6 +128,9 @@ public class IconRoomHandler extends BaseThingHandler {
             case ROOM_ROOMMODE:
                 reportControlState(pkt.getByte());
                 break;
+            case ROOMNAME:
+                updateProperty("roomName", pkt.getString());
+                break;
         }
     }
 

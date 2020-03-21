@@ -256,7 +256,7 @@ public class Icon {
         public static final int ROOM_WAKEUPINTERVAL                            = 801;   // 2   short
         public static final int ROOM_CHECKINTEMPERATURECHANGE                  = 802;   // 2   short
         public static final int ROOM_DISPLAYEDTEMPERATURE                      = 809;   // 2   short
-        public static final int ROOM_ERRORCODE                                 = 1008;
+        public static final int ROOM_ERRORCODE                                 = 1008;  // 2   short     Values are unknown. Unconnected rooms report 0 = OK
         public static final int ROOM_SETPOINTMINIMUM                           = 1287;
         public static final int ROOM_SETPOINTMAXIMUM                           = 1288;
         public static final int ROOM_SETPOINTATHOME                            = 1289;
@@ -266,7 +266,7 @@ public class Icon {
         public static final int ROOM_FLOORTEMPERATUREMAXIMUM                   = 1293;
         public static final int ROOM_ROOMMODE                                  = 4106;  // 1   byte      Current control state. See RoomMode values below
         public static final int ROOM_ROOMCONTROL                               = 4107;  // 1   byte      See RoomControl values below.
-        public static final int ROOM_SCHEDULEMONDAY                            = 4108;
+        public static final int ROOM_SCHEDULEMONDAY                            = 4108;  // 13
         public static final int ROOM_SCHEDULETUESDAY                           = 4109;
         public static final int ROOM_SCHEDULEWEDNESDAY                         = 4110;
         public static final int ROOM_SCHEDULETHURSDAY                          = 4111;
@@ -274,22 +274,22 @@ public class Icon {
         public static final int ROOM_SCHEDULESATURDAY                          = 4113;
         public static final int ROOM_SCHEDULESUNDAY                            = 4114;
         public static final int ROOM_HEATINGCOOLINGSTATE                       = 4115;
-        public static final int SETPOINTATHOMECOPY                             = 4117;
-        public static final int SETPOINTAWAYCOPY                               = 4118;
-        public static final int SETPOINTASLEEPCOPY                             = 4119;
-        public static final int ROOM_OUTPUTGROUPSLOW                           = 4128;
-        public static final int ROOM_OUTPUTGROUPMEDIUM                         = 4129;
-        public static final int ROOM_OUTPUTGROUPFAST                           = 4130;
-        public static final int ROOM_OUTPUTDUTYCYCLEINFOSLOW                   = 4144;
-        public static final int ROOM_OUTPUTDUTYCYCLEINFOMEDIUM                 = 4145;
-        public static final int ROOM_OUTPUTDUTYCYCLEINFOFAST                   = 4146;
+        public static final int SETPOINTATHOMECOPY                             = 4117;  // 2
+        public static final int SETPOINTAWAYCOPY                               = 4118;  // 2
+        public static final int SETPOINTASLEEPCOPY                             = 4119;  // 2
+        public static final int ROOM_OUTPUTGROUPSLOW                           = 4128;  // 2
+        public static final int ROOM_OUTPUTGROUPMEDIUM                         = 4129;  // 2
+        public static final int ROOM_OUTPUTGROUPFAST                           = 4130;  // 2
+        public static final int ROOM_OUTPUTDUTYCYCLEINFOSLOW                   = 4144;  // 1
+        public static final int ROOM_OUTPUTDUTYCYCLEINFOMEDIUM                 = 4145;  // 1
+        public static final int ROOM_OUTPUTDUTYCYCLEINFOFAST                   = 4146;  // 1
         public static final int ROOM_CONTROLLERTYPE                            = 4210;  // 1   byte      Reads 0, perhaps reserved
         public static final int ROOM_COOLINGENABLED                            = 4212;  // 1   boolean ?
         public static final int ROOM_HEATINGCOOLINGCONFIGURATION               = 4213;  // 1
-        public static final int ROOM_REFERENCEROOMENABLED                      = 4214;
-        public static final int ROOM_ROOMSENSOROPERATIONOFF                    = 28675;
-        public static final int ROOM_ROOMSENSORTAMPERPROOF                     = 28928;
-        public static final int ROOMNAME                                       = 29250;
+        public static final int ROOM_REFERENCEROOMENABLED                      = 4214;  // 1   boolean ?
+        public static final int ROOM_ROOMSENSOROPERATIONOFF                    = 28675; // 1
+        public static final int ROOM_ROOMSENSORTAMPERPROOF                     = 28928; // 1   boolean ?
+        public static final int ROOMNAME                                       = 29250; // 33  String    Room name
         // Class REPEATER
         public static final int REPEATER_ERRORCODE                             = 1008;
         // Class INTERNAL
