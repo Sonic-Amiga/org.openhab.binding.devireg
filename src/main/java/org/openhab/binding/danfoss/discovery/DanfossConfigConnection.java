@@ -1,4 +1,4 @@
-package org.openhab.binding.devireg.discovery;
+package org.openhab.binding.danfoss.discovery;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -8,7 +8,7 @@ import org.opensdg.OSDGConnection;
 import org.opensdg.OSDGResult;
 import org.opensdg.OSDGState;
 
-public class DeviSmartConfigConnection extends OSDGConnection {
+public class DanfossConfigConnection extends OSDGConnection {
 
     private int dataSize = 0;
     private String json = "";

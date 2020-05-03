@@ -1,4 +1,4 @@
-package org.openhab.binding.devireg.discovery;
+package org.openhab.binding.danfoss.discovery;
 
 import java.util.Collections;
 
@@ -14,10 +14,10 @@ import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.io.rest.JSONResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.openhab.binding.devireg.internal.DanfossGridConnection;
-import org.openhab.binding.devireg.internal.DeviRegBindingConfig;
-import org.openhab.binding.devireg.internal.DeviRegBindingConstants;
-import org.openhab.binding.devireg.internal.DeviRegConfiguration;
+import org.openhab.binding.danfoss.internal.DanfossGridConnection;
+import org.openhab.binding.danfoss.internal.DanfossBindingConfig;
+import org.openhab.binding.danfoss.internal.DanfossBindingConstants;
+import org.openhab.binding.danfoss.internal.DeviRegConfiguration;
 import org.opensdg.OSDGConnection;
 import org.opensdg.OSDGResult;
 import org.osgi.service.component.annotations.Component;
@@ -25,9 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(service = DiscoveryService.class)
-public class DeviRegDiscoveryService extends AbstractDiscoveryService {
+public class DanfossDiscoveryService extends AbstractDiscoveryService {
 
     private static class OKResponse {
+        @SuppressWarnings("unused") // This class is used for JSON serialization
         public int thingCount;
 
         public OKResponse(int count) {
@@ -35,16 +36,16 @@ public class DeviRegDiscoveryService extends AbstractDiscoveryService {
         }
     }
 
-    private static DeviRegDiscoveryService instance;
+    private static DanfossDiscoveryService instance;
 
-    public static DeviRegDiscoveryService get() {
+    public static DanfossDiscoveryService get() {
         return instance;
     }
 
-    private Logger logger = LoggerFactory.getLogger(DeviRegDiscoveryService.class);
+    private Logger logger = LoggerFactory.getLogger(DanfossDiscoveryService.class);
 
-    public DeviRegDiscoveryService() {
-        super(Collections.singleton(DeviRegBindingConstants.THING_TYPE_DEVIREG_SMART), 600, true);
+    public DanfossDiscoveryService() {
+        super(Collections.singleton(DanfossBindingConstants.THING_TYPE_DEVIREG_SMART), 600, true);
     }
 
     @Override
@@ -65,7 +66,7 @@ public class DeviRegDiscoveryService extends AbstractDiscoveryService {
     }
 
     public Response receiveConfig(String otp) {
-        String userName = DeviRegBindingConfig.get().userName;
+        String userName = DanfossBindingConfig.get().userName;
         OSDGConnection grid;
 
         if (userName == null || userName.isEmpty()) {
@@ -97,7 +98,7 @@ public class DeviRegDiscoveryService extends AbstractDiscoveryService {
 
                 // Our peer is the sending phone. Once we know the ID, we can establish data connection
                 byte[] phoneId = pairing.getPeerId();
-                DeviSmartConfigConnection cfg = new DeviSmartConfigConnection();
+                DanfossConfigConnection cfg = new DanfossConfigConnection();
 
                 cfg.SetBlockingMode(true);
 
@@ -189,7 +190,7 @@ public class DeviRegDiscoveryService extends AbstractDiscoveryService {
 
             logger.debug("Received peer: " + peerId + " " + roomName);
 
-            ThingUID thingUID = new ThingUID(DeviRegBindingConstants.THING_TYPE_DEVIREG_SMART, peerId);
+            ThingUID thingUID = new ThingUID(DanfossBindingConstants.THING_TYPE_DEVIREG_SMART, peerId);
             DiscoveryResult result = DiscoveryResultBuilder.create(thingUID)
                     .withProperty(DeviRegConfiguration.PEER_ID, peerId)
                     .withLabel("DeviReg Smart (" + houseName + " / " + roomName + ")").build();

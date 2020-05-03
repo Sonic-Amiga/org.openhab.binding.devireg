@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.devireg.internal;
+package org.openhab.binding.danfoss.internal;
 
 /**
  * The {@link DeviRegConfiguration} class contains fields mapping thing configuration parameters.

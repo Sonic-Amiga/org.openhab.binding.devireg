@@ -1,4 +1,4 @@
-package org.openhab.binding.devireg.internal;
+package org.openhab.binding.danfoss.internal;
 
 import org.opensdg.OSDGConnection;
 import org.opensdg.OSDGResult;
@@ -22,7 +22,7 @@ public class DanfossGridConnection extends OSDGConnection {
         if (g_Conn == null) {
             g_Conn = new DanfossGridConnection();
             g_Conn.SetBlockingMode(true);
-            g_Conn.SetPrivateKey(DeviRegBindingConfig.get());
+            g_Conn.SetPrivateKey(DanfossBindingConfig.get());
         }
 
         if (g_Conn.getState() != OSDGState.CONNECTED) {
@@ -39,14 +39,14 @@ public class DanfossGridConnection extends OSDGConnection {
         return g_Conn;
     }
 
-    private void SetPrivateKey(DeviRegBindingConfig config) {
+    private void SetPrivateKey(DanfossBindingConfig config) {
         privateKey = config.privateKey;
         SetPrivateKey(SDGUtils.ParseKey(privateKey));
     }
 
     public static synchronized void UpdatePrivateKey() {
         if (g_Conn != null) {
-            DeviRegBindingConfig config = DeviRegBindingConfig.get();
+            DanfossBindingConfig config = DanfossBindingConfig.get();
 
             if (!config.privateKey.equals(g_Conn.privateKey)) {
                 g_Conn.Close(); // Will reconnect on demand

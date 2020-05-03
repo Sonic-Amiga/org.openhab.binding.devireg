@@ -10,21 +10,21 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.devireg.internal;
+package org.openhab.binding.danfoss.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 
 /**
- * The {@link DeviRegBindingConstants} class defines common constants, which are
+ * The {@link DanfossBindingConstants} class defines common constants, which are
  * used across the whole binding.
  *
  * @author Pavel Fedin - Initial contribution
  */
 @NonNullByDefault
-public class DeviRegBindingConstants {
+public class DanfossBindingConstants {
 
-    private static final String BINDING_ID = "devireg";
+    public static final String BINDING_ID = "danfoss";
 
     // List of all Thing Type UIDs
     public static final ThingTypeUID THING_TYPE_DEVIREG_SMART = new ThingTypeUID(BINDING_ID, "devismart");

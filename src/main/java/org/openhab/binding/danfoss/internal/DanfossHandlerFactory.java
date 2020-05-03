@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.devireg.internal;
+package org.openhab.binding.danfoss.internal;
 
-import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.THING_TYPE_DEVIREG_SMART;
+import static org.openhab.binding.danfoss.internal.DanfossBindingConstants.THING_TYPE_DEVIREG_SMART;
 
 import java.util.Collections;
 import java.util.Map;
@@ -27,7 +27,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.openhab.binding.devireg.discovery.DeviRegDiscoveryServlet;
+import org.openhab.binding.danfoss.discovery.DanfossDiscoveryServlet;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -40,14 +40,14 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.http.HttpService;
 
 /**
- * The {@link DeviRegHandlerFactory} is responsible for creating things and thing
+ * The {@link DanfossHandlerFactory} is responsible for creating things and thing
  * handlers.
  *
  * @author Pavel Fedin - Initial contribution
  */
 @NonNullByDefault
-@Component(configurationPid = "binding.devireg", service = ThingHandlerFactory.class)
-public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
+@Component(configurationPid = "binding.danfoss", service = ThingHandlerFactory.class)
+public class DanfossHandlerFactory extends BaseThingHandlerFactory {
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections
             .unmodifiableSet(Stream.of(THING_TYPE_DEVIREG_SMART).collect(Collectors.toSet()));
@@ -60,7 +60,7 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
     private HttpService httpService;
 
     @Nullable
-    private DeviRegDiscoveryServlet servlet;
+    private DanfossDiscoveryServlet servlet;
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -71,9 +71,9 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
     @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> config) {
         super.activate(componentContext);
-        DeviRegBindingConfig.update(config, configurationAdmin);
+        DanfossBindingConfig.update(config, configurationAdmin);
         if (servlet == null) {
-            servlet = new DeviRegDiscoveryServlet(httpService);
+            servlet = new DanfossDiscoveryServlet(httpService);
         }
 
     }
@@ -93,7 +93,7 @@ public class DeviRegHandlerFactory extends BaseThingHandlerFactory {
         // We update instead of replace the configuration object, so that if the user updates the
         // configuration, the values are automatically available in all handlers. Because they all
         // share the same instance.
-        DeviRegBindingConfig.update(config, configurationAdmin);
+        DanfossBindingConfig.update(config, configurationAdmin);
     }
 
     @Override

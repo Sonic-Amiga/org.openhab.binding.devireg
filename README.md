@@ -1,8 +1,7 @@
-# DeviReg Binding
+# Danfoss Binding
 
-This binding allows you to control DeviReg(tm) Smart smart floor thermostat (https://www.devismart.com/), produced by Danfoss company.
-
-This thermostat communicates over Wi-Fi using a proprietary cloud via a protocol called SecureDeviceGrid(tm)
+This binding allows you to integrate heating solutions by Danfoss company. These solutions communicate over Wi-Fi using a
+proprietary cloud via a protocol called SecureDeviceGrid(tm)
 (http://securedevicegrid.com/).
 
 The cloud solution is developed by Trifork company. This binding relies on OpenSDG (https://github.com/Sonic-Amiga/opensdg), the
@@ -11,7 +10,7 @@ operate.
 
 ## Supported Things
 
-- DeviReg(tm) Smart floor thermostat
+- DeviReg(tm) Smart floor thermostat (https://www.devismart.com/)
 
 ## Installation and supported architectures
 
@@ -29,11 +28,11 @@ Currently the following architectures / operating systems are supported:
 
 ## Discovery
 
-Unfortunately automatic discovery of DeviReg Smart(tm) devices is technically very problematic and cannot be reliably performed in
-OpenHAB (or any other home automation) environment. Instead, it is supposed to set thermostats up using original smartphone
+Unfortunately automatic discovery of Danfoss devices is technically very problematic and cannot be reliably performed in
+OpenHAB (or any other home automation) environment. Instead, it is supposed to set the hardware up using original smartphone
 application according to product manual; and then share the configuration with OpenHAB.   
 
-1. Navigate to http://YOUR_OPENHAB_HOST:8080/devireg/
+1. Navigate to http://YOUR_OPENHAB_HOST:8080/danfoss/
 2. According to instructions in the form, use "Share house" function in your DeviReg(tm) Smart smartphone application.
 3. Enter the One Time Password, issued by the phone, in the form and click "Receive"
 4. On success a message is displayed, telling number of things received.

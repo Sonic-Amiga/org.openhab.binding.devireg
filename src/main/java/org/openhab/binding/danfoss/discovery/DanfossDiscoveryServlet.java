@@ -1,4 +1,4 @@
-package org.openhab.binding.devireg.discovery;
+package org.openhab.binding.danfoss.discovery;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,20 +11,21 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.danfoss.internal.DanfossBindingConstants;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeviRegDiscoveryServlet extends HttpServlet {
+public class DanfossDiscoveryServlet extends HttpServlet {
 
     private static final long serialVersionUID = 4277870755120852304L;
-    private final Logger logger = LoggerFactory.getLogger(DeviRegDiscoveryServlet.class);
-    private static final String RESOURCE_URL = "/devireg";
+    private final Logger logger = LoggerFactory.getLogger(DanfossDiscoveryServlet.class);
+    private static final String RESOURCE_URL = "/" + DanfossBindingConstants.BINDING_ID;
 
     private HttpService httpService;
 
-    public DeviRegDiscoveryServlet(HttpService svc) {
+    public DanfossDiscoveryServlet(HttpService svc) {
         httpService = svc;
         try {
             httpService.registerServlet(RESOURCE_URL, this, null, httpService.createDefaultHttpContext());
