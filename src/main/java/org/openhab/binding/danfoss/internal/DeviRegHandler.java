@@ -395,7 +395,34 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
             case MDG_CONNECTION_COUNT:
                 updateProperty("connectionCount", String.valueOf(pkt.getByte()));
                 break;
+            case WIFI_CONNECTED_STRENGTH:
+                updateProperty("wifiStrength", String.valueOf(pkt.getShort()) + " db");
+                break;
+            case SYSTEM_RUNTIME_INFO_RELAY_COUNT:
+                updateProperty("relayCount", String.valueOf(pkt.getInt()));
+                break;
+            case SYSTEM_RUNTIME_INFO_RELAY_ON_TIME:
+                updateProperty("relayOnTime", formatDuration(pkt.getInt()));
+                break;
+            case SYSTEM_RUNTIME_INFO_SYSTEM_RUNTIME:
+                updateProperty("systemRunTime", formatDuration(pkt.getInt()));
+                break;
         }
+    }
+
+    // Convert duration in seconds to (years, days, hours, minutes),
+    // just like the original application.
+    private String formatDuration(int seconds) {
+        long d = Integer.toUnsignedLong(seconds);
+        long years = d / 31536000;
+        long d2 = d % 31536000;
+        long days = d2 / 86400;
+        long d3 = d2 % 86400;
+        long hours = d3 / 3600;
+        long d4 = d3 % 3600;
+        long minutes = d4 / 60;
+
+        return String.valueOf(years) + " years" + days + " days " + hours + " hours " + minutes + " minutes";
     }
 
     @Override

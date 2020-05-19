@@ -271,7 +271,7 @@ public class DeviSmart {
       public static final int WIFI_SSID_AP                                 = 29767; /* 33  String    SSID to use for ad-hoc mode */
       public static final int WIFI_CONNECTED_SSID                          = 29768; /* 33  String    Currently used SSID */
       public static final int WIFI_CONNECT_SSID                            = 29769; /* 33  String    Currently used SSID. Difference from the above is unclear */
-      public static final int WIFI_CONNECTED_STRENGTH                      = 29804; /* 2   short     Signal strength; units are unknown */
+      public static final int WIFI_CONNECTED_STRENGTH                      = 29804; /* 2   short     Signal strength in db */
       public static final int WIFI_CONNECT_KEY                             = 29770; /* 64  String    Wi-fi network key to use */
       public static final int WIFI_CONNECT                                 = 29771; /* 1   byte      ??? */
       public static final int WIFI_NETWORK_PROCESSOR_POWER                 = 29773; /* 1   byte      ??? */
@@ -388,16 +388,16 @@ public class DeviSmart {
       public static final int SOFTWAREUPDATE_INSTALLATION_STATE            = 30595;
       public static final int SOFTWAREUPDATE_INSTALLATION_PROGRESS         = 30596;
       /* Class DOMINION_SYSTEM */
-      public static final int SYSTEM_RUNTIME_INFO_RELAY_COUNT              = 29232;
-      public static final int SYSTEM_RUNTIME_INFO_RELAY_ON_TIME            = 29233;
-      public static final int SYSTEM_RUNTIME_INFO_SYSTEM_RUNTIME           = 29234;
-      public static final int SYSTEM_RUNTIME_INFO_SYSTEM_RESETS            = 29235;
+      public static final int SYSTEM_RUNTIME_INFO_RELAY_COUNT              = 29232; // 4   int       Count of relay switches in lifetime
+      public static final int SYSTEM_RUNTIME_INFO_RELAY_ON_TIME            = 29233; // 4   int       Total relay on time in seconds
+      public static final int SYSTEM_RUNTIME_INFO_SYSTEM_RUNTIME           = 29234; // 4   int       Total run time of the device. Not an uptime, does not reset on power off.
+      public static final int SYSTEM_RUNTIME_INFO_SYSTEM_RESETS            = 29235; // 4   ?         Not used by the app, so difficult to understand.
       public static final int SYSTEM_TIME_ISVALID                          = 29236; // 1   boolean   Self-descriptive. Reads 1 = true on my device.
       public static final int SYSTEM_TIME                                  = 29237; // 6   DateTime  Current time
       public static final int SYSTEM_TIME_OFFSET                           = 29238; // 2   short     GMT offset in minutes
       public static final int SYSTEM_WIZARD_INFO                           = 29239; // 7   ?         Technician setup data
       public static final int SYSTEM_HEATING_INFO                          = 29240; // 1   boolean   Current relay state on / off
-      public static final int SYSTEM_ALARM_INFO                            = 29241; // 1   boolean   Error flag ???
+      public static final int SYSTEM_ALARM_INFO                            = 29241; // 1   byte      Error flags, see AlarmInfo
       public static final int SYSTEM_WINDOW_OPEN                           = 29242; // 1   boolean   Window open detection enable / disable
       public static final int SYSTEM_INFO_FLOOR_SENSOR_CONNECTED           = 29243; // 1   boolean   Floor sensor connection status
       public static final int SYSTEM_INFO_FORECAST_ENABLED                 = 29244; // 1   boolean   Forecast mode enable / disable
@@ -501,5 +501,13 @@ public class DeviSmart {
         public static final byte FROST_PROTECTION_OFF = 5;
         public static final byte TEMPORARY_HOME_ON = 6;
         public static final byte TEMPORARY_HOME_OFF = 7;
+    };
+
+    // AlarmInfo is a bit field, values can be ORed.
+    public static class AlarmInfo {
+        public static final byte DISCONNECTED = 1 << 0;
+        public static final byte SHORT_CIRCUITED = 1 << 1;
+        public static final byte OVERHEAT = 1 << 2;
+        public static final byte UNRECOVERABLE = 1 << 3;
     };
 }
