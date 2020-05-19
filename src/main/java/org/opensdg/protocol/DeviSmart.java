@@ -407,7 +407,7 @@ public class DeviSmart {
       /* Class DOMINION_SYSTEM */
       public static final int SYSTEM_RUNTIME_INFO_RELAY_COUNT              = 29232; // 4   int       Count of relay switches in lifetime
       public static final int SYSTEM_RUNTIME_INFO_RELAY_ON_TIME            = 29233; // 4   int       Total relay on time in seconds
-      public static final int SYSTEM_RUNTIME_INFO_SYSTEM_RUNTIME           = 29234; // 4   int       Total run time of the device. In fact counts only time when the heater is on.
+      public static final int SYSTEM_RUNTIME_INFO_SYSTEM_RUNTIME           = 29234; // 4   int       Total run time of the device. Does not reset on power off.
       public static final int SYSTEM_RUNTIME_INFO_SYSTEM_RESETS            = 29235; // 4   ?         Not used by the app, so difficult to understand.
       public static final int SYSTEM_TIME_ISVALID                          = 29236; // 1   boolean   Self-descriptive. Reads 1 = true on my device.
       public static final int SYSTEM_TIME                                  = 29237; // 6   DateTime  Current time
@@ -474,7 +474,7 @@ public class DeviSmart {
       public static final int SCHEDULER_WEEK_2                             = 29342; // 43
       /* Class DOMINION_LOGS */
       public static final int LOG_RESET                                    = 29376;
-      public static final int LOG_ENERGY_CONSUMPTION_TOTAL                 = 29377; // 4   int      Time during which the heater was on in the lifetime ; in seconds. The same as SYSTEM_RUNTIME_INFO_SYSTEM_RUNTIME.
+      public static final int LOG_ENERGY_CONSUMPTION_TOTAL                 = 29377; // 4   int      Time during which the heater was on in the lifetime; in seconds. The same as SYSTEM_RUNTIME_INFO_RELAY_ON_TIME.
       public static final int LOG_ENERGY_CONSUMPTION_30DAYS                = 29378; // 4   int      Time during which the heater was on within last 30 days; in seconds
       public static final int LOG_ENERGY_CONSUMPTION_7DAYS                 = 29379; // 4   int      Time during which the heater was on within last 7 days; in seconds
       public static final int LOG_LATEST_ACTIVITIES                        = 29380;
