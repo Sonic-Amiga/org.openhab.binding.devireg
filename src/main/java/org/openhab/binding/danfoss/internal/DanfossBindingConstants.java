@@ -48,6 +48,10 @@ public class DanfossBindingConstants {
     public static final String CHANNEL_FORECAST = "forecast";
     public static final String CHANNEL_SCREEN_LOCK = "screen_lock";
     public static final String CHANNEL_BRIGHTNESS = "brightness";
+    public static final String CHANNEL_HEATING_STATE = "heating_state";
+    public static final String CHANNEL_ON_TIME_7_DAYS = "on_time_7_days";
+    public static final String CHANNEL_ON_TIME_30_DAYS = "on_time_30_days";
+    public static final String CHANNEL_ON_TIME_TOTAL = "on_time_7_total";
 
     public static final String CONTROL_MODE_MANUAL = "MANUAL";
     public static final String CONTROL_MODE_OVERRIDE = "OVERRIDE";

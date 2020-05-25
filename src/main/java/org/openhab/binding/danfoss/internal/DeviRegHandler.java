@@ -22,6 +22,7 @@ import java.text.DateFormat;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.measure.quantity.Temperature;
+import javax.measure.quantity.Time;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -31,6 +32,7 @@ import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.library.unit.SIUnits;
+import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -41,6 +43,7 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.opensdg.protocol.DeviSmart;
 import org.opensdg.protocol.DeviSmart.ControlMode;
 import org.opensdg.protocol.DeviSmart.ControlState;
+import org.opensdg.protocol.DeviSmart.WizardInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,6 +128,18 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
                 break;
             case CHANNEL_WINDOW_OPEN:
                 sendRefresh(DOMINION_SYSTEM, SYSTEM_INFO_WINDOW_OPEN_DETECTION, command);
+                break;
+            case CHANNEL_HEATING_STATE:
+                sendRefresh(DOMINION_SYSTEM, SYSTEM_HEATING_INFO, command);
+                break;
+            case CHANNEL_ON_TIME_7_DAYS:
+                sendRefresh(DOMINION_LOGS, LOG_ENERGY_CONSUMPTION_7DAYS, command);
+                break;
+            case CHANNEL_ON_TIME_30_DAYS:
+                sendRefresh(DOMINION_LOGS, LOG_ENERGY_CONSUMPTION_30DAYS, command);
+                break;
+            case CHANNEL_ON_TIME_TOTAL:
+                sendRefresh(DOMINION_SYSTEM, SYSTEM_RUNTIME_INFO_RELAY_ON_TIME, command);
                 break;
         }
     }
@@ -295,6 +310,11 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
         updateState(ch, new DecimalType(value));
     }
 
+    private void reportDuration(String ch, int time) {
+        logger.trace("Received {} = {}", ch, time);
+        updateState(ch, new QuantityType<Time>(Integer.toUnsignedLong(time), SmartHomeUnits.SECOND));
+    }
+
     private void reportControlInfo(byte info) {
         String mode, state;
 
@@ -375,6 +395,18 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
             case SYSTEM_UI_BRIGTHNESS:
                 reportDecimal(CHANNEL_BRIGHTNESS, pkt.getByte());
                 break;
+            case SYSTEM_HEATING_INFO:
+                reportSwitch(CHANNEL_HEATING_STATE, pkt.getBoolean());
+                break;
+            case LOG_ENERGY_CONSUMPTION_7DAYS:
+                reportDuration(CHANNEL_ON_TIME_7_DAYS, pkt.getInt());
+                break;
+            case LOG_ENERGY_CONSUMPTION_30DAYS:
+                reportDuration(CHANNEL_ON_TIME_30_DAYS, pkt.getInt());
+                break;
+            case SYSTEM_RUNTIME_INFO_RELAY_ON_TIME:
+                reportDuration(CHANNEL_ON_TIME_TOTAL, pkt.getInt());
+                break;
             case GLOBAL_HARDWAREREVISION:
                 updateProperty(Thing.PROPERTY_HARDWARE_VERSION, pkt.getVersion().toString());
                 break;
@@ -401,11 +433,20 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
             case SYSTEM_RUNTIME_INFO_RELAY_COUNT:
                 updateProperty("relayCount", String.valueOf(pkt.getInt()));
                 break;
-            case SYSTEM_RUNTIME_INFO_RELAY_ON_TIME:
-                updateProperty("relayOnTime", formatDuration(pkt.getInt()));
-                break;
             case SYSTEM_RUNTIME_INFO_SYSTEM_RUNTIME:
                 updateProperty("systemRunTime", formatDuration(pkt.getInt()));
+                break;
+            case SYSTEM_INFO_BREAKOUT:
+                updateProperty("breakout", pkt.getBoolean() ? "Broken" : "In place");
+                break;
+            case SYSTEM_WIZARD_INFO:
+                WizardInfo config = pkt.getWizardInfo();
+                updateProperty("sensorType", numToString(SensorTypes, config.sensorType));
+                updateProperty("regulationType", numToString(RegulationTypes, config.regulationType));
+                updateProperty("floorType", numToString(FloorTypes, config.flooringType));
+                updateProperty("roomType", numToString(RoomTypes, config.roomType));
+                updateProperty("outputPower", config.outputPower == WizardInfo.EXTERNAL_RELAY ? "External relay"
+                        : String.valueOf(config.outputPower) + " W");
                 break;
         }
     }
@@ -424,6 +465,20 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
 
         return String.valueOf(years) + " years" + days + " days " + hours + " hours " + minutes + " minutes";
     }
+
+    private String numToString(String[] table, int value) {
+        if (value < 0 || value >= table.length) {
+            return "Unknown (" + value + ")";
+        } else {
+            return table[value];
+        }
+    }
+
+    private static final String[] SensorTypes = { "Aube 10K", "Devi 15K", "Eberle 33K", "Ensto 47K", "Fenix 10K",
+            "OJ 12K", "Raychem 10K", "Teplolux 6.8K", "WarmUp 12K" };
+    private static final String[] RegulationTypes = { "Room", "Floor", "Room + floor" };
+    private static final String[] FloorTypes = { "Tiles", "Hardwood", "Laminate", "Carpet" };
+    private static final String[] RoomTypes = { "Bathroom", "Kitchen", "Living room", "Bedroom" };
 
     @Override
     public void ping() {
