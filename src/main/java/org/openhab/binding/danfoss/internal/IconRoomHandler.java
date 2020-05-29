@@ -17,7 +17,7 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
-import org.opensdg.protocol.DeviSmart.Packet;
+import org.opensdg.protocol.Dominion;
 import org.opensdg.protocol.Icon.RoomMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +101,7 @@ public class IconRoomHandler extends BaseThingHandler {
         updateStatus(ThingStatus.UNKNOWN);
     }
 
-    public void handlePacket(@NonNull Packet pkt) {
+    public void handlePacket(Dominion.@NonNull Packet pkt) {
         if (!isOnline) {
             isOnline = true;
             updateStatus(ThingStatus.ONLINE);

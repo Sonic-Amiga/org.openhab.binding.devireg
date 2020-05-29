@@ -5,7 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.opensdg.protocol.DeviSmart;
+import org.opensdg.protocol.Dominion;
 
 public interface ISDGPeerHandler {
 
@@ -13,7 +13,7 @@ public interface ISDGPeerHandler {
 
     public void reportStatus(@NonNull ThingStatus status);
 
-    public void handlePacket(DeviSmart.@NonNull Packet pkt);
+    public void handlePacket(Dominion.@NonNull Packet pkt);
 
     public void ping();
 

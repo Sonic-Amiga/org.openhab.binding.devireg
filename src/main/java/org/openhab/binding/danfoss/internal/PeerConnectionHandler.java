@@ -17,7 +17,7 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.opensdg.OSDGState;
-import org.opensdg.protocol.DeviSmart;
+import org.opensdg.protocol.Dominion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,7 +120,7 @@ public class PeerConnectionHandler {
                 DanfossGridConnection grid = DanfossGridConnection.get();
 
                 logger.info("Connecting to peer " + DatatypeConverter.printHexBinary(peerId));
-                connection.ConnectToRemote(grid, peerId, DeviSmart.ProtocolName);
+                connection.ConnectToRemote(grid, peerId, Dominion.ProtocolName);
             } catch (Exception e) {
                 setOfflineStatus(e.getMessage());
             }
@@ -160,11 +160,11 @@ public class PeerConnectionHandler {
         }
     }
 
-    public void SendPacket(DeviSmart.Packet pkt) {
+    public void SendPacket(Dominion.Packet pkt) {
         Send(pkt.getBuffer());
     }
 
-    public void handlePacket(DeviSmart.Packet pkt) {
+    public void handlePacket(Dominion.Packet pkt) {
         lastPacket = System.currentTimeMillis();
         thingHandler.handlePacket(pkt);
     }
@@ -186,12 +186,12 @@ public class PeerConnectionHandler {
             return;
         }
 
-        SendPacket(new DeviSmart.Packet(msgClass, msgCode, newTemperature));
+        SendPacket(new Dominion.Packet(msgClass, msgCode, newTemperature));
     }
 
     public void sendRefresh(int msgClass, int msgCode, Command command) {
         if (command instanceof RefreshType) {
-            SendPacket(new DeviSmart.Packet(msgClass, msgCode));
+            SendPacket(new Dominion.Packet(msgClass, msgCode));
         }
     }
 }

@@ -22,8 +22,7 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
-import org.opensdg.protocol.DeviSmart;
-import org.opensdg.protocol.DeviSmart.Packet;
+import org.opensdg.protocol.Dominion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +30,7 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
 
     private final Logger logger = LoggerFactory.getLogger(IconMasterHandler.class);
     private PeerConnectionHandler connHandler = new PeerConnectionHandler(this);
-    private DeviSmart.@Nullable Version firmwareVer;
+    private Dominion.@Nullable Version firmwareVer;
     private int firmwareBuild = -1;
 
     private IconRoomHandler[] rooms = new IconRoomHandler[ICON_MAX_ROOMS];
@@ -79,7 +78,7 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
     }
 
     @Override
-    public void handlePacket(@NonNull Packet pkt) {
+    public void handlePacket(Dominion.@NonNull Packet pkt) {
         int msgClass = pkt.getMsgClass();
 
         if (msgClass >= ROOM_FIRST && msgClass <= ROOM_LAST) {
@@ -140,7 +139,7 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
     @Override
     public void ping() {
         // Need to request something small. Let's use VACATION_SETPOINT.
-        connHandler.SendPacket(new DeviSmart.Packet(ALL_ROOMS, VACATION_SETPOINT));
+        connHandler.SendPacket(new Dominion.Packet(ALL_ROOMS, VACATION_SETPOINT));
     }
 
     @Override

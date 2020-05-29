@@ -43,6 +43,7 @@ import org.opensdg.protocol.DeviSmart;
 import org.opensdg.protocol.DeviSmart.ControlMode;
 import org.opensdg.protocol.DeviSmart.ControlState;
 import org.opensdg.protocol.DeviSmart.WizardInfo;
+import org.opensdg.protocol.Dominion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     private final Logger logger = LoggerFactory.getLogger(DeviRegHandler.class);
     private PeerConnectionHandler connHandler = new PeerConnectionHandler(this);
     private byte currentMode = -1;
-    private DeviSmart.@Nullable Version firmwareVer;
+    private Dominion.@Nullable Version firmwareVer;
     private int firmwareBuild = -1;
 
     public DeviRegHandler(Thing thing) {
@@ -151,7 +152,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
 
     private void setSwitch(int msgClass, int msgCode, Command command) {
         if (command instanceof OnOffType) {
-            connHandler.SendPacket(new DeviSmart.Packet(msgClass, msgCode, command.equals(OnOffType.ON)));
+            connHandler.SendPacket(new Dominion.Packet(msgClass, msgCode, command.equals(OnOffType.ON)));
         } else {
             connHandler.sendRefresh(msgClass, msgCode, command);
         }
@@ -159,7 +160,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
 
     private void setByte(int msgClass, int msgCode, Command command) {
         if (command instanceof DecimalType) {
-            connHandler.SendPacket(new DeviSmart.Packet(msgClass, msgCode, ((DecimalType) command).byteValue()));
+            connHandler.SendPacket(new Dominion.Packet(msgClass, msgCode, ((DecimalType) command).byteValue()));
         } else {
             connHandler.sendRefresh(msgClass, msgCode, command);
         }
@@ -189,7 +190,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
                         // Original app resets both scheduled period and PLANNED flag, we do the same.
                         buffer.write(new DeviSmart.AwayPacket(null, null).getBuffer());
                         buffer.write(
-                                new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_AWAY_ISPLANNED, false).getBuffer());
+                                new Dominion.Packet(DOMINION_SCHEDULER, SCHEDULER_AWAY_ISPLANNED, false).getBuffer());
                         break;
 
                     case ControlState.Pause:
@@ -197,7 +198,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
                             return;
                         }
 
-                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                        buffer.write(new Dominion.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
                                 ControlMode.FROST_PROTECTION_OFF).getBuffer());
                         break;
 
@@ -206,7 +207,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
                             return;
                         }
 
-                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                        buffer.write(new Dominion.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
                                 ControlMode.OFF_STATE_OFF).getBuffer());
                         break;
 
@@ -215,22 +216,22 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
                             return;
                         }
 
-                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                        buffer.write(new Dominion.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
                                 ControlMode.TEMPORARY_HOME_OFF).getBuffer());
                         break;
                 }
 
                 switch (cmdString) {
                     case CONTROL_MODE_MANUAL:
-                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                        buffer.write(new Dominion.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
                                 ControlMode.WEEKLY_SCHEDULE_OFF).getBuffer());
                         break;
                     case CONTROL_MODE_OVERRIDE:
-                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                        buffer.write(new Dominion.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
                                 ControlMode.TEMPORARY_HOME_ON).getBuffer());
                         break;
                     case CONTROL_MODE_SCHEDULE:
-                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                        buffer.write(new Dominion.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
                                 ControlMode.WEEKLY_SCHEDULE_ON).getBuffer());
                         break;
                     case CONTROL_MODE_VACATION:
@@ -238,14 +239,14 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
                         // scheduled time period and set PLANNED to true.
                         buffer.write(new DeviSmart.AwayPacket(null, null).getBuffer());
                         buffer.write(
-                                new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_AWAY_ISPLANNED, true).getBuffer());
+                                new Dominion.Packet(DOMINION_SCHEDULER, SCHEDULER_AWAY_ISPLANNED, true).getBuffer());
                         break;
                     case CONTROL_MODE_PAUSE:
-                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                        buffer.write(new Dominion.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
                                 ControlMode.FROST_PROTECTION_ON).getBuffer());
                         break;
                     case CONTROL_MODE_OFF:
-                        buffer.write(new DeviSmart.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
+                        buffer.write(new Dominion.Packet(DOMINION_SCHEDULER, SCHEDULER_CONTROL_MODE,
                                 ControlMode.OFF_STATE_ON).getBuffer());
                         break;
                 }
@@ -326,7 +327,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     }
 
     @Override
-    public void handlePacket(DeviSmart.Packet pkt) {
+    public void handlePacket(Dominion.Packet pkt) {
         switch (pkt.getMsgCode()) {
             case HEATING_TEMPERATURE_FLOOR:
                 reportTemperature(CHANNEL_TEMPERATURE_FLOOR, pkt.getDecimal());
@@ -475,7 +476,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
         // Ping our device. Just request anything.
         // This method is called from within PeerConnectionHandler when
         // it notices that the communication seems to have stalled.
-        connHandler.SendPacket(new DeviSmart.Packet(DOMINION_HEATING, HEATING_TEMPERATURE_FLOOR));
+        connHandler.SendPacket(new Dominion.Packet(DOMINION_HEATING, HEATING_TEMPERATURE_FLOOR));
     }
 
     // Support methods for PeerConnectionHandler

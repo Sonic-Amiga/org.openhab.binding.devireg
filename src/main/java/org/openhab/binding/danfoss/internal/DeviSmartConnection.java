@@ -5,7 +5,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.opensdg.OSDGConnection;
 import org.opensdg.OSDGResult;
 import org.opensdg.OSDGState;
-import org.opensdg.protocol.DeviSmart;
+import org.opensdg.protocol.Dominion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +43,8 @@ public class DeviSmartConnection extends OSDGConnection {
          * to be done at any moment. Also this suggests that garbage zero byte
          * in the beginning of this bunch could be a buffering bug.
          */
-        while (length >= DeviSmart.Packet.HeaderSize) {
-            DeviSmart.Packet pkt = new DeviSmart.Packet(data, offset);
+        while (length >= Dominion.Packet.HeaderSize) {
+            Dominion.Packet pkt = new Dominion.Packet(data, offset);
             int packetLen = pkt.getLength();
 
             if (packetLen > length) {
