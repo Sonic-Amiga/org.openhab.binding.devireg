@@ -1,6 +1,6 @@
-package org.openhab.binding.devireg.internal;
+package org.openhab.binding.danfoss.internal;
 
-import static org.openhab.binding.devireg.internal.DeviRegBindingConstants.*;
+import static org.openhab.binding.danfoss.internal.DanfossBindingConstants.*;
 import static org.opensdg.protocol.Icon.MsgClass.*;
 import static org.opensdg.protocol.Icon.MsgCode.*;
 

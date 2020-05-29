@@ -10,21 +10,21 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.devireg.internal;
+package org.openhab.binding.danfoss.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 
 /**
- * The {@link DeviRegBindingConstants} class defines common constants, which are
+ * The {@link DanfossBindingConstants} class defines common constants, which are
  * used across the whole binding.
  *
  * @author Pavel Fedin - Initial contribution
  */
 @NonNullByDefault
-public class DeviRegBindingConstants {
+public class DanfossBindingConstants {
 
-    private static final String BINDING_ID = "devireg";
+    public static final String BINDING_ID = "danfoss";
 
     // List of all Thing Type UIDs
     public static final ThingTypeUID THING_TYPE_DEVIREG_SMART = new ThingTypeUID(BINDING_ID, "devismart");
@@ -54,6 +54,10 @@ public class DeviRegBindingConstants {
     public static final String CHANNEL_SCREEN_LOCK = "screen_lock";
     public static final String CHANNEL_BRIGHTNESS = "brightness";
     public static final String CHANNEL_BATTERY = "battery";
+    public static final String CHANNEL_HEATING_STATE = "heating_state";
+    public static final String CHANNEL_ON_TIME_7_DAYS = "on_time_7_days";
+    public static final String CHANNEL_ON_TIME_30_DAYS = "on_time_30_days";
+    public static final String CHANNEL_ON_TIME_TOTAL = "on_time_7_total";
 
     public static final String CONTROL_MODE_MANUAL = "MANUAL";
     public static final String CONTROL_MODE_OVERRIDE = "OVERRIDE";

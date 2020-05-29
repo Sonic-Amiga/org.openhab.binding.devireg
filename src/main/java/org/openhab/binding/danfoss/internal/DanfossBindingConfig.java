@@ -1,4 +1,4 @@
-package org.openhab.binding.devireg.internal;
+package org.openhab.binding.danfoss.internal;
 
 import java.io.IOException;
 import java.util.Dictionary;
@@ -14,19 +14,19 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeviRegBindingConfig {
-    private static final Logger logger = LoggerFactory.getLogger(DeviRegBindingConfig.class);
-    private static DeviRegBindingConfig g_Config = new DeviRegBindingConfig();
+public class DanfossBindingConfig {
+    private static final Logger logger = LoggerFactory.getLogger(DanfossBindingConfig.class);
+    private static DanfossBindingConfig g_Config = new DanfossBindingConfig();
 
     public String privateKey;
     public String publicKey;
     public String userName;
 
-    public static DeviRegBindingConfig get() {
+    public static DanfossBindingConfig get() {
         return g_Config;
     }
 
-    private void update(DeviRegBindingConfig newConfig) {
+    private void update(DanfossBindingConfig newConfig) {
         String newKey = newConfig.privateKey;
         byte[] newPrivkey;
 
@@ -59,7 +59,7 @@ public class DeviRegBindingConfig {
     }
 
     public static void update(@NonNull Map<String, Object> config, ConfigurationAdmin admin) {
-        DeviRegBindingConfig newConfig = new Configuration(config).as(DeviRegBindingConfig.class);
+        DanfossBindingConfig newConfig = new Configuration(config).as(DanfossBindingConfig.class);
 
         // Kludge for OpenHAB 2.4. Early development versions of this binding didn't have
         // this parameter. OpenHAB apparently cached parameter structure and doesn't present
@@ -86,7 +86,7 @@ public class DeviRegBindingConfig {
         data.put("userName", userName);
 
         try {
-            confAdmin.getConfiguration("binding.devireg", null).update(data);
+            confAdmin.getConfiguration("binding." + DanfossBindingConstants.BINDING_ID, null).update(data);
         } catch (IOException e) {
             logger.error("Failed to update binding config: " + e.getLocalizedMessage());
         }

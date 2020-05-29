@@ -12,7 +12,7 @@ function deviRegFormController($scope, $http) {
         $scope.processing = true;
         $http({
             method: 'POST',
-            url: '/rest/devireg/receive/' + $scope.otpFormData.otp,
+            url: '/rest/danfoss/receive/' + $scope.otpFormData.otp,
             data: ''
         })
             .then(function onSuccess(response) {

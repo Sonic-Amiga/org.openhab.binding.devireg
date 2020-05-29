@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<thing:thing-descriptions bindingId="devireg"
+<thing:thing-descriptions bindingId="danfoss"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
 	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
@@ -205,10 +205,35 @@
     	<description>Thermostat display brightness</description>
     	<state min="10" max="100" />
     </channel-type>
+<<<<<<< HEAD
     <channel-type id="battery" advanced="true">
         <item-type>Number</item-type>
         <label>Battery level</label>
         <description>Wireless thermostat battery charge level</description>
+=======
+    <channel-type id="heating_state" advanced="true">
+        <item-type>Switch</item-type>
+        <label>Heating state</label>
+        <description>Current heating state</description>
+        <state readOnly="true" />
+    </channel-type>
+    <channel-type id="on_time_7_days" advanced="true">
+        <item-type>Number:Time</item-type>
+        <label>Heater on time in last 7 days</label>
+        <description>Heater on time during last 7 days</description>
+        <state readOnly="true" />
+    </channel-type>
+    <channel-type id="on_time_30_days" advanced="true">
+        <item-type>Number:Time</item-type>
+        <label>Heater on time in last 30 days</label>
+        <description>Heater on time during last 30 days</description>
+        <state readOnly="true" />
+    </channel-type>
+    <channel-type id="on_time_total" advanced="true">
+        <item-type>Number:Time</item-type>
+        <label>Total heater on time</label>
+        <description>Heater on time during thermostat lifetime</description>
+>>>>>>> 100f61a905748f9aa90dfe8eaeec4eefc000d02e
         <state readOnly="true" />
     </channel-type>
 

@@ -9,9 +9,9 @@
     <version>2.5.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.openhab.binding.devireg</artifactId>
+  <artifactId>org.openhab.binding.danfoss</artifactId>
 
-  <name>openHAB Add-ons :: Bundles :: DeviReg Binding</name>
+  <name>openHAB Add-ons :: Bundles :: Danfoss Binding</name>
 
   <dependencies>
   	<dependency>

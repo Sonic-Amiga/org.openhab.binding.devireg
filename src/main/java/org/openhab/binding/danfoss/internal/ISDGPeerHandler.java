@@ -1,4 +1,4 @@
-package org.openhab.binding.devireg.internal;
+package org.openhab.binding.danfoss.internal;
 
 import java.util.concurrent.ScheduledExecutorService;
 

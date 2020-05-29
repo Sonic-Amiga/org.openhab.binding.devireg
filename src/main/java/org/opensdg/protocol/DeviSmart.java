@@ -194,6 +194,23 @@ public class DeviSmart {
             return new Version(getShort());
         }
 
+        public WizardInfo getWizardInfo() {
+            WizardInfo ret = new WizardInfo();
+
+            // WizardInfo is written as an array, so its first byte is array length
+            // and always equals to 6. Skip it.
+            position(1);
+            // Then go values.
+            ret.sensorType = m_Buffer.get();
+            ret.regulationType = m_Buffer.get();
+            ret.flooringType = m_Buffer.get();
+            ret.roomType = m_Buffer.get();
+            ret.outputPower = m_Buffer.get() * WizardInfo.POWER_SCALE;
+            // 6'th value is always set to 1, we don't know what it is.
+
+            return ret;
+        }
+
         @Override
         public String toString() {
             int length = getPayloadLength();
@@ -296,7 +313,7 @@ public class DeviSmart {
       public static final int WIFI_SSID_AP                                 = 29767; /* 33  String    SSID to use for ad-hoc mode */
       public static final int WIFI_CONNECTED_SSID                          = 29768; /* 33  String    Currently used SSID */
       public static final int WIFI_CONNECT_SSID                            = 29769; /* 33  String    Currently used SSID. Difference from the above is unclear */
-      public static final int WIFI_CONNECTED_STRENGTH                      = 29804; /* 2   short     Signal strength; units are unknown */
+      public static final int WIFI_CONNECTED_STRENGTH                      = 29804; /* 2   short     Signal strength in db */
       public static final int WIFI_CONNECT_KEY                             = 29770; /* 64  String    Wi-fi network key to use */
       public static final int WIFI_CONNECT                                 = 29771; /* 1   byte      ??? */
       public static final int WIFI_NETWORK_PROCESSOR_POWER                 = 29773; /* 1   byte      ??? */
@@ -335,7 +352,7 @@ public class DeviSmart {
       public static final int MDG_PAIRING_0_ID                             = 29952; /* 33  byte[]    Peer ID for this pairing */
       public static final int MDG_PAIRING_0_DESCRIPTION                    = 29953; /* 33  String    DEVISmart app stores user name here */
       public static final int MDG_PAIRING_0_PAIRING_TIME                   = 29954; /* 6   ?         When the pairing was created */
-      public static final int MDG_PAIRING_0_PAIRING_TYPE                   = 29955; /* 1   byte      Application type. 6 for Android. Likely determines push notifications provider */
+      public static final int MDG_PAIRING_0_PAIRING_TYPE                   = 29955; /* 1   byte      Application type. See PairingType below */
       public static final int MDG_PAIRING_0_NOTIFICATION_TOKEN             = 30476; /* 255 String    Token for push notifications, ecosystem-specific */
       public static final int MDG_PAIRING_0_NOTIFICATION_SUBSCRIPTIONS     = 30477; /* 4   int       Enabled notifications, likely bit field. Not usable outside of mobile ecosystem. */
       public static final int MDG_PAIRING_1_ID                             = 29957; /*               These fields repeat for all 10 possible pairings */
@@ -404,7 +421,7 @@ public class DeviSmart {
       public static final int MDG_PAIRING_NOTIFICATION_TOKEN               = 30474; // 255
       public static final int MDG_PAIRING_NOTIFICATION_SUBSCRIPTIONS       = 30475; // 4
       public static final int MDG_PAIRING_DESCRIPTION                      = 30496; // 33
-      public static final int MDG_PAIRING_TYPE                             = 30497; // 1
+      public static final int MDG_PAIRING_TYPE                             = 30497; // 1   byte      Original app sends this upon connection with its type. Looks like update command.
       public static final int MDG_CONFIRM_SYSTEM_WIZARD_INFO               = 30498; // 7
       /* Class SOFTWAREUPDATE */
       public static final int SOFTWAREUPDATE_ERROR_CODE                    = 1011;
@@ -413,16 +430,16 @@ public class DeviSmart {
       public static final int SOFTWAREUPDATE_INSTALLATION_STATE            = 30595;
       public static final int SOFTWAREUPDATE_INSTALLATION_PROGRESS         = 30596;
       /* Class DOMINION_SYSTEM */
-      public static final int SYSTEM_RUNTIME_INFO_RELAY_COUNT              = 29232;
-      public static final int SYSTEM_RUNTIME_INFO_RELAY_ON_TIME            = 29233;
-      public static final int SYSTEM_RUNTIME_INFO_SYSTEM_RUNTIME           = 29234;
-      public static final int SYSTEM_RUNTIME_INFO_SYSTEM_RESETS            = 29235;
+      public static final int SYSTEM_RUNTIME_INFO_RELAY_COUNT              = 29232; // 4   int       Count of relay switches in lifetime
+      public static final int SYSTEM_RUNTIME_INFO_RELAY_ON_TIME            = 29233; // 4   int       Total relay on time in seconds
+      public static final int SYSTEM_RUNTIME_INFO_SYSTEM_RUNTIME           = 29234; // 4   int       Total run time of the device. Does not reset on power off.
+      public static final int SYSTEM_RUNTIME_INFO_SYSTEM_RESETS            = 29235; // 4   ?         Not used by the app, so difficult to understand.
       public static final int SYSTEM_TIME_ISVALID                          = 29236; // 1   boolean   Self-descriptive. Reads 1 = true on my device.
       public static final int SYSTEM_TIME                                  = 29237; // 6   DateTime  Current time
       public static final int SYSTEM_TIME_OFFSET                           = 29238; // 2   short     GMT offset in minutes
-      public static final int SYSTEM_WIZARD_INFO                           = 29239; // 7   ?         Technician setup data
+      public static final int SYSTEM_WIZARD_INFO                           = 29239; // 7   byte[]    Technician setup data, serialized as array. See WizardInfo below.
       public static final int SYSTEM_HEATING_INFO                          = 29240; // 1   boolean   Current relay state on / off
-      public static final int SYSTEM_ALARM_INFO                            = 29241; // 1   boolean   Error flag ???
+      public static final int SYSTEM_ALARM_INFO                            = 29241; // 1   byte      Error flags, see AlarmInfo
       public static final int SYSTEM_WINDOW_OPEN                           = 29242; // 1   boolean   Window open detection enable / disable
       public static final int SYSTEM_INFO_FLOOR_SENSOR_CONNECTED           = 29243; // 1   boolean   Floor sensor connection status
       public static final int SYSTEM_INFO_FORECAST_ENABLED                 = 29244; // 1   boolean   Forecast mode enable / disable
@@ -482,9 +499,9 @@ public class DeviSmart {
       public static final int SCHEDULER_WEEK_2                             = 29342; // 43
       /* Class DOMINION_LOGS */
       public static final int LOG_RESET                                    = 29376;
-      public static final int LOG_ENERGY_CONSUMPTION_TOTAL                 = 29377;
-      public static final int LOG_ENERGY_CONSUMPTION_30DAYS                = 29378;
-      public static final int LOG_ENERGY_CONSUMPTION_7DAYS                 = 29379;
+      public static final int LOG_ENERGY_CONSUMPTION_TOTAL                 = 29377; // 4   int      Time during which the heater was on in the lifetime; in seconds. The same as SYSTEM_RUNTIME_INFO_RELAY_ON_TIME.
+      public static final int LOG_ENERGY_CONSUMPTION_30DAYS                = 29378; // 4   int      Time during which the heater was on within last 30 days; in seconds
+      public static final int LOG_ENERGY_CONSUMPTION_7DAYS                 = 29379; // 4   int      Time during which the heater was on within last 7 days; in seconds
       public static final int LOG_LATEST_ACTIVITIES                        = 29380;
     };
  // @formatter:on
@@ -503,6 +520,20 @@ public class DeviSmart {
         public String toString() {
             return String.valueOf(Major) + "." + String.valueOf(Minor);
         }
+    };
+
+    // Some known values of pairing types, just for documentation
+    // and pure curiosity. Android DeviReg Smart app uses value of 6.
+    // Custom software is very unlikely to be able to use this because
+    // this requires interoperation with the Grid owner.
+    // Also app source code mentions "baidu" as GooglePlay alternative,
+    // but respective values are missing.
+    public static class PairingType {
+        public static final byte none = 0;
+        public static final byte tpaFieldTest = 2;
+        public static final byte tpaTest = 4;
+        public static final byte release_devi = 6;
+        public static final byte release_danfoss = 8;
     };
 
     public static class ControlState {
@@ -526,5 +557,53 @@ public class DeviSmart {
         public static final byte FROST_PROTECTION_OFF = 5;
         public static final byte TEMPORARY_HOME_ON = 6;
         public static final byte TEMPORARY_HOME_OFF = 7;
+    };
+
+    // AlarmInfo is a bit field, values can be ORed.
+    public static class AlarmInfo {
+        public static final byte DISCONNECTED = 1 << 0;
+        public static final byte SHORT_CIRCUITED = 1 << 1;
+        public static final byte OVERHEAT = 1 << 2;
+        public static final byte UNRECOVERABLE = 1 << 3;
+    };
+
+    public static class WizardInfo {
+        public byte sensorType;
+        public byte regulationType;
+        public byte flooringType;
+        public byte roomType;
+        public int outputPower;
+
+        // sensorType values
+        public static final byte SENSOR_AUBE_10K = 0;
+        public static final byte SENSOR_DEVI_15K = 1;
+        public static final byte SENSOR_EBERLE_33K = 2;
+        public static final byte SENSOR_ENSTO_47K = 3;
+        public static final byte SENSOR_FENIX_10K = 4;
+        public static final byte SENSOR_OJ_12K = 5;
+        public static final byte SENSOR_RAYCHEM_10K = 6;
+        public static final byte SENSOR_TEPLOLUX_6K8 = 7;
+        public static final byte SENSOR_WARMUP_12K = 8;
+
+        // regulationType values
+        public static final byte REGULATION_ROOM = 0;
+        public static final byte REGULATION_FLOOR = 1;
+        public static final byte REGULATION_ROOM_AND_FLOOR = 2;
+
+        // flooringType values
+        public static final byte FLOOR_TILES = 0;
+        public static final byte FLOOR_HARDWOOD = 1;
+        public static final byte FLOOR_LAMINATE = 2;
+        public static final byte FLOOR_CARPET = 3;
+
+        // roomType values
+        public static final byte ROOM_BATHROOM = 0;
+        public static final byte ROOM_KITCHEN = 1;
+        public static final byte ROOM_LIVINGROOM = 2;
+        public static final byte ROOM_BEDROOM = 3;
+
+        // Some special values for outputPower
+        public static final short POWER_SCALE = 255;
+        public static final int EXTERNAL_RELAY = 255 * POWER_SCALE;
     };
 }

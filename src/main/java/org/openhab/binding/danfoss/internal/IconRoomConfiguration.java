@@ -1,4 +1,4 @@
-package org.openhab.binding.devireg.internal;
+package org.openhab.binding.danfoss.internal;
 
 public class IconRoomConfiguration {
     public static final String ROOM_NUMBER = "roomNumber";
