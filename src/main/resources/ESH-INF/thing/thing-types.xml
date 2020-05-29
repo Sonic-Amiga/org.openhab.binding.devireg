@@ -26,6 +26,14 @@
 			<channel typeId="forecast" id="forecast" />
 			<channel typeId="screen_lock" id="screen_lock" />
 			<channel typeId="brightness" id="brightness" />
+            <channel typeId="heating_state" id="heating_state" />
+            <channel typeId="on_time_7_days" id="on_time_7_days" />
+            <channel typeId="on_time_30_days" id="on_time_30_days" />
+            <channel typeId="on_time_total" id="on_time_total" />
+			<channel typeId="sensor_disconnected" id="sensor_disconnected" />
+			<channel typeId="sensor_shorted" id="sensor_shorted" />
+			<channel typeId="overheat" id="overheat" />
+			<channel typeId="unrecoverable" id="unrecoverable" />
 		</channels>
 
 		<config-description>
@@ -205,12 +213,11 @@
     	<description>Thermostat display brightness</description>
     	<state min="10" max="100" />
     </channel-type>
-<<<<<<< HEAD
     <channel-type id="battery" advanced="true">
         <item-type>Number</item-type>
         <label>Battery level</label>
         <description>Wireless thermostat battery charge level</description>
-=======
+    </channel-type>
     <channel-type id="heating_state" advanced="true">
         <item-type>Switch</item-type>
         <label>Heating state</label>
@@ -233,7 +240,30 @@
         <item-type>Number:Time</item-type>
         <label>Total heater on time</label>
         <description>Heater on time during thermostat lifetime</description>
->>>>>>> 100f61a905748f9aa90dfe8eaeec4eefc000d02e
+        <state readOnly="true" />
+    </channel-type>
+    <channel-type id="sensor_disconnected" advanced="true">
+        <item-type>Switch</item-type>
+        <label>Sensor disconnected</label>
+        <description>Floor sensor disconnected</description>
+        <state readOnly="true" />
+    </channel-type>
+    <channel-type id="sensor_shorted" advanced="true">
+        <item-type>Switch</item-type>
+        <label>Sensor shorted</label>
+        <description>Floor sensor short-circuited</description>
+        <state readOnly="true" />
+    </channel-type>
+    <channel-type id="overheat" advanced="true">
+        <item-type>Switch</item-type>
+        <label>Overheat</label>
+        <description>Floor overheated</description>
+        <state readOnly="true" />
+    </channel-type>
+        <channel-type id="unrecoverable" advanced="true">
+        <item-type>Switch</item-type>
+        <label>Unrecoverable failure</label>
+        <description>Internal software or hardware fault</description>
         <state readOnly="true" />
     </channel-type>
 

@@ -58,6 +58,13 @@ public class DanfossBindingConstants {
     public static final String CHANNEL_ON_TIME_7_DAYS = "on_time_7_days";
     public static final String CHANNEL_ON_TIME_30_DAYS = "on_time_30_days";
     public static final String CHANNEL_ON_TIME_TOTAL = "on_time_7_total";
+    public static final String CHANNEL_DISCONNECTED = "sensor_disconnected";
+    public static final String CHANNEL_SHORTED = "sensor_shorted";
+    public static final String CHANNEL_OVERHEAT = "overheat";
+    public static final String CHANNEL_UNRECOVERABLE = "unrecoverable";
+
+    public static final String[] ALARM_CHANNELS = { CHANNEL_DISCONNECTED, CHANNEL_SHORTED, CHANNEL_OVERHEAT,
+            CHANNEL_UNRECOVERABLE };
 
     public static final String CONTROL_MODE_MANUAL = "MANUAL";
     public static final String CONTROL_MODE_OVERRIDE = "OVERRIDE";

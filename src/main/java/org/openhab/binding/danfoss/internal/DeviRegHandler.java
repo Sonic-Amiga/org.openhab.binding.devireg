@@ -140,6 +140,12 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
             case CHANNEL_ON_TIME_TOTAL:
                 connHandler.sendRefresh(DOMINION_SYSTEM, SYSTEM_RUNTIME_INFO_RELAY_ON_TIME, command);
                 break;
+            case CHANNEL_DISCONNECTED:
+            case CHANNEL_SHORTED:
+            case CHANNEL_OVERHEAT:
+            case CHANNEL_UNRECOVERABLE:
+                connHandler.sendRefresh(DOMINION_SYSTEM, SYSTEM_ALARM_INFO, command);
+                break;
         }
     }
 
@@ -384,6 +390,12 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
                 break;
             case SYSTEM_RUNTIME_INFO_RELAY_ON_TIME:
                 reportDuration(CHANNEL_ON_TIME_TOTAL, pkt.getInt());
+                break;
+            case SYSTEM_ALARM_INFO:
+                byte alarms = pkt.getByte();
+                for (int i = 0; i < ALARM_CHANNELS.length; i++) {
+                    reportSwitch(ALARM_CHANNELS[i], (alarms & (1 << i)) != 0);
+                }
                 break;
             case GLOBAL_HARDWAREREVISION:
                 updateProperty(Thing.PROPERTY_HARDWARE_VERSION, pkt.getVersion().toString());
