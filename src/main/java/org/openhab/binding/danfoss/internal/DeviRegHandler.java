@@ -66,7 +66,6 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
         super(thing);
     }
 
-    @SuppressWarnings("null")
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
         String ch = channelUID.getId();
@@ -262,7 +261,6 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
         }
     }
 
-    @SuppressWarnings("null")
     @Override
     public void initialize() {
         DeviRegConfiguration config = getConfigAs(DeviRegConfiguration.class);

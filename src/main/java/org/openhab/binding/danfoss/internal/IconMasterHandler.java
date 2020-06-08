@@ -141,7 +141,7 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
 
     private void reportTemperature(String ch, double temp) {
         logger.trace("Received {} = {}", ch, temp);
-        updateState(ch, new QuantityType<Temperature>(new DecimalType(temp), SIUnits.CELSIUS));
+        updateState(ch, new QuantityType<@NonNull Temperature>(new DecimalType(temp), SIUnits.CELSIUS));
     }
 
     private void reportFirmware() {

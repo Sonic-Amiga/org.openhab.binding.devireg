@@ -58,7 +58,8 @@ public class DanfossBindingConfig {
         userName = newConfig.userName;
     }
 
-    public static void update(@NonNull Map<String, Object> config, ConfigurationAdmin admin) {
+    public static void update(@NonNull Map<@NonNull String, @NonNull Object> config, ConfigurationAdmin admin) {
+        @SuppressWarnings("null")
         DanfossBindingConfig newConfig = new Configuration(config).as(DanfossBindingConfig.class);
 
         // Kludge for OpenHAB 2.4. Early development versions of this binding didn't have
