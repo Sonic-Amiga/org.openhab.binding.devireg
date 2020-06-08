@@ -5,12 +5,14 @@ import static org.opensdg.protocol.Icon.MsgClass.*;
 import static org.opensdg.protocol.Icon.MsgCode.*;
 
 import java.text.DateFormat;
+import java.util.Hashtable;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.config.discovery.DiscoveryService;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.library.unit.SIUnits;
@@ -22,7 +24,10 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
+import org.openhab.binding.danfoss.discovery.IconRoomDiscoveryService;
 import org.opensdg.protocol.Dominion;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,13 +35,19 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
 
     private final Logger logger = LoggerFactory.getLogger(IconMasterHandler.class);
     private PeerConnectionHandler connHandler = new PeerConnectionHandler(this);
+    private IconRoomDiscoveryService discoveryService;
+    private ServiceRegistration<?> discoveryReg;
     private Dominion.@Nullable Version firmwareVer;
     private int firmwareBuild = -1;
 
     private IconRoomHandler[] rooms = new IconRoomHandler[ICON_MAX_ROOMS];
 
-    public IconMasterHandler(Bridge bridge) {
+    public IconMasterHandler(Bridge bridge, BundleContext bundleContext) {
         super(bridge);
+        discoveryService = new IconRoomDiscoveryService(this);
+        discoveryService.activate();
+        discoveryReg = bundleContext.registerService(DiscoveryService.class.getName(), discoveryService,
+                new Hashtable<>());
     }
 
     @Override
@@ -64,6 +75,13 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
 
     @Override
     public void dispose() {
+        if (discoveryReg != null) {
+            discoveryReg.unregister();
+            if (discoveryService != null) {
+                discoveryService.deactivate();
+                discoveryService = null;
+            }
+        }
         connHandler.dispose();
     }
 
@@ -86,6 +104,8 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
 
             if (room != null) {
                 room.handlePacket(pkt);
+            } else {
+                discoveryService.handlePacket(pkt);
             }
         } else {
             switch (pkt.getMsgCode()) {
@@ -142,6 +162,13 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
         connHandler.SendPacket(new Dominion.Packet(ALL_ROOMS, VACATION_SETPOINT));
     }
 
+    public void scanRooms() {
+        // Request names for all the rooms
+        for (int msgClass = ROOM_FIRST; msgClass <= ROOM_LAST; msgClass++) {
+            connHandler.SendPacket(new Dominion.Packet(msgClass, ROOMNAME));
+        }
+    }
+
     @Override
     public void childHandlerInitialized(ThingHandler handler, Thing thing) {
         super.childHandlerInitialized(handler, thing);
@@ -172,5 +199,9 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
         }
 
         super.childHandlerDisposed(handler, thing);
+    }
+
+    public byte[] getPeerId() {
+        return connHandler.getPeerId();
     }
 }

@@ -104,7 +104,7 @@ public class DanfossHandlerFactory extends BaseThingHandlerFactory {
         if (THING_TYPE_DEVIREG_SMART.equals(thingTypeUID)) {
             return new DeviRegHandler(thing);
         } else if (THING_TYPE_ICON_WIFI.equals(thingTypeUID)) {
-            return new IconMasterHandler((Bridge) thing);
+            return new IconMasterHandler((Bridge) thing, bundleContext);
         } else if (THING_TYPE_ICON_ROOM.equals(thingTypeUID)) {
             return new IconRoomHandler(thing);
         }
