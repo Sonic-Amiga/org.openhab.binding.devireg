@@ -200,8 +200,4 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
 
         super.childHandlerDisposed(handler, thing);
     }
-
-    public byte[] getPeerId() {
-        return connHandler.getPeerId();
-    }
 }

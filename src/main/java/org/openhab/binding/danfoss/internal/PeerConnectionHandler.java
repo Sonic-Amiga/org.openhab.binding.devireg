@@ -194,8 +194,4 @@ public class PeerConnectionHandler {
             SendPacket(new Dominion.Packet(msgClass, msgCode));
         }
     }
-
-    public byte[] getPeerId() {
-        return peerId;
-    }
 }
