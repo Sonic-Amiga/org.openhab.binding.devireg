@@ -210,37 +210,36 @@ public class Icon {
         public static final int RAIL_CHECKININTERVALMIN                        = 800;
         public static final int RAIL_CHECKININTERVALMAX                        = 801;
         public static final int RAIL_CHECKINTEMPERATURECHANGE                  = 802;
-        public static final int RAIL_ERRORCODE = 1008;
-        public static final int RAIL_SOURCEADAPTION = 4099;
-        public static final int RAIL_INPUTAWAY = 4101;
-        public static final int RAIL_INPUTHEATORCOOL = 4102;
-        public static final int RAIL_INPUTDEWPOINT = 4103;
-        public static final int RAIL_HEATINGCOOLINGCONFIGURATION = 4213;
-        public static final int RAIL_REFERENCEROOM = 4215;
-        public static final int RAIL_REFERENCE_TEMPERATURE = 4216;
-        public static final int RAIL_MODE = 4352;
-        public static final int RAIL_APP_NUMBER = 4353;
-        public static final int RAIL_DISABLEDAYLIGHTSAVINGSTIME = 5927;
-        public static final int RAIL_DEGRADEDOUTPUT = 28691;
-        public static final int RAIL_DEGRADEDTIME = 28695;
-        public static final int RAIL_DEGRADEDFINALOUTPUT = 28696;
-        public static final int RAIL_LOCALOUTPUTACTIVE = 28724;
-        public static final int RAIL_PUMPMODE = 28725;
-        public static final int RAIL_PUMPSTARTDELAY = 28726;
-        public static final int RAIL_PUMPSTOPDELAY = 28727;
-        public static final int RAIL_GLOBALOUTPUTACTIVE = 28728;
-        public static final int RAIL_BOILERMODE = 28730;
-        public static final int RAIL_BOILERSTARTDELAY = 28731;
-        public static final int RAIL_BOILERSTOPDELAY = 28732;
-        public static final int RAIL_OUTPUTSALARMSTATUS = 28735;
-        public static final int RAIL_OUTPUTSAVAILABLE = 28736;
-        public static final int RAIL_OUTPUTSINUSE = 28737;
-        public static final int RAIL_OUTPUTLEDINDICATION = 28739;
-        public static final int RAIL_OUTPUTLEDINDICATIONTIME = 28740;
+        public static final int RAIL_ERRORCODE                                 = 1008;  // 2   short     Master controller error, see below
+        public static final int RAIL_INPUTAWAY                                 = 4101;
+        public static final int RAIL_INPUTHEATORCOOL                           = 4102;
+        public static final int RAIL_INPUTDEWPOINT                             = 4103;
+        public static final int RAIL_HEATINGCOOLINGCONFIGURATION               = 4213;
+        public static final int RAIL_REFERENCEROOM                             = 4215;
+        public static final int RAIL_REFERENCE_TEMPERATURE                     = 4216;
+        public static final int RAIL_MODE                                      = 4352;
+        public static final int RAIL_APP_NUMBER                                = 4353;
+        public static final int RAIL_DISABLEDAYLIGHTSAVINGSTIME                = 5927;
+        public static final int RAIL_DEGRADEDOUTPUT                            = 28691;
+        public static final int RAIL_DEGRADEDTIME                              = 28695;
+        public static final int RAIL_DEGRADEDFINALOUTPUT                       = 28696;
+        public static final int RAIL_LOCALOUTPUTACTIVE                         = 28724;
+        public static final int RAIL_PUMPMODE                                  = 28725;
+        public static final int RAIL_PUMPSTARTDELAY                            = 28726;
+        public static final int RAIL_PUMPSTOPDELAY                             = 28727;
+        public static final int RAIL_GLOBALOUTPUTACTIVE                        = 28728;
+        public static final int RAIL_BOILERMODE                                = 28730;
+        public static final int RAIL_BOILERSTARTDELAY                          = 28731;
+        public static final int RAIL_BOILERSTOPDELAY                           = 28732;
+        public static final int RAIL_OUTPUTSALARMSTATUS                        = 28735;
+        public static final int RAIL_OUTPUTSAVAILABLE                          = 28736;
+        public static final int RAIL_OUTPUTSINUSE                              = 28737;
+        public static final int RAIL_OUTPUTLEDINDICATION                       = 28739;
+        public static final int RAIL_OUTPUTLEDINDICATIONTIME                   = 28740;
         public static final int RAIL_INPUTINUSE                                = 28741;
         // Class OUTPUT
         public static final int OUTPUT_REGULATIONFLOORDUTYCYCLE                = 780;
-        public static final int OUTPUT_ERRORCODE                               = 1008;
+        public static final int OUTPUT_ERRORCODE                               = 1008;  // 2    short     Actuator error, see below
         public static final int OUTPUT_USEDBYROOM                              = 4104;
         public static final int OUTPUT_STATE_AUTO                              = 4608;
         public static final int OUTPUT_STATE_MANUAL                            = 4609;
@@ -256,7 +255,7 @@ public class Icon {
         public static final int ROOM_WAKEUPINTERVAL                            = 801;   // 2   short
         public static final int ROOM_CHECKINTEMPERATURECHANGE                  = 802;   // 2   short
         public static final int ROOM_DISPLAYEDTEMPERATURE                      = 809;   // 2   short
-        public static final int ROOM_ERRORCODE                                 = 1008;  // 2   short     Values are unknown. Unconnected rooms report 0 = OK
+        public static final int ROOM_ERRORCODE                                 = 1008;  // 2   short     See below.
         public static final int ROOM_SETPOINTMINIMUM                           = 1287;
         public static final int ROOM_SETPOINTMAXIMUM                           = 1288;
         public static final int ROOM_SETPOINTATHOME                            = 1289;
@@ -273,7 +272,7 @@ public class Icon {
         public static final int ROOM_SCHEDULEFRIDAY                            = 4112;
         public static final int ROOM_SCHEDULESATURDAY                          = 4113;
         public static final int ROOM_SCHEDULESUNDAY                            = 4114;
-        public static final int ROOM_HEATINGCOOLINGSTATE                       = 4115;
+        public static final int ROOM_HEATINGCOOLINGSTATE                       = 4115;  // 1   byte
         public static final int SETPOINTATHOMECOPY                             = 4117;  // 2
         public static final int SETPOINTAWAYCOPY                               = 4118;  // 2
         public static final int SETPOINTASLEEPCOPY                             = 4119;  // 2
@@ -291,39 +290,39 @@ public class Icon {
         public static final int ROOM_ROOMSENSORTAMPERPROOF                     = 28928; // 1   boolean ?
         public static final int ROOMNAME                                       = 29250; // 33  String    Room name
         // Class REPEATER
-        public static final int REPEATER_ERRORCODE                             = 1008;
+        public static final int REPEATER_ERRORCODE                             = 1008;  // 2   short     See below
         // Class INTERNAL
         public static final int RAIL_INPUTPT1000                               = 4100;
         public static final int INTERNAL_PRODUCTCONFIGURATION                  = 4186;
-        public static final int INTERNAL_TOUCH_STATE_AUTO = 4187;
-        public static final int INTERNAL_TOUCH_STATE_MANUAL = 4188;
-        public static final int INTERNAL_LED_STATE_AUTO = 4189;
-        public static final int INTERNAL_LED_STATE_MANUAL = 4190;
-        public static final int INTERNAL_BSP_TEST_CASE_SELECT = 4194;
-        public static final int INTERNAL_BSP_TEST_CASE_STATUS = 4195;
-        public static final int INTERNAL_BSP_TEST_CASE_CONTROL = 4196;
-        public static final int INTERNAL_RESET_LEVEL = 4197;
-        public static final int INTERNAL_WATCHDOG_RESET_COUNTER = 4198;
-        public static final int INTERNAL_SW_RESET_COUNTER = 4199;
-        public static final int INTERNAL_ZWAVEMODULEDETECTED = 4217;
-        public static final int INTERNAL_INPUT_1 = 4354;
-        public static final int INTERNAL_INPUT_2 = 4355;
-        public static final int INTERNAL_SENSOR_PT1000_RAW = 4356;
-        public static final int INTERNAL_PWR1_AUTO = 4357;
-        public static final int INTERNAL_PWR1_MANUAL = 4358;
-        public static final int INTERNAL_RELAY_AUTO = 4359;
-        public static final int INTERNAL_RELAY_MANUAL = 4360;
+        public static final int INTERNAL_TOUCH_STATE_AUTO                      = 4187;
+        public static final int INTERNAL_TOUCH_STATE_MANUAL                    = 4188;
+        public static final int INTERNAL_LED_STATE_AUTO                        = 4189;
+        public static final int INTERNAL_LED_STATE_MANUAL                      = 4190;
+        public static final int INTERNAL_BSP_TEST_CASE_SELECT                  = 4194;
+        public static final int INTERNAL_BSP_TEST_CASE_STATUS                  = 4195;
+        public static final int INTERNAL_BSP_TEST_CASE_CONTROL                 = 4196;
+        public static final int INTERNAL_RESET_LEVEL                           = 4197;
+        public static final int INTERNAL_WATCHDOG_RESET_COUNTER                = 4198;
+        public static final int INTERNAL_SW_RESET_COUNTER                      = 4199;
+        public static final int INTERNAL_ZWAVEMODULEDETECTED                   = 4217;
+        public static final int INTERNAL_INPUT_1                               = 4354;
+        public static final int INTERNAL_INPUT_2                               = 4355;
+        public static final int INTERNAL_SENSOR_PT1000_RAW                     = 4356;
+        public static final int INTERNAL_PWR1_AUTO                             = 4357;
+        public static final int INTERNAL_PWR1_MANUAL                           = 4358;
+        public static final int INTERNAL_RELAY_AUTO                            = 4359;
+        public static final int INTERNAL_RELAY_MANUAL                          = 4360;
         public static final int INTERNAL_APP_TEST_ID                           = 4361;
-        public static final int INTERNAL_APP_TEST_CONTROL = 4362;
-        public static final int INTERNAL_APP_TEST_STATUS = 4363;
-        public static final int INTERNAL_ALARM_NUMBER = 4364;
-        public static final int INTERNAL_ALARM_TYPE = 4365;
-        public static final int INTERNAL_ALARM_DATA = 4366;
-        public static final int INTERNAL_MIXINGSHUNT_DUTY_AUTO = 4367;
-        public static final int INTERNAL_MIXINGSHUNT_DUTY_MANUAL = 4368;
-        public static final int INTERNAL_MIXINGSHUNT_OPENING_AUTO = 4369;
-        public static final int INTERNAL_MIXINGSHUNT_OPENING_MANUAL = 4370;
-        public static final int INTERNAL_MIXINGSHUNTTWACURRENT = 4371;
+        public static final int INTERNAL_APP_TEST_CONTROL                      = 4362;
+        public static final int INTERNAL_APP_TEST_STATUS                       = 4363;
+        public static final int INTERNAL_ALARM_NUMBER                          = 4364;
+        public static final int INTERNAL_ALARM_TYPE                            = 4365;
+        public static final int INTERNAL_ALARM_DATA                            = 4366;
+        public static final int INTERNAL_MIXINGSHUNT_DUTY_AUTO                 = 4367;
+        public static final int INTERNAL_MIXINGSHUNT_DUTY_MANUAL               = 4368;
+        public static final int INTERNAL_MIXINGSHUNT_OPENING_AUTO              = 4369;
+        public static final int INTERNAL_MIXINGSHUNT_OPENING_MANUAL            = 4370;
+        public static final int INTERNAL_MIXINGSHUNTTWACURRENT                 = 4371;
         public static final int INTERNAL_MIXINGSHUNTTWARESISTORMINIMUM         = 4372;
         public static final int HECTARCH_SERVER_ADDRESS                        = 28743; // 1   byte      Reads 0. Strange.
         public static final int HECTARCH_SECURITY_KEY                          = 28744; // 17  byte[]    Well, some key, 16 bytes. What is hectarch ???
@@ -367,5 +366,34 @@ public class Icon {
         public static final byte Manual = 0;
         public static final byte Auto = 1;
         public static final byte Schedule = 20;
+    }
+
+    // ROOM_ERRORCODE values
+    public static class RoomError {
+        public static final short OK = 0x0000; // Unconnected rooms also report this
+        public static final short COMM_LOST = 0x0101;
+    }
+
+    // OUTPUT_ERRORCODE values
+    public static class OutputError {
+        public static final short OK = 0x0000;
+        public static final short ACTUATOR_DEFECTIVE = 0x0101;
+        public static final short ACTUATOR_DEFECTIVE2 = 0x0102;
+    }
+
+    // RAIL_ERRORCODE values
+    public static class RailError {
+        public static final short OK = 0x0000;
+        public static final short RADIO_COMM_LOST = 0x0401;
+        public static final short SLAVE_COMM_LOST = 0x1001;
+        public static final short SLAVE_COMM_LOST2 = 0x1101;
+        public static final short CM_COMM_LOST = 0x0801;
+        public static final short EXPANSION_COMM_LOST = 0x0201;
+    }
+
+    // REPEATER_ERRORCODE values
+    public static class RepeaterError {
+        public static final short OK = 0x0000;
+        public static final short COMM_LOST = 0x0101;
     }
 }
