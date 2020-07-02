@@ -62,6 +62,7 @@ public class DanfossBindingConstants {
     public static final String CHANNEL_SHORTED = "sensor_shorted";
     public static final String CHANNEL_OVERHEAT = "overheat";
     public static final String CHANNEL_UNRECOVERABLE = "unrecoverable";
+    public static final String CHANNEL_MANUAL_MODE = "manual_mode";
 
     public static final String[] ALARM_CHANNELS = { CHANNEL_DISCONNECTED, CHANNEL_SHORTED, CHANNEL_OVERHEAT,
             CHANNEL_UNRECOVERABLE };

@@ -106,7 +106,8 @@ Channels, supported by Icon Room:
 | setpoint_asleep           | Temperature | Set point for "Asleep" period                         | N |
 | setpoint_min_floor        | Temperature | Minimum floor temperature                             | N |
 | setpoint_max_floor        | Temperature | Maximum allowed floor temperature                     | N |
-| control_state             | String      | Current control state: HOME, AWAY, ASLEEP FATAL       | Y |
+| manual_mode               | Switch      | Manual mode on/off                                    | N |
+| control_state             | String      | Current control state: HOME, AWAY, ASLEEP, FATAL      | Y |
 | battery                   | Number      | Battery charge percentage for wireless thermostats    | Y |
 
 NOTES:

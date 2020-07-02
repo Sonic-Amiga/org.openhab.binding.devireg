@@ -8,6 +8,7 @@ import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.library.unit.SIUnits;
@@ -18,6 +19,7 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.opensdg.protocol.Dominion;
+import org.opensdg.protocol.Icon.RoomControl;
 import org.opensdg.protocol.Icon.RoomMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +70,14 @@ public class IconRoomHandler extends BaseThingHandler {
             case CHANNEL_SETPOINT_MAX_FLOOR:
                 setTemperature(ROOM_FLOORTEMPERATUREMAXIMUM, command);
                 break;
+            case CHANNEL_MANUAL_MODE:
+                if (command instanceof OnOffType) {
+                    connHandler.SendPacket(new Dominion.Packet(ROOM_FIRST + roomNumber, ROOM_ROOMCONTROL,
+                            command.equals(OnOffType.ON) ? RoomControl.Manual : RoomControl.Auto));
+                } else {
+                    connHandler.sendRefresh(ROOM_FIRST + roomNumber, ROOM_ROOMCONTROL, command);
+                }
+                break;
             // Read-only channels may send refreshType command
             case CHANNEL_TEMPERATURE_FLOOR:
                 sendRefresh(ROOM_FLOORTEMPERATURE, command);
@@ -76,6 +86,7 @@ public class IconRoomHandler extends BaseThingHandler {
                 sendRefresh(ROOM_ROOMTEMPERATURE, command);
                 break;
         }
+
     }
 
     public void setTemperature(int msgCode, Command command) {
@@ -135,6 +146,9 @@ public class IconRoomHandler extends BaseThingHandler {
             case ROOM_ROOMMODE:
                 reportControlState(pkt.getByte());
                 break;
+            case ROOM_ROOMCONTROL:
+                reportSwitch(CHANNEL_MANUAL_MODE, pkt.getByte() == RoomControl.Manual);
+                break;
             case ROOMNAME:
                 updateProperty("roomName", pkt.getString());
                 break;
@@ -150,6 +164,11 @@ public class IconRoomHandler extends BaseThingHandler {
     private void reportDecimal(String ch, long value) {
         logger.trace("Received {} = {}", ch, value);
         updateState(ch, new DecimalType(value));
+    }
+
+    private void reportSwitch(String ch, boolean on) {
+        logger.trace("Received {} = {}", ch, on);
+        updateState(ch, OnOffType.from(on));
     }
 
     private void reportControlState(byte info) {

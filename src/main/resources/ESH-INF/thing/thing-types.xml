@@ -74,6 +74,7 @@
             <channel typeId="setpoint_asleep" id="setpoint_asleep"></channel>
             <channel typeId="setpoint_min_floor" id="setpoint_min_floor"></channel>
             <channel typeId="setpoint_max_floor" id="setpoint_max_floor"></channel>
+            <channel typeId="manual_mode" id="manual_mode"></channel>
         </channels>
         <config-description>
             <parameter name="roomNumber" type="integer" required="true" min="0" max="44">
@@ -260,11 +261,16 @@
         <description>Floor overheated</description>
         <state readOnly="true" />
     </channel-type>
-        <channel-type id="unrecoverable" advanced="true">
+    <channel-type id="unrecoverable" advanced="true">
         <item-type>Switch</item-type>
         <label>Unrecoverable failure</label>
         <description>Internal software or hardware fault</description>
         <state readOnly="true" />
+    </channel-type>
+    <channel-type id="manual_mode">
+        <item-type>Switch</item-type>
+        <label>Manual mode</label>
+        <description>Disable schedule</description>
     </channel-type>
 
 </thing:thing-descriptions>
