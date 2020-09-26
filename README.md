@@ -14,6 +14,9 @@ operate.
 - Danfoss Icon controller (https://icon.danfoss.com/)
 - Danfors Icon room
 
+Note that Danfoss Icon support is currently incomplete and in beta state. It was done entirely with user's
+support; i, the developer, don't have Icon hardware on my disposal.
+
 ## Installation and supported architectures
 
 This binding relies on OpenSDG library (https://github.com/Sonic-Amiga/opensdg/releases) for communicating with the hardware.
@@ -87,6 +90,19 @@ Channels, supported by DeviReg Smart(tm) thermostat:
 | setpoint_warning          | Temperature | Temperature below which an alarm notification is sent to your phone  | N |
 | control_mode              | String      | Chosen control mode: MANUAL, OVERRIDE, SCHEDULE, VACATION, PAUSE, OFF| N |
 | control_state             | String      | Current control state: CONFIGURING, MANUAL, HOME, AWAY, VACATION, FATAL, PAUSE, OFF, OVERRIDE | Y |
+| window_detection          | Switch      | Enable or disable open window detection               | N |
+| window_open               | Switch      | Whether an open window is detected in the room        | Y |
+| forecast                  | Switch      | Attempt to forecast heating and provide desired temperature at desired time | N |
+| screen_lock               | Switch      | Thermostat sensor controls lock                       | N |
+| brightness                | Number      | Thermostat screen brightness, from 10 to 100          | Y |
+| heating_state             | Switch      | Current heater state, on / off                        | Y |
+| on_time_7_days            | Time        | Summary heater on time for the last 7 days            | Y |
+| on_time_30_days           | Time        | Summary heater on time for the last 14 days           | Y |
+| on_time_total             | Time        | Total heater on time                                  | Y |
+| sensor_disconnected       | Switch      | Temperature sensor fault flag: disconnected           | Y |
+| sensor_shorted            | Switch      | Temperature sensor fault flag: short circuit          | Y |
+| overheat                  | Switch      | Thermostat fault flag: floor overheated               | Y |
+| unrecoverable             | Switch      | Internal thermostat fault flag                        | Y |
 
 Channels, supported by Icon Master:
 

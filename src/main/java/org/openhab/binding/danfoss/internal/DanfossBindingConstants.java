@@ -57,7 +57,7 @@ public class DanfossBindingConstants {
     public static final String CHANNEL_HEATING_STATE = "heating_state";
     public static final String CHANNEL_ON_TIME_7_DAYS = "on_time_7_days";
     public static final String CHANNEL_ON_TIME_30_DAYS = "on_time_30_days";
-    public static final String CHANNEL_ON_TIME_TOTAL = "on_time_7_total";
+    public static final String CHANNEL_ON_TIME_TOTAL = "on_time_total";
     public static final String CHANNEL_DISCONNECTED = "sensor_disconnected";
     public static final String CHANNEL_SHORTED = "sensor_shorted";
     public static final String CHANNEL_OVERHEAT = "overheat";
