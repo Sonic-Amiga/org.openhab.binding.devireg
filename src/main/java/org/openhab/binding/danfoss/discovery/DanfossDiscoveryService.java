@@ -67,6 +67,8 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
     }
 
     public Response receiveConfig(String otp) {
+        logger.trace("Pairing with OTP: {}", otp);
+
         String userName = DanfossBindingConfig.get().userName;
         OSDGConnection grid;
 
