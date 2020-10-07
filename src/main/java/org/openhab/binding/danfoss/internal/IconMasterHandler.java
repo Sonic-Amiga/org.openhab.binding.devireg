@@ -178,10 +178,10 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
             int roomId = room.getNumber();
 
             if (rooms[roomId] != null) {
-                logger.error("Room number " + roomId + " is already in use");
+                logger.error("Room number {} is already in use", roomId);
                 room.setConfigError("Room number is already in use");
             } else {
-                logger.trace("Room " + roomId + " initialized");
+                logger.trace("Room {} initialized", roomId);
                 room.setConnectionHandler(connHandler);
                 rooms[roomId] = room;
             }
@@ -194,7 +194,7 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
             IconRoomHandler room = (IconRoomHandler) handler;
             int roomId = room.getNumber();
 
-            logger.trace("Room " + roomId + " disposed");
+            logger.trace("Room {} disposed", roomId);
             rooms[roomId] = null;
         }
 

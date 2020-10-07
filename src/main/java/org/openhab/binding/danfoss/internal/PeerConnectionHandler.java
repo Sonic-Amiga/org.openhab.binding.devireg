@@ -119,7 +119,7 @@ public class PeerConnectionHandler {
             try {
                 DanfossGridConnection grid = DanfossGridConnection.get();
 
-                logger.info("Connecting to peer " + DatatypeConverter.printHexBinary(peerId));
+                logger.info("Connecting to peer {}", DatatypeConverter.printHexBinary(peerId));
                 connection.ConnectToRemote(grid, peerId, Dominion.ProtocolName);
             } catch (Exception e) {
                 setOfflineStatus(e.getMessage());
@@ -136,7 +136,7 @@ public class PeerConnectionHandler {
     }
 
     public void setOfflineStatus(String reason) {
-        logger.error("Device went offline: " + reason);
+        logger.error("Device went offline: {}", reason);
 
         if (connection != null) {
             thingHandler.reportStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, reason);

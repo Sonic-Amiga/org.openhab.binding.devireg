@@ -47,7 +47,7 @@ public class DanfossDiscoveryServlet extends HttpServlet {
         }
 
         String filePath = req.getRequestURI().substring(RESOURCE_URL.length());
-        logger.trace("GET " + filePath);
+        logger.trace("GET {}", filePath);
 
         if (filePath.isEmpty()) {
             resp.sendRedirect(RESOURCE_URL + "/");

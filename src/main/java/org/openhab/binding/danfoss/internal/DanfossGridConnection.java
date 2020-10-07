@@ -15,7 +15,7 @@ public class DanfossGridConnection extends OSDGConnection {
     private String privateKey;
 
     static {
-        logger.info("Using libopensdg " + OpenSDG.GetVersion());
+        logger.info("Using libopensdg {}", OpenSDG.GetVersion());
     }
 
     public synchronized static DanfossGridConnection get() throws Exception {

@@ -36,7 +36,7 @@ public class DanfossBindingConfig {
             newPrivkey = OpenSDG.CreatePrivateKey();
             newKey = DatatypeConverter.printHexBinary(newPrivkey);
 
-            logger.debug("Created new private key: " + newKey);
+            logger.debug("Created new private key: {}", newKey);
         } else if (newKey.equals(privateKey)) {
             return;
         } else {
@@ -46,11 +46,11 @@ public class DanfossBindingConfig {
             newPrivkey = SDGUtils.ParseKey(newKey);
 
             if (newPrivkey == null) {
-                logger.warn("Invalid private key configured: " + newKey + "; reverting back to old one");
+                logger.warn("Invalid private key configured: {}; reverting back to old one", newKey);
                 return;
             }
 
-            logger.debug("Got private key from configuration: " + newKey);
+            logger.debug("Got private key from configuration: {}", newKey);
         }
 
         privateKey = newKey;
@@ -89,7 +89,7 @@ public class DanfossBindingConfig {
         try {
             confAdmin.getConfiguration("binding." + DanfossBindingConstants.BINDING_ID, null).update(data);
         } catch (IOException e) {
-            logger.error("Failed to update binding config: " + e.getLocalizedMessage());
+            logger.error("Failed to update binding config: {}", e.getLocalizedMessage());
         }
     }
 }

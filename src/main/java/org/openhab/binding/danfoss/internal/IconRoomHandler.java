@@ -107,7 +107,7 @@ public class IconRoomHandler extends BaseThingHandler {
 
         roomNumber = config.roomNumber;
 
-        logger.trace("Initializing room " + roomNumber);
+        logger.trace("Initializing room {}", roomNumber);
         isOnline = false;
         updateStatus(ThingStatus.UNKNOWN);
     }

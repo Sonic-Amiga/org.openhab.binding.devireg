@@ -191,7 +191,7 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
         String houseName = parsedConfig.getString("houseName");
         int thingCount = 0;
 
-        logger.debug("Received house: " + houseName);
+        logger.debug("Received house: {}", houseName);
 
         if (parsedConfig.has("rooms")) {
             JSONArray rooms = parsedConfig.getJSONArray("rooms");
@@ -202,7 +202,7 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
                 String roomName = room.getString("roomName");
                 String peerId = room.getString("peerId");
 
-                logger.debug("Received DeviSmart thing: " + peerId + " " + roomName);
+                logger.debug("Received DeviSmart thing: {} {}", peerId, roomName);
 
                 addThing(DanfossBindingConstants.THING_TYPE_DEVIREG_SMART, peerId,
                         "DeviReg Smart (" + houseName + " / " + roomName + ")");
