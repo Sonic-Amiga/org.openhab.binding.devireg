@@ -8,7 +8,7 @@ import java.util.Map;
 import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.config.core.Configuration;
+import org.openhab.core.config.core.Configuration;
 import org.opensdg.OpenSDG;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;

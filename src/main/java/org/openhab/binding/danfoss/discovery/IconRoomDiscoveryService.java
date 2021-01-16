@@ -7,13 +7,13 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.danfoss.internal.DanfossBindingConstants;
 import org.openhab.binding.danfoss.internal.IconMasterHandler;
 import org.openhab.binding.danfoss.internal.IconRoomConfiguration;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.thing.ThingUID;
 import org.opensdg.protocol.Dominion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

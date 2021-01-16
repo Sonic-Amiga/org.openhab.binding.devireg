@@ -3,8 +3,8 @@ package org.openhab.binding.danfoss.internal;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 import org.opensdg.protocol.Dominion;
 
 public interface ISDGPeerHandler {

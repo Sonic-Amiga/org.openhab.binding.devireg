@@ -9,33 +9,38 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.eclipse.smarthome.io.rest.JSONResponse;
-import org.eclipse.smarthome.io.rest.RESTResource;
 import org.openhab.binding.danfoss.internal.DanfossBindingConstants;
+import org.openhab.core.io.rest.JSONResponse;
+import org.openhab.core.io.rest.RESTConstants;
+import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Component(service = RESTResource.class)
+@JaxrsResource
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @Path("/" + DanfossBindingConstants.BINDING_ID)
-@Api(value = DanfossBindingConstants.BINDING_ID)
+@Tag(name = DanfossBindingConstants.BINDING_ID)
 @Produces(MediaType.APPLICATION_JSON)
 public class DanfossDiscoveryApi implements RESTResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/receive/{otp: [0-9]+}")
-    @ApiOperation(value = "Receive Danfoss configuration")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 400, message = "Invalid OTP supplied"),
-            @ApiResponse(code = 404, message = "Connection refused, likely wrong OTP"),
-            @ApiResponse(code = 500, message = "Communication error"),
-            @ApiResponse(code = 503, message = "Discovery service shut down") })
-    public Response receiveConfig(@PathParam("otp") @ApiParam(value = "One-time password") String otp) {
+    @Operation(summary = "Receive Danfoss configuration", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "Invalid OTP supplied"),
+            @ApiResponse(responseCode = "404", description = "Connection refused, likely wrong OTP"),
+            @ApiResponse(responseCode = "500", description = "Communication error"),
+            @ApiResponse(responseCode = "503", description = "Discovery service shut down") })
+    public Response receiveConfig(@PathParam("otp") @Parameter(description = "One-time password") String otp) {
         DanfossDiscoveryService discovery = DanfossDiscoveryService.get();
 
         if (discovery != null) {
