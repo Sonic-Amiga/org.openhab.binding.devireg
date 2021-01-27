@@ -20,7 +20,7 @@ function deviRegFormController($scope, $http) {
         })
             .then(function onSuccess(response) {
                 // Handle success
-                $scope.result_success = 'Successfully received ' + response.data.thingCount + ' things. Please check your <a href="/paperui/#/inbox" class="alert-link">Inbox</a>';
+                $scope.result_success = 'Successfully received ' + response.data.thingCount + ' things. Please check your <a href="/#!/settings/things/inbox" class="alert-link">Inbox</a>';
 				$scope.result_error = '';
                 $scope.processing = false;
             })
