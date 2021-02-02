@@ -46,7 +46,16 @@ public class DanfossDiscoveryServlet extends HttpServlet {
             return;
         }
 
-        String filePath = req.getRequestURI().substring(RESOURCE_URL.length());
+        String uri = req.getRequestURI();
+
+        if (uri == null) {
+            // This doesn't make any sense but Eclipse simply forced me to write this
+            logger.debug("GET: null URI");
+            resp.sendRedirect(RESOURCE_URL + "/");
+            return;
+        }
+
+        String filePath = uri.substring(RESOURCE_URL.length());
         logger.trace("GET {}", filePath);
 
         if (filePath.isEmpty()) {
