@@ -1,15 +1,16 @@
 package org.openhab.binding.danfoss.internal;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import javax.xml.bind.DatatypeConverter;
 
-import org.opensdg.OSDGConnection;
-import org.opensdg.OSDGResult;
-import org.opensdg.OSDGState;
+import org.opensdg.java.PeerConnection;
 import org.opensdg.protocol.Dominion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeviSmartConnection extends OSDGConnection {
+public class DeviSmartConnection extends PeerConnection {
     private final Logger logger = LoggerFactory.getLogger(DeviSmartConnection.class);
 
     private PeerConnectionHandler m_Handler;
@@ -19,23 +20,24 @@ public class DeviSmartConnection extends OSDGConnection {
     }
 
     @Override
-    protected void onStatusChanged(OSDGState newState) {
-        switch (newState) {
-            case CONNECTED:
-                m_Handler.setOnlineStatus();
-                break;
-            case CLOSED:
-                break; // The handler has already been disposed
-            default:
-                m_Handler.setOfflineStatus(getLastResultStr());
-                break;
-        }
+    protected void onError(Throwable t) {
+        m_Handler.setOfflineStatus(t.toString());
     }
 
     @Override
-    protected OSDGResult onDataReceived(byte[] data) {
+    protected void onDataReceived(InputStream stream) {
         int offset = 0;
-        int length = data.length;
+        int length;
+        byte[] data;
+
+        try {
+            length = stream.available();
+            data = new byte[length];
+            stream.read(data);
+        } catch (IOException e) {
+            logger.warn("Failed to read input data: {}", e.toString());
+            return;
+        }
 
         /*
          * For some reason the first data packet from the thermostat actually
@@ -59,13 +61,14 @@ public class DeviSmartConnection extends OSDGConnection {
             offset += packetLen;
             length -= packetLen;
         }
-
-        return OSDGResult.NO_ERROR;
     }
 
     public void blockingClose() {
-        SetBlockingMode(true);
-        Close();
+        try {
+            close();
+        } catch (IOException e) {
+            logger.warn("Failed to close connection: {}", e.toString());
+        }
         logger.info("Connection closed");
     }
 }

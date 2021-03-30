@@ -1,66 +1,52 @@
 package org.openhab.binding.danfoss.discovery;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.concurrent.Semaphore;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
-import org.opensdg.OSDGConnection;
-import org.opensdg.OSDGResult;
-import org.opensdg.OSDGState;
+import org.opensdg.java.PeerConnection;
 
-public class DanfossConfigConnection extends OSDGConnection {
+public class DanfossConfigConnection extends PeerConnection {
 
-    private int dataSize = 0;
-    private String json = "";
-    private boolean received = false;
-    private Semaphore done = new Semaphore(0, false);
-
-    @Override
-    protected OSDGResult onDataReceived(byte[] data) {
+    public String Receive() throws IOException, InterruptedException, ExecutionException, TimeoutException {
+        int dataSize = 0;
         int offset = 0;
-        int size = data.length;
+        byte[] data = null;
 
-        if (size > 8) {
-            ByteBuffer header = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
+        do {
+            DataInputStream chunk = new DataInputStream(receiveData());
+            int chunkSize = chunk.available();
 
-            // In chunked mode the data will arrive in several packets.
-            // The first one will contain the header, specifying full data length.
-            // The header has integer 0 in the beginning so that it's easily distinguished
-            // from JSON plaintext
-            if (header.getInt() == 0) {
-                dataSize = header.getInt();
-                offset = 8;
-                size -= 8;
+            if (chunkSize > 8) {
+                // In chunked mode the data will arrive in several packets.
+                // The first one will contain the header, specifying full data length.
+                // The header has integer 0 in the beginning so that it's easily distinguished
+                // from JSON plaintext
+                if (chunk.readInt() == 0) {
+                    // Size is little-endian here
+                    dataSize = Integer.reverseBytes(chunk.readInt());
+                    System.out.println("Chunked mode; full size = " + dataSize);
+                    data = new byte[dataSize];
+                    chunkSize -= 8; // We've consumed the header
+                } else {
+                    // No header, go back to the beginning
+                    chunk.reset();
+                }
             }
-        }
 
-        if (dataSize == 0) {
-            // If the first packet didn't contain the header, this is not
-            // a chunked mode, so just use the complete length of this packet
-            // and we're done
-            dataSize = size;
-        }
+            if (dataSize == 0) {
+                // If the first packet didn't contain the header, this is not
+                // a chunked mode, so just use the complete length of this packet
+                // and we're done
+                dataSize = chunkSize;
+                data = new byte[dataSize];
+            }
 
-        json += new String(data, offset, size);
-        dataSize -= size;
+            chunk.read(data, offset, chunkSize);
+            offset += chunkSize;
+        } while (offset < dataSize);
 
-        if (dataSize <= 0) {
-            received = true;
-            done.release();
-        }
-
-        return OSDGResult.NO_ERROR;
-    }
-
-    @Override
-    protected void onStatusChanged(OSDGState state) {
-        if ((state != OSDGState.CONNECTED) && (!received)) {
-            done.release();
-        }
-    }
-
-    public String Receive() {
-        done.acquireUninterruptibly();
-        return received ? json : null;
+        return new String(data);
     }
 }

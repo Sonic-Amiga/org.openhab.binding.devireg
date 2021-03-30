@@ -1,56 +1,49 @@
 package org.openhab.binding.danfoss.internal;
 
-import org.opensdg.OSDGConnection;
-import org.opensdg.OSDGResult;
-import org.opensdg.OSDGState;
-import org.opensdg.OpenSDG;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import org.opensdg.java.Connection;
+import org.opensdg.java.GridConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DanfossGridConnection extends OSDGConnection {
+public class DanfossGridConnection extends GridConnection {
     private static final Logger logger = LoggerFactory.getLogger(DanfossGridConnection.class);
     private static DanfossGridConnection g_Conn;
     private static int numUsers = 0;
+    private static String privateKey = null;
 
-    private String privateKey;
-
-    static {
-        logger.info("Using libopensdg {}", OpenSDG.GetVersion());
-    }
-
-    public synchronized static DanfossGridConnection get() throws Exception {
+    public synchronized static DanfossGridConnection get()
+            throws IOException, InterruptedException, ExecutionException, TimeoutException {
+        if (privateKey == null) {
+            privateKey = DanfossBindingConfig.get().privateKey;
+        }
         if (g_Conn == null) {
-            g_Conn = new DanfossGridConnection();
-            g_Conn.SetBlockingMode(true);
-            g_Conn.SetPrivateKey(DanfossBindingConfig.get());
+            g_Conn = new DanfossGridConnection(SDGUtils.ParseKey(privateKey));
         }
 
-        if (g_Conn.getState() != OSDGState.CONNECTED) {
-            OSDGResult res = g_Conn.ConnectToDanfoss();
-            if (res != OSDGResult.NO_ERROR) {
-                String msg = "Danfoss grid connection failed: " + g_Conn.getLastResultStr();
-
-                logger.error(msg);
-                throw new Exception(msg);
-            }
+        if (g_Conn.getState() != Connection.State.CONNECTED) {
+            g_Conn.connect(GridConnection.Danfoss);
             logger.info("Successfully connected to Danfoss grid");
         }
 
         return g_Conn;
     }
 
-    private void SetPrivateKey(DanfossBindingConfig config) {
-        privateKey = config.privateKey;
-        SetPrivateKey(SDGUtils.ParseKey(privateKey));
+    public DanfossGridConnection(byte[] privKey) {
+        super(privKey);
     }
 
     public static synchronized void UpdatePrivateKey() {
         if (g_Conn != null) {
             DanfossBindingConfig config = DanfossBindingConfig.get();
 
-            if (!config.privateKey.equals(g_Conn.privateKey)) {
-                g_Conn.Close(); // Will reconnect on demand
-                g_Conn.SetPrivateKey(config);
+            if (!config.privateKey.equals(privateKey)) {
+                // Will reconnect on demand
+                closeConnection();
+                privateKey = config.privateKey;
             }
         }
     }
@@ -69,8 +62,18 @@ public class DanfossGridConnection extends OSDGConnection {
         }
 
         logger.warn("Last user is gone, disconnecting from Danfoss grid");
-        g_Conn.Close();
-        g_Conn.Dispose();
-        g_Conn = null;
+        closeConnection();
     }
+
+    private static void closeConnection() {
+        try {
+            g_Conn.close();
+        } catch (IOException e) {
+            logger.warn("Error closing GridConnection: {}", e.toString());
+        }
+        g_Conn = null;
+        logger.info("Grid connection closed");
+
+    }
+
 }

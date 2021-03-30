@@ -9,7 +9,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.smarthome.config.core.Configuration;
-import org.opensdg.OpenSDG;
+import org.opensdg.java.SDG;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class DanfossBindingConfig {
         userName = newConfig.userName;
 
         if (newKey == null || newKey.isEmpty()) {
-            newPrivkey = OpenSDG.CreatePrivateKey();
+            newPrivkey = SDG.createPrivateKey();
             newKey = DatatypeConverter.printHexBinary(newPrivkey);
 
             logger.debug("Created new private key: {}", newKey);
@@ -54,7 +54,7 @@ public class DanfossBindingConfig {
         }
 
         privateKey = newKey;
-        publicKey = DatatypeConverter.printHexBinary(OpenSDG.CalcPublicKey(newPrivkey));
+        publicKey = DatatypeConverter.printHexBinary(SDG.calcPublicKey(newPrivkey));
         userName = newConfig.userName;
     }
 

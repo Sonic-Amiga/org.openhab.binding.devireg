@@ -1,9 +1,12 @@
 package org.openhab.binding.danfoss.internal;
 
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.measure.quantity.Temperature;
 import javax.xml.bind.DatatypeConverter;
@@ -16,7 +19,7 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
-import org.opensdg.OSDGState;
+import org.opensdg.java.Connection;
 import org.opensdg.protocol.Dominion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +61,7 @@ public class PeerConnectionHandler {
         connection = new DeviSmartConnection(this);
 
         watchdog = thingHandler.getScheduler().scheduleAtFixedRate(() -> {
-            if (connection == null || connection.getState() != OSDGState.CONNECTED) {
+            if (connection == null || connection.getState() != Connection.State.CONNECTED) {
                 return;
             }
             if (System.currentTimeMillis() - lastPacket > 30000) {
@@ -100,7 +103,6 @@ public class PeerConnectionHandler {
 
             if (conn != null) {
                 conn.blockingClose();
-                conn.Dispose();
             }
         });
 
@@ -120,7 +122,8 @@ public class PeerConnectionHandler {
                 DanfossGridConnection grid = DanfossGridConnection.get();
 
                 logger.info("Connecting to peer {}", DatatypeConverter.printHexBinary(peerId));
-                connection.ConnectToRemote(grid, peerId, Dominion.ProtocolName);
+                connection.connectToRemote(grid, peerId, Dominion.ProtocolName);
+                setOnlineStatus();
             } catch (Exception e) {
                 setOfflineStatus(e.getMessage());
             }
@@ -156,7 +159,11 @@ public class PeerConnectionHandler {
         DeviSmartConnection conn = connection;
 
         if (conn != null) {
-            conn.Send(data);
+            try {
+                conn.sendData(data);
+            } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
+                logger.warn("Failed to send data: {}", e.toString());
+            }
         }
     }
 

@@ -14,6 +14,11 @@
   <name>openHAB Add-ons :: Bundles :: Danfoss Binding</name>
 
   <dependencies>
+      <dependency>
+      <groupId>org.opensdg</groupId>
+      <artifactId>osdg_java</artifactId>
+      <version>1.0</version>
+    </dependency>
   	<dependency>
         <groupId>org.json</groupId>
         <artifactId>json</artifactId>

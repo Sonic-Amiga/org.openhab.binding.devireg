@@ -1,6 +1,11 @@
 package org.openhab.binding.danfoss.discovery;
 
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -19,8 +24,8 @@ import org.openhab.binding.danfoss.internal.DanfossBindingConfig;
 import org.openhab.binding.danfoss.internal.DanfossBindingConstants;
 import org.openhab.binding.danfoss.internal.DanfossGridConnection;
 import org.openhab.binding.danfoss.internal.DeviRegConfiguration;
-import org.opensdg.OSDGConnection;
-import org.opensdg.OSDGResult;
+import org.opensdg.java.Connection;
+import org.opensdg.java.PairingConnection;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +75,7 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
         logger.trace("Pairing with OTP: {}", otp);
 
         String userName = DanfossBindingConfig.get().userName;
-        OSDGConnection grid;
+        DanfossGridConnection grid;
 
         if (userName == null || userName.isEmpty()) {
             return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR,
@@ -81,7 +86,7 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
 
         try {
             grid = DanfossGridConnection.get();
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
             DanfossGridConnection.RemoveUser();
             return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -90,64 +95,50 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
         Status errorCode = Status.INTERNAL_SERVER_ERROR;
         String errorStr = null;
 
-        OSDGConnection pairing = new OSDGConnection();
-        pairing.SetBlockingMode(true);
+        PairingConnection pairing = new PairingConnection();
 
-        OSDGResult r = pairing.PairRemote(grid, otp);
-
-        switch (r) {
-            case NO_ERROR:
-                logger.debug("Pairing successful");
-
-                // Our peer is the sending phone. Once we know the ID, we can establish data connection
-                byte[] phoneId = pairing.getPeerId();
-                DanfossConfigConnection cfg = new DanfossConfigConnection();
-
-                cfg.SetBlockingMode(true);
-
-                if (cfg.ConnectToRemote(grid, phoneId, "dominion-config-1.0") == OSDGResult.NO_ERROR) {
-                    JSONObject request = new JSONObject();
-
-                    // Request the data from the phone. chunkedMessage is important
-                    // because if the data is too long, it wouldn't fit into fixed length
-                    // buffer (approx. 1536 bytes) of phone's mdglib version. See comments
-                    // in DeviSmartConfigConnection for more insight on this.
-                    request.put("phoneName", userName);
-                    request.put("phonePublicKey", DatatypeConverter.printHexBinary(grid.GetMyPeerId()));
-                    request.put("chunkedMessage", true);
-
-                    cfg.Send(request.toString().getBytes());
-                    configJSON = cfg.Receive();
-
-                    if (configJSON == null) {
-                        errorStr = "Failed to receive config: " + cfg.getLastResultStr();
-                    }
-
-                    cfg.Close();
-
-                } else {
-                    errorStr = "Failed to connect to the sender: " + cfg.getLastResultStr();
-                }
-
-                cfg.Dispose();
-                break;
-
-            case INVALID_PARAMETERS:
-                errorStr = "Invalid OTP supplied";
-                errorCode = Status.BAD_REQUEST;
-                break;
-
-            case CONNECTION_REFUSED:
-                errorStr = "Connection refused by peer; likely wrong OTP";
-                errorCode = Status.NOT_FOUND;
-                break;
-
-            default:
-                errorStr = "Pairing failed: " + pairing.getLastResultStr();
-                break;
+        try {
+            pairing.pairWithRemote(grid, otp);
+        } catch (RemoteException e) {
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Connection refused by peer; likely wrong OTP");
+        } catch (IOException | InterruptedException | ExecutionException | GeneralSecurityException
+                | TimeoutException e) {
+            return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR, "Pairing failed: " + e.toString());
         }
 
-        pairing.Dispose();
+        byte[] phoneId = pairing.getPeerId();
+        safeClose(pairing);
+
+        logger.debug("Pairing successful");
+
+        // Our peer is the sending phone. Once we know the ID, we can establish data connection
+        DanfossConfigConnection cfg = new DanfossConfigConnection();
+
+        try {
+            cfg.connectToRemote(grid, phoneId, "dominion-configuration-1.0");
+        } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
+            return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR,
+                    "Failed to connect to the sender: " + e.toString());
+        }
+
+        JSONObject request = new JSONObject();
+
+        // Request the data from the phone. chunkedMessage is important
+        // because if the data is too long, it wouldn't fit into fixed length
+        // buffer (approx. 1536 bytes) of phone's mdglib version. See comments
+        // in DeviSmartConfigConnection for more insight on this.
+        request.put("phoneName", userName);
+        request.put("phonePublicKey", DatatypeConverter.printHexBinary(grid.getMyPeerId()));
+        request.put("chunkedMessage", true);
+
+        try {
+            cfg.sendData(request.toString().getBytes());
+            configJSON = cfg.Receive();
+        } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
+            errorStr = "Failed to receive config: " + e.toString();
+        }
+
+        safeClose(cfg);
         DanfossGridConnection.RemoveUser();
 
         if (errorStr != null) {
@@ -220,6 +211,15 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
 
         OKResponse response = new OKResponse(thingCount);
         return JSONResponse.createResponse(Status.OK, response, "OK");
+    }
+
+    private void safeClose(Connection conn) {
+        try {
+            conn.close();
+        } catch (IOException e) {
+            // This should not happen
+            logger.warn("Failed to close PeerConnection: {}", e.toString());
+        }
     }
 
     private void addThing(ThingTypeUID typeId, String peerId, String label) {
