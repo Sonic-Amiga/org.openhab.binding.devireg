@@ -1,8 +1,8 @@
 package org.openhab.binding.danfoss.internal;
 
 import static org.openhab.binding.danfoss.internal.DanfossBindingConstants.*;
-import static org.opensdg.protocol.Icon.MsgClass.*;
-import static org.opensdg.protocol.Icon.MsgCode.*;
+import static org.openhab.binding.danfoss.internal.protocol.Icon.MsgClass.*;
+import static org.openhab.binding.danfoss.internal.protocol.Icon.MsgCode.*;
 
 import java.text.DateFormat;
 import java.util.Hashtable;
@@ -25,7 +25,7 @@ import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.danfoss.discovery.IconRoomDiscoveryService;
-import org.opensdg.protocol.Dominion;
+import org.openhab.binding.danfoss.internal.protocol.Dominion;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
