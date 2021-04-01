@@ -9,6 +9,7 @@ import javax.measure.quantity.Temperature;
 import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.danfoss.internal.protocol.Dominion;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.SIUnits;
@@ -17,7 +18,6 @@ import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.opensdg.OSDGState;
-import org.opensdg.protocol.Dominion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

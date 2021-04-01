@@ -3,9 +3,9 @@ package org.openhab.binding.danfoss.internal;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.openhab.binding.danfoss.internal.protocol.Dominion;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
-import org.opensdg.protocol.Dominion;
 
 public interface ISDGPeerHandler {
 

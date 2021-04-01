@@ -13,8 +13,8 @@
 package org.openhab.binding.danfoss.internal;
 
 import static org.openhab.binding.danfoss.internal.DanfossBindingConstants.*;
-import static org.opensdg.protocol.DeviSmart.MsgClass.*;
-import static org.opensdg.protocol.DeviSmart.MsgCode.*;
+import static org.openhab.binding.danfoss.internal.protocol.DeviSmart.MsgClass.*;
+import static org.openhab.binding.danfoss.internal.protocol.DeviSmart.MsgCode.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,6 +27,11 @@ import javax.measure.quantity.Time;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.danfoss.internal.protocol.DeviSmart;
+import org.openhab.binding.danfoss.internal.protocol.DeviSmart.ControlMode;
+import org.openhab.binding.danfoss.internal.protocol.DeviSmart.ControlState;
+import org.openhab.binding.danfoss.internal.protocol.DeviSmart.WizardInfo;
+import org.openhab.binding.danfoss.internal.protocol.Dominion;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.QuantityType;
@@ -39,11 +44,6 @@ import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.types.Command;
-import org.opensdg.protocol.DeviSmart;
-import org.opensdg.protocol.DeviSmart.ControlMode;
-import org.opensdg.protocol.DeviSmart.ControlState;
-import org.opensdg.protocol.DeviSmart.WizardInfo;
-import org.opensdg.protocol.Dominion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,12 +1,15 @@
 package org.openhab.binding.danfoss.internal;
 
 import static org.openhab.binding.danfoss.internal.DanfossBindingConstants.*;
-import static org.opensdg.protocol.Icon.MsgClass.ROOM_FIRST;
-import static org.opensdg.protocol.Icon.MsgCode.*;
+import static org.openhab.binding.danfoss.internal.protocol.Icon.MsgClass.ROOM_FIRST;
+import static org.openhab.binding.danfoss.internal.protocol.Icon.MsgCode.*;
 
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.openhab.binding.danfoss.internal.protocol.Dominion;
+import org.openhab.binding.danfoss.internal.protocol.Icon.RoomControl;
+import org.openhab.binding.danfoss.internal.protocol.Icon.RoomMode;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.QuantityType;
@@ -18,9 +21,6 @@ import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.types.Command;
-import org.opensdg.protocol.Dominion;
-import org.opensdg.protocol.Icon.RoomControl;
-import org.opensdg.protocol.Icon.RoomMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

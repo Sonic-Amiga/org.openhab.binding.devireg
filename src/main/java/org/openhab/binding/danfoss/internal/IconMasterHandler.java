@@ -1,8 +1,8 @@
 package org.openhab.binding.danfoss.internal;
 
 import static org.openhab.binding.danfoss.internal.DanfossBindingConstants.*;
-import static org.opensdg.protocol.Icon.MsgClass.*;
-import static org.opensdg.protocol.Icon.MsgCode.*;
+import static org.openhab.binding.danfoss.internal.protocol.Icon.MsgClass.*;
+import static org.openhab.binding.danfoss.internal.protocol.Icon.MsgCode.*;
 
 import java.text.DateFormat;
 import java.util.Hashtable;
@@ -13,6 +13,7 @@ import javax.measure.quantity.Temperature;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.danfoss.discovery.IconRoomDiscoveryService;
+import org.openhab.binding.danfoss.internal.protocol.Dominion;
 import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
@@ -25,7 +26,6 @@ import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.binding.BaseBridgeHandler;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.types.Command;
-import org.opensdg.protocol.Dominion;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;

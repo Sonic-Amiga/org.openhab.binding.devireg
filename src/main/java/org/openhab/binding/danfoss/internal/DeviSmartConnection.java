@@ -2,10 +2,10 @@ package org.openhab.binding.danfoss.internal;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.openhab.binding.danfoss.internal.protocol.Dominion;
 import org.opensdg.OSDGConnection;
 import org.opensdg.OSDGResult;
 import org.opensdg.OSDGState;
-import org.opensdg.protocol.Dominion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
