@@ -5,8 +5,8 @@ import java.io.InputStream;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.openhab.binding.danfoss.internal.protocol.Dominion;
 import org.opensdg.java.PeerConnection;
-import org.opensdg.protocol.Dominion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,7 +1,7 @@
 package org.openhab.binding.danfoss.discovery;
 
-import static org.opensdg.protocol.Icon.MsgClass.ROOM_FIRST;
-import static org.opensdg.protocol.Icon.MsgCode.ROOMNAME;
+import static org.openhab.binding.danfoss.internal.protocol.Icon.MsgClass.ROOM_FIRST;
+import static org.openhab.binding.danfoss.internal.protocol.Icon.MsgCode.ROOMNAME;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.danfoss.internal.DanfossBindingConstants;
 import org.openhab.binding.danfoss.internal.IconMasterHandler;
 import org.openhab.binding.danfoss.internal.IconRoomConfiguration;
-import org.opensdg.protocol.Dominion;
+import org.openhab.binding.danfoss.internal.protocol.Dominion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,8 +1,8 @@
-package org.opensdg.protocol;
+package org.openhab.binding.danfoss.internal.protocol;
 
 import java.util.Date;
 
-import org.opensdg.protocol.Dominion.Packet;
+import org.openhab.binding.danfoss.internal.protocol.Dominion.Packet;
 
 public class DeviSmart {
     public static class AwayPacket extends Packet {

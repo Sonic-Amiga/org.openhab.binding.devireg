@@ -1,8 +1,8 @@
 package org.openhab.binding.danfoss.internal;
 
 import static org.openhab.binding.danfoss.internal.DanfossBindingConstants.*;
-import static org.opensdg.protocol.Icon.MsgClass.ROOM_FIRST;
-import static org.opensdg.protocol.Icon.MsgCode.*;
+import static org.openhab.binding.danfoss.internal.protocol.Icon.MsgClass.ROOM_FIRST;
+import static org.openhab.binding.danfoss.internal.protocol.Icon.MsgCode.*;
 
 import javax.measure.quantity.Temperature;
 
@@ -18,9 +18,9 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
-import org.opensdg.protocol.Dominion;
-import org.opensdg.protocol.Icon.RoomControl;
-import org.opensdg.protocol.Icon.RoomMode;
+import org.openhab.binding.danfoss.internal.protocol.Dominion;
+import org.openhab.binding.danfoss.internal.protocol.Icon.RoomControl;
+import org.openhab.binding.danfoss.internal.protocol.Icon.RoomMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

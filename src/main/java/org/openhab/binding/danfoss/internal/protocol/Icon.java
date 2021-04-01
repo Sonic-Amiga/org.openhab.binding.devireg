@@ -1,4 +1,4 @@
-package org.opensdg.protocol;
+package org.openhab.binding.danfoss.internal.protocol;
 
 public class Icon {
 
