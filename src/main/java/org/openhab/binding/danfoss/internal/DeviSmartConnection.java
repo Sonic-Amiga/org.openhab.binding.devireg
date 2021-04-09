@@ -64,11 +64,7 @@ public class DeviSmartConnection extends PeerConnection {
     }
 
     public void blockingClose() {
-        try {
-            close();
-        } catch (IOException e) {
-            logger.warn("Failed to close connection: {}", e.toString());
-        }
+        close();
         logger.info("Connection closed");
     }
 }

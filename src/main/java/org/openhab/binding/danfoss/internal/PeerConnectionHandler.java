@@ -72,7 +72,7 @@ public class PeerConnectionHandler {
                     if (connection == null) {
                         return; // We are being disposed
                     }
-                    connection.blockingClose();
+                    connection.close();
                     scheduleReconnect();
                 });
             } else if (System.currentTimeMillis() - lastPacket > 15000) {
@@ -102,7 +102,7 @@ public class PeerConnectionHandler {
             }
 
             if (conn != null) {
-                conn.blockingClose();
+                conn.close();
             }
         });
 

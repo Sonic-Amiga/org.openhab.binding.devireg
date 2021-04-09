@@ -66,11 +66,7 @@ public class DanfossGridConnection extends GridConnection {
     }
 
     private static void closeConnection() {
-        try {
-            g_Conn.close();
-        } catch (IOException e) {
-            logger.warn("Error closing GridConnection: {}", e.toString());
-        }
+        g_Conn.close();
         g_Conn = null;
         logger.info("Grid connection closed");
 

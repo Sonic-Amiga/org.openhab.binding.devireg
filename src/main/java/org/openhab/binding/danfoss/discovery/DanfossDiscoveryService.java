@@ -24,7 +24,6 @@ import org.openhab.binding.danfoss.internal.DanfossBindingConfig;
 import org.openhab.binding.danfoss.internal.DanfossBindingConstants;
 import org.openhab.binding.danfoss.internal.DanfossGridConnection;
 import org.openhab.binding.danfoss.internal.DeviRegConfiguration;
-import org.opensdg.java.Connection;
 import org.opensdg.java.PairingConnection;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -107,7 +106,7 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
         }
 
         byte[] phoneId = pairing.getPeerId();
-        safeClose(pairing);
+        pairing.close();
 
         logger.debug("Pairing successful");
 
@@ -138,7 +137,7 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
             errorStr = "Failed to receive config: " + e.toString();
         }
 
-        safeClose(cfg);
+        cfg.close();
         DanfossGridConnection.RemoveUser();
 
         if (errorStr != null) {
@@ -211,15 +210,6 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
 
         OKResponse response = new OKResponse(thingCount);
         return JSONResponse.createResponse(Status.OK, response, "OK");
-    }
-
-    private void safeClose(Connection conn) {
-        try {
-            conn.close();
-        } catch (IOException e) {
-            // This should not happen
-            logger.warn("Failed to close PeerConnection: {}", e.toString());
-        }
     }
 
     private void addThing(ThingTypeUID typeId, String peerId, String label) {
