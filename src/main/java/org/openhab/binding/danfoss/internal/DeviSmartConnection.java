@@ -62,9 +62,4 @@ public class DeviSmartConnection extends PeerConnection {
             length -= packetLen;
         }
     }
-
-    public void blockingClose() {
-        close();
-        logger.info("Connection closed");
-    }
 }
