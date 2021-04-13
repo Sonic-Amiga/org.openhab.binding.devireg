@@ -1,5 +1,6 @@
 package org.openhab.binding.danfoss.discovery;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.security.GeneralSecurityException;
@@ -25,6 +26,7 @@ import org.openhab.binding.danfoss.internal.DanfossBindingConstants;
 import org.openhab.binding.danfoss.internal.DanfossGridConnection;
 import org.openhab.binding.danfoss.internal.DeviRegConfiguration;
 import org.opensdg.java.PairingConnection;
+import org.opensdg.java.PeerConnection;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +92,6 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
             return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
 
-        String configJSON = null;
         Status errorCode = Status.INTERNAL_SERVER_ERROR;
         String errorStr = null;
 
@@ -111,7 +112,7 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
         logger.debug("Pairing successful");
 
         // Our peer is the sending phone. Once we know the ID, we can establish data connection
-        DanfossConfigConnection cfg = new DanfossConfigConnection();
+        PeerConnection cfg = new PeerConnection();
 
         try {
             cfg.connectToRemote(grid, phoneId, "dominion-configuration-1.0");
@@ -130,9 +131,46 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
         request.put("phonePublicKey", DatatypeConverter.printHexBinary(grid.getMyPeerId()));
         request.put("chunkedMessage", true);
 
+        int dataSize = 0;
+        int offset = 0;
+        byte[] data = null;
+
         try {
             cfg.sendData(request.toString().getBytes());
-            configJSON = cfg.Receive();
+
+            do {
+                DataInputStream chunk = new DataInputStream(cfg.receiveData());
+                int chunkSize = chunk.available();
+
+                if (chunkSize > 8) {
+                    // In chunked mode the data will arrive in several packets.
+                    // The first one will contain the header, specifying full data length.
+                    // The header has integer 0 in the beginning so that it's easily distinguished
+                    // from JSON plaintext
+                    if (chunk.readInt() == 0) {
+                        // Size is little-endian here
+                        dataSize = Integer.reverseBytes(chunk.readInt());
+                        logger.trace("Chunked mode; full size = {}", dataSize);
+                        data = new byte[dataSize];
+                        chunkSize -= 8; // We've consumed the header
+                    } else {
+                        // No header, go back to the beginning
+                        chunk.reset();
+                    }
+                }
+
+                if (dataSize == 0) {
+                    // If the first packet didn't contain the header, this is not
+                    // a chunked mode, so just use the complete length of this packet
+                    // and we're done
+                    dataSize = chunkSize;
+                    logger.trace("Raw mode; full size = {}", dataSize);
+                    data = new byte[dataSize];
+                }
+
+                chunk.read(data, offset, chunkSize);
+                offset += chunkSize;
+            } while (offset < dataSize);
         } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
             errorStr = "Failed to receive config: " + e.toString();
         }
@@ -177,7 +215,7 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
          * are not aware of them.
          */
 
-        JSONObject parsedConfig = new JSONObject(configJSON);
+        JSONObject parsedConfig = new JSONObject(new String(data));
         String houseName = parsedConfig.getString("houseName");
         int thingCount = 0;
 
