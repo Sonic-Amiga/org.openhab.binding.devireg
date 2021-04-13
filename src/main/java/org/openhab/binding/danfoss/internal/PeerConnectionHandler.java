@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.measure.quantity.Temperature;
-import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -21,6 +20,7 @@ import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.danfoss.internal.protocol.Dominion;
 import org.opensdg.java.Connection;
+import org.opensdg.java.SDG;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ public class PeerConnectionHandler {
 
         peerId = SDGUtils.ParseKey(peerIdStr);
         if (peerId == null) {
-            logger.error("Peer ID is not set");
+            logger.warn("Peer ID is not set");
             thingHandler.reportStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR,
                     "Peer ID is not set");
             return;
@@ -121,13 +121,15 @@ public class PeerConnectionHandler {
             try {
                 DanfossGridConnection grid = DanfossGridConnection.get();
 
-                logger.info("Connecting to peer {}", DatatypeConverter.printHexBinary(peerId));
+                logger.info("Connecting to peer {}", SDG.bin2hex(peerId));
                 connection.connectToRemote(grid, peerId, Dominion.ProtocolName);
-                connection.asyncReceive();
-                setOnlineStatus();
-            } catch (Exception e) {
+            } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
                 setOfflineStatus(e.getMessage());
+                return;
             }
+
+            connection.asyncReceive();
+            setOnlineStatus();
         });
     }
 
@@ -140,7 +142,7 @@ public class PeerConnectionHandler {
     }
 
     public void setOfflineStatus(String reason) {
-        logger.error("Device went offline: {}", reason);
+        logger.warn("Device went offline: {}", reason);
 
         if (connection != null) {
             thingHandler.reportStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, reason);
