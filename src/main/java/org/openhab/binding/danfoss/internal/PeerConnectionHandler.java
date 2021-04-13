@@ -20,6 +20,7 @@ import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.danfoss.internal.protocol.Dominion;
 import org.opensdg.java.Connection;
+import org.opensdg.java.GridConnection;
 import org.opensdg.java.SDG;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,7 @@ public class PeerConnectionHandler {
     public void initialize(String peerIdStr) {
         logger.trace("initialize()");
 
-        DanfossGridConnection.AddUser();
+        GridConnectionKeeper.AddUser();
 
         peerId = SDGUtils.ParseKey(peerIdStr);
         if (peerId == null) {
@@ -106,7 +107,7 @@ public class PeerConnectionHandler {
             }
         });
 
-        DanfossGridConnection.RemoveUser();
+        GridConnectionKeeper.RemoveUser();
     }
 
     private void connect() {
@@ -119,7 +120,7 @@ public class PeerConnectionHandler {
             }
 
             try {
-                DanfossGridConnection grid = DanfossGridConnection.get();
+                GridConnection grid = GridConnectionKeeper.getConnection();
 
                 logger.info("Connecting to peer {}", SDG.bin2hex(peerId));
                 connection.connectToRemote(grid, peerId, Dominion.ProtocolName);

@@ -9,19 +9,19 @@ import org.opensdg.java.GridConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DanfossGridConnection extends GridConnection {
-    private static final Logger logger = LoggerFactory.getLogger(DanfossGridConnection.class);
-    private static DanfossGridConnection g_Conn;
+public class GridConnectionKeeper {
+    private static final Logger logger = LoggerFactory.getLogger(GridConnectionKeeper.class);
+    private static GridConnection g_Conn;
     private static int numUsers = 0;
     private static String privateKey = null;
 
-    public synchronized static DanfossGridConnection get()
+    public synchronized static GridConnection getConnection()
             throws IOException, InterruptedException, ExecutionException, TimeoutException {
         if (privateKey == null) {
             privateKey = DanfossBindingConfig.get().privateKey;
         }
         if (g_Conn == null) {
-            g_Conn = new DanfossGridConnection(SDGUtils.ParseKey(privateKey));
+            g_Conn = new GridConnection(SDGUtils.ParseKey(privateKey));
         }
 
         if (g_Conn.getState() != Connection.State.CONNECTED) {
@@ -30,10 +30,6 @@ public class DanfossGridConnection extends GridConnection {
         }
 
         return g_Conn;
-    }
-
-    public DanfossGridConnection(byte[] privKey) {
-        super(privKey);
     }
 
     public static synchronized void UpdatePrivateKey() {
@@ -69,7 +65,6 @@ public class DanfossGridConnection extends GridConnection {
         g_Conn.close();
         g_Conn = null;
         logger.info("Grid connection closed");
-
     }
 
 }

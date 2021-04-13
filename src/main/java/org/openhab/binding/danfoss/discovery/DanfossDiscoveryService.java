@@ -23,8 +23,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.openhab.binding.danfoss.internal.DanfossBindingConfig;
 import org.openhab.binding.danfoss.internal.DanfossBindingConstants;
-import org.openhab.binding.danfoss.internal.DanfossGridConnection;
+import org.openhab.binding.danfoss.internal.GridConnectionKeeper;
 import org.openhab.binding.danfoss.internal.DeviRegConfiguration;
+import org.opensdg.java.GridConnection;
 import org.opensdg.java.PairingConnection;
 import org.opensdg.java.PeerConnection;
 import org.osgi.service.component.annotations.Component;
@@ -76,19 +77,19 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
         logger.trace("Pairing with OTP: {}", otp);
 
         String userName = DanfossBindingConfig.get().userName;
-        DanfossGridConnection grid;
+        GridConnection grid;
 
         if (userName == null || userName.isEmpty()) {
             return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR,
                     "Username is not set in binding configuration");
         }
 
-        DanfossGridConnection.AddUser();
+        GridConnectionKeeper.AddUser();
 
         try {
-            grid = DanfossGridConnection.get();
+            grid = GridConnectionKeeper.getConnection();
         } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
-            DanfossGridConnection.RemoveUser();
+            GridConnectionKeeper.RemoveUser();
             return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
 
@@ -176,7 +177,7 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
         }
 
         cfg.close();
-        DanfossGridConnection.RemoveUser();
+        GridConnectionKeeper.RemoveUser();
 
         if (errorStr != null) {
             return JSONResponse.createErrorResponse(errorCode, errorStr);
