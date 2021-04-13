@@ -123,6 +123,7 @@ public class PeerConnectionHandler {
 
                 logger.info("Connecting to peer {}", DatatypeConverter.printHexBinary(peerId));
                 connection.connectToRemote(grid, peerId, Dominion.ProtocolName);
+                connection.asyncReceive();
                 setOnlineStatus();
             } catch (Exception e) {
                 setOfflineStatus(e.getMessage());
