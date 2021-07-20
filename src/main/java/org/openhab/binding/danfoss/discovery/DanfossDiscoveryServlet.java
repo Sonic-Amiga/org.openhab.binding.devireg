@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.danfoss.internal.DanfossBindingConstants;
 import org.osgi.service.http.HttpService;
@@ -80,7 +79,7 @@ public class DanfossDiscoveryServlet extends HttpServlet {
             logger.trace("content-type " + type);
 
             resp.addHeader("content-type", type);
-            IOUtils.copy(in, resp.getOutputStream());
+            in.transferTo(resp.getOutputStream());
         } else {
             resp.sendError(404, "Not found");
         }
