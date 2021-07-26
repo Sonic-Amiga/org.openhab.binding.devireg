@@ -12,12 +12,4 @@
   <artifactId>org.openhab.binding.danfoss</artifactId>
 
   <name>openHAB Add-ons :: Bundles :: Danfoss Binding</name>
-
-  <dependencies>
-  	<dependency>
-        <groupId>org.json</groupId>
-        <artifactId>json</artifactId>
-        <version>20180130</version>
-  	</dependency>
-  </dependencies>
 </project>
