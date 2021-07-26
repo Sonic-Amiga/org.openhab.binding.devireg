@@ -24,17 +24,5 @@
         <artifactId>json</artifactId>
         <version>20180130</version>
   	</dependency>
-  	<!-- For some reason i have to add opensdg's dependencies here, otherwise
-  	     they aren't packaged into the JAR. Is there any way to do it automatically ? -->
-    <dependency>
-      <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-java</artifactId>
-      <version>3.15.8</version>
-    </dependency>
-    <dependency>
-      <groupId>org.zeromq</groupId>
-      <artifactId>jnacl</artifactId>
-      <version>0.1.0</version>
-    </dependency>
   </dependencies>
 </project>
