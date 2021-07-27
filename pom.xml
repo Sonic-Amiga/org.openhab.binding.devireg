@@ -21,4 +21,32 @@
       <version>1.0</version>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <!-- By default transitive dependencies aren't included, but we need jnacl and protobuf
+             for osdg_java's functioning -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>unpack-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeArtifactIds>jnacl,protobuf-java</includeArtifactIds>
+              <excludes>**/*.MF</excludes>
+              <outputDirectory>${project.build.directory}/classes</outputDirectory>
+              <overWriteIfNewer>true</overWriteIfNewer>
+              <overWriteSnapshots>true</overWriteSnapshots>
+              <overWriteReleases>true</overWriteReleases>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

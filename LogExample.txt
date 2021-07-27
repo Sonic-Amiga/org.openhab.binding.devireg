@@ -1,0 +1,19 @@
+12:11:43.258 [Thread-23] INFO  o.o.b.d.internal.IconMasterHandler:97 - Connection established
+12:11:43.262 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   3 30470   1 02
+12:11:43.262 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0     2   1 00
+12:11:43.262 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0    16   1 09
+12:11:43.262 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0    17   1 03
+12:11:43.262 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0    18   1 00
+12:11:43.262 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0    19   2 0110
+12:11:43.262 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0    20   4 03303020
+12:11:43.262 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0    21   4 00010103
+12:11:43.262 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0    22   4 C5579900
+12:11:43.262 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0    23   2 FFFF
+12:11:43.262 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0    24  32 FF01000000000000000000000000000000000000000000000000000000000000
+12:11:43.262 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0     8   2 7800
+12:11:43.263 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0    34   2 0103
+12:11:43.263 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0    35   2 0001
+12:11:43.263 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   0    44   6 001E06CD0112
+12:11:43.263 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   1  1008   2 0000
+12:11:43.263 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   1 29696  33 000000000000000000000000000000000000000000000000000000000000000000
+12:11:43.263 [Thread-23] INFO  o.o.b.d.internal.DeviRegHandler:64 - Data:   1 29698   1 00
