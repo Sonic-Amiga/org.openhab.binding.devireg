@@ -18,5 +18,4 @@ public interface ISDGPeerHandler {
     public void ping();
 
     ScheduledExecutorService getScheduler();
-
 }

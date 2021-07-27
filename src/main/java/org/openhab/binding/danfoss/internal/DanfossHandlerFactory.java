@@ -76,7 +76,6 @@ public class DanfossHandlerFactory extends BaseThingHandlerFactory {
         if (servlet == null) {
             servlet = new DanfossDiscoveryServlet(httpService);
         }
-
     }
 
     @Override

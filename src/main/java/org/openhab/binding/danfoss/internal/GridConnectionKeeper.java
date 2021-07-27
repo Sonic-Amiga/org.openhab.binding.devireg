@@ -66,5 +66,4 @@ public class GridConnectionKeeper {
         g_Conn = null;
         logger.info("Grid connection closed");
     }
-
 }
