@@ -92,13 +92,15 @@ public class PeerConnectionHandler {
             DeviSmartConnection conn = connection;
             connection = null; // This signals we are being disposed
 
-            if (reconnectReq != null) {
-                reconnectReq.cancel(false);
+            Future<?> reconnect = reconnectReq;
+            if (reconnect != null) {
+                reconnect.cancel(false);
                 reconnectReq = null;
             }
 
-            if (watchdog != null) {
-                watchdog.cancel(false);
+            Future<?> wd = watchdog;
+            if (wd != null) {
+                wd.cancel(false);
                 watchdog = null;
             }
 

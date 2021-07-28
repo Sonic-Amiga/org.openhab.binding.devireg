@@ -318,9 +318,10 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     }
 
     private void reportFirmware() {
-        if (firmwareVer != null && firmwareBuild != -1) {
-            updateProperty(Thing.PROPERTY_FIRMWARE_VERSION,
-                    firmwareVer.toString() + "." + String.valueOf(firmwareBuild));
+        Dominion.Version ver = firmwareVer;
+
+        if (ver != null && firmwareBuild != -1) {
+            updateProperty(Thing.PROPERTY_FIRMWARE_VERSION, ver.toString() + "." + String.valueOf(firmwareBuild));
         }
     }
 
