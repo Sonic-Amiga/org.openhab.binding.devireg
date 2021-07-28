@@ -2,8 +2,10 @@ package org.openhab.binding.danfoss.internal;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeoutException;
 
+import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.opensdg.java.Connection;
 import org.opensdg.java.GridConnection;
 import org.slf4j.Logger;
@@ -21,7 +23,14 @@ public class GridConnectionKeeper {
             privateKey = DanfossBindingConfig.get().privateKey;
         }
         if (g_Conn == null) {
-            g_Conn = new GridConnection(SDGUtils.ParseKey(privateKey));
+            // We are not necessarily called from within a ThingHandler; it could also be
+            // a DanfossDiscoveryService. Here we are trying to reuse the same named pool
+            // as used by all thing handlers for the sake of resource conservation
+            // A little bit hacky-wacky (because this name is OpenHAB's internal constant),
+            // but we don't want to create yet another pool for such small needs as pinging
+            // the grid connection.
+            ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool("thingHandler");
+            g_Conn = new GridConnection(SDGUtils.ParseKey(privateKey), scheduler);
         }
 
         if (g_Conn.getState() != Connection.State.CONNECTED) {
