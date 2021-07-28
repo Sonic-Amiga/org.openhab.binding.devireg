@@ -57,7 +57,7 @@ public class GridConnectionKeeper {
             return;
         }
 
-        logger.warn("Last user is gone, disconnecting from Danfoss grid");
+        logger.info("Last user is gone, disconnecting from Danfoss grid");
         closeConnection();
     }
 
