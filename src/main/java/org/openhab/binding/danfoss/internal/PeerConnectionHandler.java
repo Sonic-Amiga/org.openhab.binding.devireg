@@ -162,12 +162,18 @@ public class PeerConnectionHandler {
         // with dispose() zeroing it between test and usage
         DeviSmartConnection conn = connection;
 
-        if (conn != null) {
-            try {
-                conn.sendData(data);
-            } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
-                logger.warn("Failed to send data: {}", e.toString());
-            }
+        if (conn == null || conn.getState() != Connection.State.CONNECTED) {
+            // Avoid "Failed to send data" warning if the connection hasn't been
+            // connected yet. This may happen as OpenHAB sends REFRESH request for
+            // every item right after the Thing has been initialized; it doesn't wait
+            // for the Thing to go online.
+            return;
+        }
+
+        try {
+            conn.sendData(data);
+        } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
+            logger.warn("Failed to send data: {}", e.toString());
         }
     }
 
