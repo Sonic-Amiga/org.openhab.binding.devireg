@@ -32,13 +32,11 @@
         <executions>
           <execution>
             <id>unpack-dependencies</id>
-            <phase>package</phase>
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
             <configuration>
               <includeArtifactIds>jnacl,protobuf-java</includeArtifactIds>
-              <excludes>**/*.MF</excludes>
               <outputDirectory>${project.build.directory}/classes</outputDirectory>
               <overWriteIfNewer>true</overWriteIfNewer>
               <overWriteSnapshots>true</overWriteSnapshots>
@@ -49,4 +47,8 @@
       </plugin>
     </plugins>
   </build>
+  <properties>
+    <!--  protobuf wants sun.misc as optional, OpenHAB doesn't export it -->
+    <bnd.importpackage>sun.misc;resolution:=optional</bnd.importpackage>
+  </properties>
 </project>
