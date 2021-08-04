@@ -25,7 +25,7 @@ import org.opensdg.java.SDG;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PeerConnectionHandler {
+public class SDGPeerConnector {
 
     private final ExecutorService singleThread = Executors.newSingleThreadExecutor();
     private ISDGPeerHandler thingHandler;
@@ -36,7 +36,7 @@ public class PeerConnectionHandler {
     private @Nullable Future<?> watchdog;
     private long lastPacket = 0;
 
-    PeerConnectionHandler(ISDGPeerHandler handler) {
+    SDGPeerConnector(ISDGPeerHandler handler) {
         this.thingHandler = handler;
         logger = LoggerFactory.getLogger(handler.getClass());
     }

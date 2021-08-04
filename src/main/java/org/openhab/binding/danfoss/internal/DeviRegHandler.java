@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler {
 
     private final Logger logger = LoggerFactory.getLogger(DeviRegHandler.class);
-    private PeerConnectionHandler connHandler = new PeerConnectionHandler(this);
+    private SDGPeerConnector connHandler = new SDGPeerConnector(this);
     private byte currentMode = -1;
     private Dominion.@Nullable Version firmwareVer;
     private int firmwareBuild = -1;

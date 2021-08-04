@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 public class DeviSmartConnection extends PeerConnection {
     private final Logger logger = LoggerFactory.getLogger(DeviSmartConnection.class);
 
-    private PeerConnectionHandler m_Handler;
+    private SDGPeerConnector m_Handler;
 
-    DeviSmartConnection(PeerConnectionHandler handler) {
+    DeviSmartConnection(SDGPeerConnector handler) {
         m_Handler = handler;
     }
 
