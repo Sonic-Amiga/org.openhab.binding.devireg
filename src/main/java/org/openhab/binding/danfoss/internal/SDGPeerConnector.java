@@ -32,7 +32,7 @@ public class SDGPeerConnector {
     private final ExecutorService singleThread = Executors.newSingleThreadExecutor();
     private ISDGPeerHandler thingHandler;
     private ScheduledExecutorService scheduler;
-    private Logger logger;
+    private Logger logger = LoggerFactory.getLogger(SDGPeerConnector.class);
     private byte[] peerId;
     private DeviSmartConnection connection;
     private @Nullable Future<?> reconnectReq;
@@ -42,7 +42,6 @@ public class SDGPeerConnector {
     SDGPeerConnector(ISDGPeerHandler handler, ScheduledExecutorService scheduler) {
         this.thingHandler = handler;
         this.scheduler = scheduler;
-        logger = LoggerFactory.getLogger(handler.getClass());
     }
 
     public void initialize(String peerIdStr) {
