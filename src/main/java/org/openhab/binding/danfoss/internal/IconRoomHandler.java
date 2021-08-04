@@ -28,7 +28,7 @@ public class IconRoomHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(IconRoomHandler.class);
     private int roomNumber;
-    private PeerConnectionHandler connHandler;
+    private SDGPeerConnector connHandler;
     private boolean isOnline;
 
     public IconRoomHandler(Thing thing) {
@@ -40,7 +40,7 @@ public class IconRoomHandler extends BaseThingHandler {
         return roomNumber;
     }
 
-    public void setConnectionHandler(PeerConnectionHandler h) {
+    public void setConnectionHandler(SDGPeerConnector h) {
         connHandler = h;
     }
 

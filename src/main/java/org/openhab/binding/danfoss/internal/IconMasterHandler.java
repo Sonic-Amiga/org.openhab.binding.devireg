@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHandler {
 
     private final Logger logger = LoggerFactory.getLogger(IconMasterHandler.class);
-    private PeerConnectionHandler connHandler = new PeerConnectionHandler(this);
+    private SDGPeerConnector connHandler = new SDGPeerConnector(this);
     private IconRoomDiscoveryService discoveryService;
     private ServiceRegistration<?> discoveryReg;
     private Dominion.@Nullable Version firmwareVer;
