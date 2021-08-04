@@ -3,11 +3,13 @@ package org.openhab.binding.danfoss.internal;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.measure.quantity.Temperature;
 import javax.xml.bind.DatatypeConverter;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.QuantityType;
@@ -25,6 +27,7 @@ public class SDGPeerConnector {
 
     private final ExecutorService singleThread = Executors.newSingleThreadExecutor();
     private ISDGPeerHandler thingHandler;
+    private ScheduledExecutorService scheduler;
     private Logger logger;
     private byte[] peerId;
     private DeviSmartConnection connection;
@@ -32,8 +35,9 @@ public class SDGPeerConnector {
     private @Nullable Future<?> watchdog;
     private long lastPacket = 0;
 
-    SDGPeerConnector(ISDGPeerHandler handler) {
+    SDGPeerConnector(ISDGPeerHandler handler, ScheduledExecutorService scheduler) {
         this.thingHandler = handler;
+        this.scheduler = scheduler;
         logger = LoggerFactory.getLogger(handler.getClass());
     }
 
@@ -53,11 +57,11 @@ public class SDGPeerConnector {
         // set the thing status to UNKNOWN temporarily and let the background task decide for the real status.
         // the framework is then able to reuse the resources from the thing handler initialization.
         // we set this upfront to reliably check status updates in unit tests.
-        thingHandler.reportStatus(ThingStatus.UNKNOWN);
+        reportStatus(ThingStatus.UNKNOWN);
 
         connection = new DeviSmartConnection(this);
 
-        watchdog = thingHandler.getScheduler().scheduleAtFixedRate(() -> {
+        watchdog = scheduler.scheduleAtFixedRate(() -> {
             if (connection == null || connection.getState() != OSDGState.CONNECTED) {
                 return;
             }
@@ -131,7 +135,7 @@ public class SDGPeerConnector {
         logger.info("Connection established");
 
         if (connection != null) {
-            thingHandler.reportStatus(ThingStatus.ONLINE);
+            reportStatus(ThingStatus.ONLINE);
         }
     }
 
@@ -145,7 +149,7 @@ public class SDGPeerConnector {
     }
 
     private void scheduleReconnect() {
-        reconnectReq = thingHandler.getScheduler().schedule(() -> {
+        reconnectReq = scheduler.schedule(() -> {
             connect();
         }, 10, TimeUnit.SECONDS);
     }
@@ -193,5 +197,9 @@ public class SDGPeerConnector {
         if (command instanceof RefreshType) {
             SendPacket(new Dominion.Packet(msgClass, msgCode));
         }
+    }
+
+    private void reportStatus(@NonNull ThingStatus status) {
+        thingHandler.reportStatus(status, ThingStatusDetail.NONE, null);
     }
 }
