@@ -6,7 +6,6 @@ import static org.openhab.binding.danfoss.internal.protocol.Icon.MsgCode.*;
 
 import java.text.DateFormat;
 import java.util.Hashtable;
-import java.util.concurrent.ScheduledExecutorService;
 
 import javax.measure.quantity.Temperature;
 
@@ -34,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHandler {
 
     private final Logger logger = LoggerFactory.getLogger(IconMasterHandler.class);
-    private SDGPeerConnector connHandler = new SDGPeerConnector(this);
+    private SDGPeerConnector connHandler = new SDGPeerConnector(this, scheduler);
     private IconRoomDiscoveryService discoveryService;
     private ServiceRegistration<?> discoveryReg;
     private Dominion.@Nullable Version firmwareVer;
@@ -91,11 +90,6 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
     }
 
     @Override
-    public void reportStatus(@NonNull ThingStatus status) {
-        updateStatus(status);
-    }
-
-    @Override
     public void handlePacket(Dominion.@NonNull Packet pkt) {
         int msgClass = pkt.getMsgClass();
 
@@ -149,11 +143,6 @@ public class IconMasterHandler extends BaseBridgeHandler implements ISDGPeerHand
             updateProperty(Thing.PROPERTY_FIRMWARE_VERSION,
                     firmwareVer.toString() + "." + String.valueOf(firmwareBuild));
         }
-    }
-
-    @Override
-    public ScheduledExecutorService getScheduler() {
-        return scheduler;
     }
 
     @Override
