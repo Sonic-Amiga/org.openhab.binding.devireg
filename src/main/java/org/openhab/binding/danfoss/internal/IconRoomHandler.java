@@ -86,7 +86,6 @@ public class IconRoomHandler extends BaseThingHandler {
                 sendRefresh(ROOM_ROOMTEMPERATURE, command);
                 break;
         }
-
     }
 
     public void setTemperature(int msgCode, Command command) {

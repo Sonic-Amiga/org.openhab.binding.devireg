@@ -24,6 +24,7 @@ public class DeviSmart {
             }
         }
     }
+
     /*
      * Message class. Codes (defined below) appear only under their class,
      * so this is kinda redundant.
