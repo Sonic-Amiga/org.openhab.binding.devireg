@@ -62,7 +62,7 @@ public class SDGPeerConnector {
         connection = new DeviSmartConnection(this);
 
         watchdog = scheduler.scheduleAtFixedRate(() -> {
-            if (connection == null || connection.getState() != OSDGState.CONNECTED) {
+            if (connection.getState() != OSDGState.CONNECTED) {
                 return;
             }
             if (System.currentTimeMillis() - lastPacket > 30000) {
