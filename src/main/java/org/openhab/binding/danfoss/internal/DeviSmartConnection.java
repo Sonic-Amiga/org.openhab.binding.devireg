@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 public class DeviSmartConnection extends OSDGConnection {
     private final Logger logger = LoggerFactory.getLogger(DeviSmartConnection.class);
 
-    private PeerConnectionHandler m_Handler;
+    private SDGPeerConnector m_Handler;
 
-    DeviSmartConnection(PeerConnectionHandler handler) {
+    DeviSmartConnection(SDGPeerConnector handler) {
         m_Handler = handler;
     }
 
@@ -49,8 +49,8 @@ public class DeviSmartConnection extends OSDGConnection {
 
             if (packetLen > length) {
                 // Packet header specifies more bytes than we have. The packet is clearly malformed.
-                logger.error("Malformed data at position {}; size exceeds buffer", offset);
-                logger.error(DatatypeConverter.printHexBinary(data));
+                logger.warn("Malformed data at position {}; size exceeds buffer", offset);
+                logger.warn(DatatypeConverter.printHexBinary(data));
                 break; // Drop the rest of data and continue
             }
 

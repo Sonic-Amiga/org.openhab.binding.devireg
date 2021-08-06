@@ -241,5 +241,4 @@ public class Dominion {
     }
 
     public static final String ProtocolName = "dominion-1.0";
-
 }

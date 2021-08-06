@@ -1,17 +1,17 @@
 package org.openhab.binding.danfoss.discovery;
 
+import java.io.StringReader;
 import java.util.Collections;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.DatatypeConverter;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.openhab.binding.danfoss.internal.DanfossBindingConfig;
 import org.openhab.binding.danfoss.internal.DanfossBindingConstants;
 import org.openhab.binding.danfoss.internal.DanfossGridConnection;
 import org.openhab.binding.danfoss.internal.DeviRegConfiguration;
+import org.openhab.binding.danfoss.internal.protocol.DominionConfiguration;
 import org.openhab.core.config.discovery.AbstractDiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultBuilder;
@@ -24,6 +24,9 @@ import org.opensdg.OSDGResult;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 
 @Component(service = DiscoveryService.class)
 public class DanfossDiscoveryService extends AbstractDiscoveryService {
@@ -45,13 +48,16 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
 
     private Logger logger = LoggerFactory.getLogger(DanfossDiscoveryService.class);
 
+    private final Gson gson = new Gson();
+
     public DanfossDiscoveryService() {
         super(Collections.singleton(DanfossBindingConstants.THING_TYPE_DEVIREG_SMART), 600, true);
     }
 
     @Override
     protected void startScan() {
-        logger.error("Manual scan without parameters is not supported");
+        // This does nothing as manual scan requires an OTP, which can't be provided
+        // by OpenHAB's default functionality.
     }
 
     @Override
@@ -106,17 +112,14 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
                 cfg.SetBlockingMode(true);
 
                 if (cfg.ConnectToRemote(grid, phoneId, "dominion-config-1.0") == OSDGResult.NO_ERROR) {
-                    JSONObject request = new JSONObject();
-
                     // Request the data from the phone. chunkedMessage is important
                     // because if the data is too long, it wouldn't fit into fixed length
                     // buffer (approx. 1536 bytes) of phone's mdglib version. See comments
                     // in DeviSmartConfigConnection for more insight on this.
-                    request.put("phoneName", userName);
-                    request.put("phonePublicKey", DatatypeConverter.printHexBinary(grid.GetMyPeerId()));
-                    request.put("chunkedMessage", true);
+                    DominionConfiguration.Request request = new DominionConfiguration.Request(userName,
+                            DatatypeConverter.printHexBinary(grid.GetMyPeerId()));
 
-                    cfg.Send(request.toString().getBytes());
+                    cfg.Send(gson.toJson(request).getBytes());
                     configJSON = cfg.Receive();
 
                     if (configJSON == null) {
@@ -124,7 +127,6 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
                     }
 
                     cfg.Close();
-
                 } else {
                     errorStr = "Failed to connect to the sender: " + cfg.getLastResultStr();
                 }
@@ -152,55 +154,27 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
 
         if (errorStr != null) {
             return JSONResponse.createErrorResponse(errorCode, errorStr);
+        } else if (configJSON == null) {
+            // This is an impossible situation, but Eclipse forces us to have this check
+            return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR, "Unknown error");
         }
 
-        /*
-         * Configuration description is a JSON of the following self-explanatory format.
-         * @formatter:off
-         * Example from DeviSmart:
-         * {
-         *   "houseName":"My Flat",
-         *   "houseEditUsers":false,
-         *   "rooms":[
-         *      {
-         *        "roomName":"Living room",
-         *        "peerId":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-         *        "zone":"Living",
-         *        "sortOrder":0
-         *      },
-         *      {
-         *        "roomName":"Kitchen",
-         *        "peerId":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-         *        "zone":"None",
-         *        "sortOrder":1
-         *      }
-         *   ]
-         * }
-         * Example from Icon:
-         * {
-         *   "houseName":"MyHouse",
-         *   "housePeerId":" xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx ",
-         *   "houseEditUsers":false
-         * }
-         * @formatter:on
-         * "houseEditUsers", "zone" and "sortOrder" are used by the smartphone app only. Thermostats
-         * are not aware of them.
-         */
-
-        JSONObject parsedConfig = new JSONObject(configJSON);
-        String houseName = parsedConfig.getString("houseName");
+        // If we use fromJson(String) or fromJson(java.util.reader), it will throw
+        // "JSON not fully consumed" exception, because not all the reader's content has been
+        // used up. We avoid that for backwards compatibility reasons because newer application
+        // versions may add fields.
+        JsonReader jsonReader = new JsonReader(new StringReader(configJSON));
+        DominionConfiguration.Response parsedConfig = gson.fromJson(jsonReader, DominionConfiguration.Response.class);
+        String houseName = parsedConfig.houseName;
         int thingCount = 0;
 
         logger.debug("Received house: {}", houseName);
 
-        if (parsedConfig.has("rooms")) {
-            JSONArray rooms = parsedConfig.getJSONArray("rooms");
-
-            thingCount = rooms.length();
-            for (int i = 0; i < thingCount; i++) {
-                JSONObject room = rooms.getJSONObject(i);
-                String roomName = room.getString("roomName");
-                String peerId = room.getString("peerId");
+        if (parsedConfig.rooms != null) {
+            thingCount = parsedConfig.rooms.length;
+            for (DominionConfiguration.Room room : parsedConfig.rooms) {
+                String roomName = room.roomName;
+                String peerId = room.peerId;
 
                 logger.debug("Received DeviSmart thing: {} {}", peerId, roomName);
 
@@ -209,10 +183,10 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
             }
         }
 
-        if (parsedConfig.has("housePeerId")) {
-            String peerId = parsedConfig.getString("housePeerId");
+        if (parsedConfig.housePeerId != null) {
+            String peerId = parsedConfig.housePeerId;
 
-            logger.debug("Received IconWifi thing: " + peerId);
+            logger.debug("Received IconWifi thing: {}", peerId);
 
             thingCount = 1;
             addThing(DanfossBindingConstants.THING_TYPE_ICON_WIFI, peerId, "Danfoss Icon Wifi (" + houseName + ")");

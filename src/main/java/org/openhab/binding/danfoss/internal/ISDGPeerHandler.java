@@ -1,7 +1,5 @@
 package org.openhab.binding.danfoss.internal;
 
-import java.util.concurrent.ScheduledExecutorService;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.binding.danfoss.internal.protocol.Dominion;
 import org.openhab.core.thing.ThingStatus;
@@ -11,12 +9,7 @@ public interface ISDGPeerHandler {
 
     public void reportStatus(@NonNull ThingStatus status, @NonNull ThingStatusDetail statusDetail, String description);
 
-    public void reportStatus(@NonNull ThingStatus status);
-
     public void handlePacket(Dominion.@NonNull Packet pkt);
 
     public void ping();
-
-    ScheduledExecutorService getScheduler();
-
 }

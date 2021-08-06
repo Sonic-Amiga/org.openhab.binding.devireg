@@ -19,7 +19,6 @@ import static org.openhab.binding.danfoss.internal.protocol.DeviSmart.MsgCode.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.util.concurrent.ScheduledExecutorService;
 
 import javax.measure.quantity.Temperature;
 import javax.measure.quantity.Time;
@@ -57,7 +56,7 @@ import org.slf4j.LoggerFactory;
 public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler {
 
     private final Logger logger = LoggerFactory.getLogger(DeviRegHandler.class);
-    private PeerConnectionHandler connHandler = new PeerConnectionHandler(this);
+    private SDGPeerConnector connHandler = new SDGPeerConnector(this, scheduler);
     private byte currentMode = -1;
     private Dominion.@Nullable Version firmwareVer;
     private int firmwareBuild = -1;
@@ -254,7 +253,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
 
             } catch (IOException e) {
                 // We should never get here
-                logger.error("Error building control mode packet(s): " + e.toString());
+                logger.warn("Error building control mode packet(s): {}", e);
             }
         } else {
             connHandler.sendRefresh(DOMINION_SCHEDULER, SCHEDULER_CONTROL_INFO, command);
@@ -477,7 +476,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
         connHandler.SendPacket(new Dominion.Packet(DOMINION_HEATING, HEATING_TEMPERATURE_FLOOR));
     }
 
-    // Support methods for PeerConnectionHandler
+    // Support method for SDGPeerConnector
     // Unfortunately Java doesn't support multiple inheritance, so this is
     // a small hack to simulate it
 
@@ -485,15 +484,5 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
     public void reportStatus(@NonNull ThingStatus status, @NonNull ThingStatusDetail statusDetail,
             @Nullable String description) {
         updateStatus(status, statusDetail, description);
-    }
-
-    @Override
-    public void reportStatus(@NonNull ThingStatus status) {
-        updateStatus(status);
-    }
-
-    @Override
-    public ScheduledExecutorService getScheduler() {
-        return scheduler;
     }
 }

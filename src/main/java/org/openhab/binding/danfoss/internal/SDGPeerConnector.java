@@ -3,11 +3,13 @@ package org.openhab.binding.danfoss.internal;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.measure.quantity.Temperature;
 import javax.xml.bind.DatatypeConverter;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.danfoss.internal.protocol.Dominion;
 import org.openhab.core.library.types.DecimalType;
@@ -21,10 +23,11 @@ import org.opensdg.OSDGState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PeerConnectionHandler {
+public class SDGPeerConnector {
 
     private final ExecutorService singleThread = Executors.newSingleThreadExecutor();
     private ISDGPeerHandler thingHandler;
+    private ScheduledExecutorService scheduler;
     private Logger logger;
     private byte[] peerId;
     private DeviSmartConnection connection;
@@ -32,8 +35,9 @@ public class PeerConnectionHandler {
     private @Nullable Future<?> watchdog;
     private long lastPacket = 0;
 
-    PeerConnectionHandler(ISDGPeerHandler handler) {
+    SDGPeerConnector(ISDGPeerHandler handler, ScheduledExecutorService scheduler) {
         this.thingHandler = handler;
+        this.scheduler = scheduler;
         logger = LoggerFactory.getLogger(handler.getClass());
     }
 
@@ -44,7 +48,6 @@ public class PeerConnectionHandler {
 
         peerId = SDGUtils.ParseKey(peerIdStr);
         if (peerId == null) {
-            logger.error("Peer ID is not set");
             thingHandler.reportStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR,
                     "Peer ID is not set");
             return;
@@ -53,12 +56,12 @@ public class PeerConnectionHandler {
         // set the thing status to UNKNOWN temporarily and let the background task decide for the real status.
         // the framework is then able to reuse the resources from the thing handler initialization.
         // we set this upfront to reliably check status updates in unit tests.
-        thingHandler.reportStatus(ThingStatus.UNKNOWN);
+        reportStatus(ThingStatus.UNKNOWN);
 
         connection = new DeviSmartConnection(this);
 
-        watchdog = thingHandler.getScheduler().scheduleAtFixedRate(() -> {
-            if (connection == null || connection.getState() != OSDGState.CONNECTED) {
+        watchdog = scheduler.scheduleAtFixedRate(() -> {
+            if (connection.getState() != OSDGState.CONNECTED) {
                 return;
             }
             if (System.currentTimeMillis() - lastPacket > 30000) {
@@ -131,7 +134,7 @@ public class PeerConnectionHandler {
         logger.info("Connection established");
 
         if (connection != null) {
-            thingHandler.reportStatus(ThingStatus.ONLINE);
+            reportStatus(ThingStatus.ONLINE);
         }
     }
 
@@ -145,7 +148,7 @@ public class PeerConnectionHandler {
     }
 
     private void scheduleReconnect() {
-        reconnectReq = thingHandler.getScheduler().schedule(() -> {
+        reconnectReq = scheduler.schedule(() -> {
             connect();
         }, 10, TimeUnit.SECONDS);
     }
@@ -193,5 +196,9 @@ public class PeerConnectionHandler {
         if (command instanceof RefreshType) {
             SendPacket(new Dominion.Packet(msgClass, msgCode));
         }
+    }
+
+    private void reportStatus(@NonNull ThingStatus status) {
+        thingHandler.reportStatus(status, ThingStatusDetail.NONE, null);
     }
 }

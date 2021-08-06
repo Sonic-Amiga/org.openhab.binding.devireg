@@ -30,7 +30,7 @@ public class DanfossGridConnection extends OSDGConnection {
             if (res != OSDGResult.NO_ERROR) {
                 String msg = "Danfoss grid connection failed: " + g_Conn.getLastResultStr();
 
-                logger.error(msg);
+                logger.warn(msg);
                 throw new Exception(msg);
             }
             logger.info("Successfully connected to Danfoss grid");
@@ -68,7 +68,7 @@ public class DanfossGridConnection extends OSDGConnection {
             return;
         }
 
-        logger.warn("Last user is gone, disconnecting from Danfoss grid");
+        logger.info("Last user is gone, disconnecting from Danfoss grid");
         g_Conn.Close();
         g_Conn.Dispose();
         g_Conn = null;
