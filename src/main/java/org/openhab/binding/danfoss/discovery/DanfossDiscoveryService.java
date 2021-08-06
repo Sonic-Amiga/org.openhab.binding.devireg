@@ -56,7 +56,8 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
 
     @Override
     protected void startScan() {
-        logger.error("Manual scan without parameters is not supported");
+        // This does nothing as manual scan requires an OTP, which can't be provided
+        // by OpenHAB's default functionality.
     }
 
     @Override
@@ -183,7 +184,7 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
         if (parsedConfig.housePeerId != null) {
             String peerId = parsedConfig.housePeerId;
 
-            logger.debug("Received IconWifi thing: " + peerId);
+            logger.debug("Received IconWifi thing: {}", peerId);
 
             thingCount = 1;
             addThing(DanfossBindingConstants.THING_TYPE_ICON_WIFI, peerId, "Danfoss Icon Wifi (" + houseName + ")");

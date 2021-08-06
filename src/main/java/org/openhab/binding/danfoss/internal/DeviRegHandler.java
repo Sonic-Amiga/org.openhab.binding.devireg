@@ -253,7 +253,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
 
             } catch (IOException e) {
                 // We should never get here
-                logger.error("Error building control mode packet(s): " + e.toString());
+                logger.warn("Error building control mode packet(s): {}", e);
             }
         } else {
             connHandler.sendRefresh(DOMINION_SCHEDULER, SCHEDULER_CONTROL_INFO, command);

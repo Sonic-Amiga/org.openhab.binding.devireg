@@ -48,7 +48,6 @@ public class SDGPeerConnector {
 
         peerId = SDGUtils.ParseKey(peerIdStr);
         if (peerId == null) {
-            logger.error("Peer ID is not set");
             thingHandler.reportStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR,
                     "Peer ID is not set");
             return;

@@ -68,7 +68,7 @@ public class DanfossDiscoveryServlet extends HttpServlet {
                 type = URLConnection.guessContentTypeFromName(filePath);
             }
 
-            logger.trace("content-type " + type);
+            logger.trace("content-type {}", type);
 
             resp.addHeader("content-type", type);
             IOUtils.copy(in, resp.getOutputStream());

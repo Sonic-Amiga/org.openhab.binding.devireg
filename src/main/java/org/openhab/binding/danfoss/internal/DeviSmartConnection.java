@@ -49,8 +49,8 @@ public class DeviSmartConnection extends OSDGConnection {
 
             if (packetLen > length) {
                 // Packet header specifies more bytes than we have. The packet is clearly malformed.
-                logger.error("Malformed data at position {}; size exceeds buffer", offset);
-                logger.error(DatatypeConverter.printHexBinary(data));
+                logger.warn("Malformed data at position {}; size exceeds buffer", offset);
+                logger.warn(DatatypeConverter.printHexBinary(data));
                 break; // Drop the rest of data and continue
             }
 
