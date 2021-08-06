@@ -451,7 +451,7 @@ public class DeviRegHandler extends BaseThingHandler implements ISDGPeerHandler 
         long d4 = d3 % 3600;
         long minutes = d4 / 60;
 
-        return String.valueOf(years) + " years" + days + " days " + hours + " hours " + minutes + " minutes";
+        return String.valueOf(years) + " years " + days + " days " + hours + " hours " + minutes + " minutes";
     }
 
     private String numToString(String[] table, int value) {
