@@ -98,7 +98,7 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
             return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
 
-        byte[] myPeerId = grid.getPeerId();
+        byte[] myPeerId = grid.getMyPeerId();
 
         if (myPeerId == null) {
             // This is an impossible situation, but Eclipse thinks it knows better :(
