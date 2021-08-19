@@ -41,16 +41,12 @@ public class GridConnectionKeeper {
         return g_Conn;
     }
 
-    public static synchronized void UpdatePrivateKey() {
-        if (g_Conn != null) {
-            DanfossBindingConfig config = DanfossBindingConfig.get();
-
-            if (!config.privateKey.equals(privateKey)) {
-                // Will reconnect on demand
-                closeConnection();
-                privateKey = config.privateKey;
-            }
+    public static synchronized void UpdatePrivateKey(String newKey) {
+        if (g_Conn != null && !newKey.equals(privateKey)) {
+            // Will reconnect on demand
+            closeConnection();
         }
+        privateKey = newKey;
     }
 
     public static synchronized void AddUser() {
