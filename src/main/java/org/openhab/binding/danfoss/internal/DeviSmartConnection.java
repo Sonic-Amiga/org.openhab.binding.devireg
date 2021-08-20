@@ -21,7 +21,7 @@ public class DeviSmartConnection extends PeerConnection {
 
     @Override
     protected void onError(Throwable t) {
-        m_Handler.setOfflineStatus(t.toString());
+        m_Handler.setOfflineStatus(t);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.openhab.binding.danfoss.internal;
 
 import java.io.IOException;
+import java.nio.channels.ClosedChannelException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -130,7 +131,7 @@ public class SDGPeerConnector {
                 logger.info("Connecting to peer {}", SDG.bin2hex(peerId));
                 connection.connectToRemote(grid, peerId, Dominion.ProtocolName);
             } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
-                setOfflineStatus(e.getMessage());
+                setOfflineStatus(e);
                 return;
             }
 
@@ -147,7 +148,18 @@ public class SDGPeerConnector {
         }
     }
 
-    public void setOfflineStatus(String reason) {
+    public void setOfflineStatus(Throwable t) {
+        String reason = t.getMessage();
+
+        if (reason == null) {
+            // Some Throwables might not have a reason
+            if (t instanceof ClosedChannelException) {
+                reason = "Peer not connected";
+            } else {
+                reason = t.toString();
+            }
+        }
+
         logger.warn("Device went offline: {}", reason);
 
         if (connection != null) {
