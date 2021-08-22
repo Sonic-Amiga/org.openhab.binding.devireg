@@ -155,6 +155,8 @@ public class SDGPeerConnector {
             // Some Throwables might not have a reason
             if (t instanceof ClosedChannelException) {
                 reason = "Peer not connected";
+            } else if (t instanceof TimeoutException) {
+                reason = "Communication timeout";
             } else {
                 reason = t.toString();
             }
