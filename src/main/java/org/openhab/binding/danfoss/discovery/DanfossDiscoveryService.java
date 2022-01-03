@@ -1,16 +1,21 @@
 package org.openhab.binding.danfoss.discovery;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.io.StringReader;
+import java.rmi.RemoteException;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.xml.bind.DatatypeConverter;
 
 import org.openhab.binding.danfoss.internal.DanfossBindingConfig;
 import org.openhab.binding.danfoss.internal.DanfossBindingConstants;
-import org.openhab.binding.danfoss.internal.DanfossGridConnection;
 import org.openhab.binding.danfoss.internal.DeviRegConfiguration;
+import org.openhab.binding.danfoss.internal.GridConnectionKeeper;
 import org.openhab.binding.danfoss.internal.protocol.DominionConfiguration;
 import org.openhab.core.config.discovery.AbstractDiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryResult;
@@ -19,8 +24,10 @@ import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
-import org.opensdg.OSDGConnection;
-import org.opensdg.OSDGResult;
+import org.opensdg.java.GridConnection;
+import org.opensdg.java.PairingConnection;
+import org.opensdg.java.PeerConnection;
+import org.opensdg.java.SDG;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,94 +83,120 @@ public class DanfossDiscoveryService extends AbstractDiscoveryService {
         logger.trace("Pairing with OTP: {}", otp);
 
         String userName = DanfossBindingConfig.get().userName;
-        OSDGConnection grid;
+        GridConnection grid;
 
         if (userName == null || userName.isEmpty()) {
             return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR,
                     "Username is not set in binding configuration");
         }
 
-        DanfossGridConnection.AddUser();
+        GridConnectionKeeper.AddUser();
 
         try {
-            grid = DanfossGridConnection.get();
-        } catch (Exception e) {
-            DanfossGridConnection.RemoveUser();
+            grid = GridConnectionKeeper.getConnection();
+        } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
+            GridConnectionKeeper.RemoveUser();
             return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
 
-        String configJSON = null;
+        byte[] myPeerId = grid.getMyPeerId();
+
+        if (myPeerId == null) {
+            // This is an impossible situation, but Eclipse thinks it knows better :(
+            GridConnectionKeeper.RemoveUser();
+            return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR, "PeerID is not set");
+        }
+
         Status errorCode = Status.INTERNAL_SERVER_ERROR;
         String errorStr = null;
 
-        OSDGConnection pairing = new OSDGConnection();
-        pairing.SetBlockingMode(true);
+        PairingConnection pairing = new PairingConnection();
 
-        OSDGResult r = pairing.PairRemote(grid, otp);
-
-        switch (r) {
-            case NO_ERROR:
-                logger.debug("Pairing successful");
-
-                // Our peer is the sending phone. Once we know the ID, we can establish data connection
-                byte[] phoneId = pairing.getPeerId();
-                DanfossConfigConnection cfg = new DanfossConfigConnection();
-
-                cfg.SetBlockingMode(true);
-
-                if (cfg.ConnectToRemote(grid, phoneId, "dominion-config-1.0") == OSDGResult.NO_ERROR) {
-                    // Request the data from the phone. chunkedMessage is important
-                    // because if the data is too long, it wouldn't fit into fixed length
-                    // buffer (approx. 1536 bytes) of phone's mdglib version. See comments
-                    // in DeviSmartConfigConnection for more insight on this.
-                    DominionConfiguration.Request request = new DominionConfiguration.Request(userName,
-                            DatatypeConverter.printHexBinary(grid.GetMyPeerId()));
-
-                    cfg.Send(gson.toJson(request).getBytes());
-                    configJSON = cfg.Receive();
-
-                    if (configJSON == null) {
-                        errorStr = "Failed to receive config: " + cfg.getLastResultStr();
-                    }
-
-                    cfg.Close();
-                } else {
-                    errorStr = "Failed to connect to the sender: " + cfg.getLastResultStr();
-                }
-
-                cfg.Dispose();
-                break;
-
-            case INVALID_PARAMETERS:
-                errorStr = "Invalid OTP supplied";
-                errorCode = Status.BAD_REQUEST;
-                break;
-
-            case CONNECTION_REFUSED:
-                errorStr = "Connection refused by peer; likely wrong OTP";
-                errorCode = Status.NOT_FOUND;
-                break;
-
-            default:
-                errorStr = "Pairing failed: " + pairing.getLastResultStr();
-                break;
+        try {
+            pairing.pairWithRemote(grid, otp);
+        } catch (RemoteException e) {
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Connection refused by peer; likely wrong OTP");
+        } catch (IOException | InterruptedException | ExecutionException | GeneralSecurityException
+                | TimeoutException e) {
+            return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR, "Pairing failed: " + e.toString());
         }
 
-        pairing.Dispose();
-        DanfossGridConnection.RemoveUser();
+        byte[] phoneId = pairing.getPeerId();
+        pairing.close();
+
+        logger.debug("Pairing successful");
+
+        // Our peer is the sending phone. Once we know the ID, we can establish data connection
+        PeerConnection cfg = new PeerConnection();
+
+        try {
+            cfg.connectToRemote(grid, phoneId, "dominion-configuration-1.0");
+        } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
+            return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR,
+                    "Failed to connect to the sender: " + e.toString());
+        }
+
+        DominionConfiguration.Request request = new DominionConfiguration.Request(userName, SDG.bin2hex(myPeerId));
+
+        int dataSize = 0;
+        int offset = 0;
+        byte[] data = null;
+
+        try {
+            cfg.sendData(gson.toJson(request).getBytes());
+
+            do {
+                DataInputStream chunk = new DataInputStream(cfg.receiveData());
+                int chunkSize = chunk.available();
+
+                if (chunkSize > 8) {
+                    // In chunked mode the data will arrive in several packets.
+                    // The first one will contain the header, specifying full data length.
+                    // The header has integer 0 in the beginning so that it's easily distinguished
+                    // from JSON plaintext
+                    if (chunk.readInt() == 0) {
+                        // Size is little-endian here
+                        dataSize = Integer.reverseBytes(chunk.readInt());
+                        logger.trace("Chunked mode; full size = {}", dataSize);
+                        data = new byte[dataSize];
+                        chunkSize -= 8; // We've consumed the header
+                    } else {
+                        // No header, go back to the beginning
+                        chunk.reset();
+                    }
+                }
+
+                if (dataSize == 0) {
+                    // If the first packet didn't contain the header, this is not
+                    // a chunked mode, so just use the complete length of this packet
+                    // and we're done
+                    dataSize = chunkSize;
+                    logger.trace("Raw mode; full size = {}", dataSize);
+                    data = new byte[dataSize];
+                }
+
+                chunk.read(data, offset, chunkSize);
+                offset += chunkSize;
+            } while (offset < dataSize);
+        } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
+            errorStr = "Failed to receive config: " + e.toString();
+        }
+
+        cfg.close();
+        GridConnectionKeeper.RemoveUser();
 
         if (errorStr != null) {
             return JSONResponse.createErrorResponse(errorCode, errorStr);
-        } else if (configJSON == null) {
+        } else if (data == null) {
             // This is an impossible situation, but Eclipse forces us to have this check
-            return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR, "Unknown error");
+            return JSONResponse.createErrorResponse(Status.INTERNAL_SERVER_ERROR, "Unknown error (data == null");
         }
 
         // If we use fromJson(String) or fromJson(java.util.reader), it will throw
         // "JSON not fully consumed" exception, because not all the reader's content has been
         // used up. We avoid that for backwards compatibility reasons because newer application
         // versions may add fields.
-        JsonReader jsonReader = new JsonReader(new StringReader(configJSON));
+        JsonReader jsonReader = new JsonReader(new StringReader(new String(data)));
         DominionConfiguration.Response parsedConfig = gson.fromJson(jsonReader, DominionConfiguration.Response.class);
         String houseName = parsedConfig.houseName;
         int thingCount = 0;

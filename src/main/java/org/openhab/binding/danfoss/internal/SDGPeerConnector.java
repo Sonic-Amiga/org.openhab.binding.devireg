@@ -1,13 +1,16 @@
 package org.openhab.binding.danfoss.internal;
 
+import java.io.IOException;
+import java.nio.channels.ClosedChannelException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.measure.quantity.Temperature;
-import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -19,7 +22,9 @@ import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
-import org.opensdg.OSDGState;
+import org.opensdg.java.Connection;
+import org.opensdg.java.GridConnection;
+import org.opensdg.java.SDG;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +33,7 @@ public class SDGPeerConnector {
     private final ExecutorService singleThread = Executors.newSingleThreadExecutor();
     private ISDGPeerHandler thingHandler;
     private ScheduledExecutorService scheduler;
-    private Logger logger;
+    private Logger logger = LoggerFactory.getLogger(SDGPeerConnector.class);
     private byte[] peerId;
     private DeviSmartConnection connection;
     private @Nullable Future<?> reconnectReq;
@@ -38,13 +43,12 @@ public class SDGPeerConnector {
     SDGPeerConnector(ISDGPeerHandler handler, ScheduledExecutorService scheduler) {
         this.thingHandler = handler;
         this.scheduler = scheduler;
-        logger = LoggerFactory.getLogger(handler.getClass());
     }
 
     public void initialize(String peerIdStr) {
         logger.trace("initialize()");
 
-        DanfossGridConnection.AddUser();
+        GridConnectionKeeper.AddUser();
 
         peerId = SDGUtils.ParseKey(peerIdStr);
         if (peerId == null) {
@@ -61,7 +65,7 @@ public class SDGPeerConnector {
         connection = new DeviSmartConnection(this);
 
         watchdog = scheduler.scheduleAtFixedRate(() -> {
-            if (connection.getState() != OSDGState.CONNECTED) {
+            if (connection == null || connection.getState() != Connection.State.CONNECTED) {
                 return;
             }
             if (System.currentTimeMillis() - lastPacket > 30000) {
@@ -72,7 +76,7 @@ public class SDGPeerConnector {
                     if (connection == null) {
                         return; // We are being disposed
                     }
-                    connection.blockingClose();
+                    connection.close();
                     scheduleReconnect();
                 });
             } else if (System.currentTimeMillis() - lastPacket > 15000) {
@@ -91,23 +95,24 @@ public class SDGPeerConnector {
             DeviSmartConnection conn = connection;
             connection = null; // This signals we are being disposed
 
-            if (reconnectReq != null) {
-                reconnectReq.cancel(false);
+            Future<?> reconnect = reconnectReq;
+            if (reconnect != null) {
+                reconnect.cancel(false);
                 reconnectReq = null;
             }
 
-            if (watchdog != null) {
-                watchdog.cancel(false);
+            Future<?> wd = watchdog;
+            if (wd != null) {
+                wd.cancel(false);
                 watchdog = null;
             }
 
             if (conn != null) {
-                conn.blockingClose();
-                conn.Dispose();
+                conn.close();
             }
         });
 
-        DanfossGridConnection.RemoveUser();
+        GridConnectionKeeper.RemoveUser();
     }
 
     private void connect() {
@@ -120,13 +125,17 @@ public class SDGPeerConnector {
             }
 
             try {
-                DanfossGridConnection grid = DanfossGridConnection.get();
+                GridConnection grid = GridConnectionKeeper.getConnection();
 
-                logger.info("Connecting to peer {}", DatatypeConverter.printHexBinary(peerId));
-                connection.ConnectToRemote(grid, peerId, Dominion.ProtocolName);
-            } catch (Exception e) {
-                setOfflineStatus(e.getMessage());
+                logger.info("Connecting to peer {}", SDG.bin2hex(peerId));
+                connection.connectToRemote(grid, peerId, Dominion.ProtocolName);
+            } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
+                setOfflineStatus(e);
+                return;
             }
+
+            connection.asyncReceive();
+            setOnlineStatus();
         });
     }
 
@@ -138,8 +147,21 @@ public class SDGPeerConnector {
         }
     }
 
-    public void setOfflineStatus(String reason) {
-        logger.error("Device went offline: {}", reason);
+    public void setOfflineStatus(Throwable t) {
+        String reason = t.getMessage();
+
+        if (reason == null) {
+            // Some Throwables might not have a reason
+            if (t instanceof ClosedChannelException) {
+                reason = "Peer not connected";
+            } else if (t instanceof TimeoutException) {
+                reason = "Communication timeout";
+            } else {
+                reason = t.toString();
+            }
+        }
+
+        logger.warn("Device went offline: {}", reason);
 
         if (connection != null) {
             thingHandler.reportStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, reason);
@@ -158,8 +180,18 @@ public class SDGPeerConnector {
         // with dispose() zeroing it between test and usage
         DeviSmartConnection conn = connection;
 
-        if (conn != null) {
-            conn.Send(data);
+        if (conn == null || conn.getState() != Connection.State.CONNECTED) {
+            // Avoid "Failed to send data" warning if the connection hasn't been
+            // connected yet. This may happen as OpenHAB sends REFRESH request for
+            // every item right after the Thing has been initialized; it doesn't wait
+            // for the Thing to go online.
+            return;
+        }
+
+        try {
+            conn.sendData(data);
+        } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
+            logger.warn("Failed to send data: {}", e.toString());
         }
     }
 

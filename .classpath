@@ -30,6 +30,5 @@
 			<attribute name="annotationpath" value="target/dependency"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/OpenSDG.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

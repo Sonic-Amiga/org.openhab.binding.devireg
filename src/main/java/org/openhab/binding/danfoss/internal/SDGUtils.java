@@ -1,6 +1,6 @@
 package org.openhab.binding.danfoss.internal;
 
-import javax.xml.bind.DatatypeConverter;
+import org.opensdg.java.SDG;
 
 public class SDGUtils {
     public static byte[] ParseKey(String keyStr) {
@@ -8,11 +8,7 @@ public class SDGUtils {
             return null;
         }
 
-        try {
-            byte[] key = DatatypeConverter.parseHexBinary(keyStr);
-            return key.length == 32 ? key : null;
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+        byte[] key = SDG.hex2bin(keyStr);
+        return key.length == 32 ? key : null;
     }
 }
