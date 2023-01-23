@@ -367,7 +367,7 @@ public class DeviSmart {
         public static final byte ROOM_BEDROOM = 3;
 
         // Some special values for outputPower
-        public static final short POWER_SCALE = 255;
+        public static final short POWER_SCALE = 25;
         public static final int EXTERNAL_RELAY = 255 * POWER_SCALE;
     };
 }
