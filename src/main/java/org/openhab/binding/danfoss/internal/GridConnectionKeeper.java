@@ -6,10 +6,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeoutException;
 
 import org.openhab.core.common.ThreadPoolManager;
-import org.opensdg.java.Connection;
-import org.opensdg.java.GridConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.github.sonic_amiga.opensdg.java.Connection;
+import io.github.sonic_amiga.opensdg.java.GridConnection;
 
 public class GridConnectionKeeper {
     private static final Logger logger = LoggerFactory.getLogger(GridConnectionKeeper.class);

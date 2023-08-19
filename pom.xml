@@ -18,9 +18,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.opensdg</groupId>
-      <artifactId>osdg_java</artifactId>
-      <version>1.0</version>
+      <groupId>io.github.sonic-amiga</groupId>
+      <artifactId>opensdg_java</artifactId>
+      <version>1.0.0</version>
     </dependency>
   </dependencies>
   <build>

@@ -24,16 +24,17 @@ import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
-import org.opensdg.java.GridConnection;
-import org.opensdg.java.PairingConnection;
-import org.opensdg.java.PeerConnection;
-import org.opensdg.java.SDG;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+
+import io.github.sonic_amiga.opensdg.java.GridConnection;
+import io.github.sonic_amiga.opensdg.java.PairingConnection;
+import io.github.sonic_amiga.opensdg.java.PeerConnection;
+import io.github.sonic_amiga.opensdg.java.SDG;
 
 @Component(service = DiscoveryService.class)
 public class DanfossDiscoveryService extends AbstractDiscoveryService {

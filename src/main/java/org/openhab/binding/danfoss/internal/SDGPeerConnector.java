@@ -22,11 +22,12 @@ import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
-import org.opensdg.java.Connection;
-import org.opensdg.java.GridConnection;
-import org.opensdg.java.SDG;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.github.sonic_amiga.opensdg.java.Connection;
+import io.github.sonic_amiga.opensdg.java.GridConnection;
+import io.github.sonic_amiga.opensdg.java.SDG;
 
 public class SDGPeerConnector {
 

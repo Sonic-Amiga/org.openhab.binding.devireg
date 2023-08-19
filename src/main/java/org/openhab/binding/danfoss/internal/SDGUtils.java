@@ -1,6 +1,6 @@
 package org.openhab.binding.danfoss.internal;
 
-import org.opensdg.java.SDG;
+import io.github.sonic_amiga.opensdg.java.SDG;
 
 public class SDGUtils {
     public static byte[] ParseKey(String keyStr) {

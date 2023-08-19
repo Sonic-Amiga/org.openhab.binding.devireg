@@ -9,10 +9,11 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.config.core.Configuration;
-import org.opensdg.java.SDG;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.github.sonic_amiga.opensdg.java.SDG;
 
 public class DanfossBindingConfig {
     private static final Logger logger = LoggerFactory.getLogger(DanfossBindingConfig.class);

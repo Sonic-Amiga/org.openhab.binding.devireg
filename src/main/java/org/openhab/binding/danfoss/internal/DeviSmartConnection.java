@@ -6,9 +6,10 @@ import java.io.InputStream;
 import javax.xml.bind.DatatypeConverter;
 
 import org.openhab.binding.danfoss.internal.protocol.Dominion;
-import org.opensdg.java.PeerConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.github.sonic_amiga.opensdg.java.PeerConnection;
 
 public class DeviSmartConnection extends PeerConnection {
     private final Logger logger = LoggerFactory.getLogger(DeviSmartConnection.class);
