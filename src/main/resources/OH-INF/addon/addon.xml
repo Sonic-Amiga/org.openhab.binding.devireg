@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<binding:binding id="danfoss" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:binding="https://openhab.org/schemas/binding/v1.0.0"
-	xsi:schemaLocation="https://openhab.org/schemas/binding/v1.0.0 https://openhab.org/schemas/binding-1.0.0.xsd">
+<addon:addon id="danfoss" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:addon="https://openhab.org/schemas/addon/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/addon/v1.0.0 https://openhab.org/schemas/addon-1.0.0.xsd">
 
+	<type>binding</type>
 	<name>Danfoss Binding</name>
 	<description>Danfoss heating solutions binding.</description>
-	<author>Pavel Fedin</author>
+	<connection>cloud</connection>
 
 	<config-description>
 		<parameter name="privateKey" type="text" readOnly="true" pattern="[0-9A-Fa-f]{64}">
@@ -26,4 +27,4 @@
 		</parameter>
 	</config-description>
 
-</binding:binding>
+</addon:addon>
